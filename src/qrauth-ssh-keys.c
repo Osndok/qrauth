@@ -28,6 +28,14 @@ void print_public_key(git_repository *repo, const git_oid *oid);
 
 /**
  * Given a username, lists any public keys embedded in the privy qrauth git repo.
+ * This code path is particularly sensitive, because it is the primary authentication
+ * method. Therefore, care should be taken regarding security and performance.
+ *
+ * Also, for auditing it might be best to keep this code somewhat self-contained
+ * (minimal libraries and other source files).
+ *
+ * @todo: many return values are not checked
+ * @todo: obscure timing attack that could be used to discover if a username is valid
  */
 int main(int argc, char *argv[])
 {
