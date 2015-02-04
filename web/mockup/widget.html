@@ -4,20 +4,26 @@
 
 <div class="outer">
 
-<methods>
+<methods class="tabs">
 	<prompt>Login method:</prompt>
-	<method key="legacy">Legacy</method>
-	<method key="sqrl" class="selected">SQRL</method>
-	<method key="otp">OTP</method>
-	<method key="ppp">PPP</method>
-	<method key="rsa">RSA</method>
-	<method key="email">Email</method>
-	<method key="overview">Overview</method>
+	<a data-tab="#legacy"   href="noscript/legacy">Legacy</a>
+	<a data-tab="#sqrl"     href="noscript/sqrl" class="active">SQRL</a>
+	<a data-tab="#otp"      href="noscript/otp">OTP</a>
+	<a data-tab="#ppp"      href="noscript/ppp">PPP</a>
+	<a data-tab="#rsa"      href="noscript/rsa">RSA</a>
+	<a data-tab="#email"    href="noscript/email">Email</a>
+	<a data-tab="#overview" href="noscript/overview">Overview</a>
 </methods>
 
-<arena class="sqrl active">
+<div class="tabs-content">
+
+<arena id="legacy">
+Legacy login goes here...
+</arena>
+
+<arena id="sqrl" class="active">
 	<left>
-		<a href="sqrl://xxx.example.com/sqrl?aosenutaosuentoaheusnth" onClick="window.setTimeout( startPageSync, 1 );">
+		<a href="sqrl://xxx.example.com/sqrl?aosenutaosuentoaheusnth" onClick="window.setTimeout( qrauth_sqrlClick, 1 );">
 			<img src="sqrl.png"/>
 		</a>
 		<br/>
@@ -48,7 +54,7 @@
 </arena>
 
 
-<arena class="otp">
+<arena id="otp">
 	<table>
 		<tr>
 			<th>Prompt</th>
@@ -79,7 +85,7 @@
 </arena>
 
 
-<arena class="ppp">
+<arena id="ppp">
 	<table>
 		<tr>
 			<th>Step</th>
@@ -115,7 +121,7 @@
 	<a href="https://www.grc.com/ppp.htm">the PPP page on grc.com</a>.
 </arena>
 
-<arena class="rsa">
+<arena id="rsa">
 	<label for="username">Username (or RSA public key):</label>
 	<br/>
 	<textarea name="username"></textarea>
@@ -132,7 +138,11 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 	<input type="submit" value="Submit"/>
 </arena>
 
-<arena class="overview">
+<arena id="email">
+	Email goes here...
+</arena>
+
+<arena id="overview">
 	<table>
 		<tr>
 			<th>Method:</th>
@@ -170,7 +180,7 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<!-- HOTP -->
 			<td title="HOTP requires that a counter be increment after each successful authentication attempt"><yes/></td>
 			<!-- TOTP -->
-			<td title="The challenge is proving possition of a shared secret, obfuscated by the current time, so no state *needs* to be updated"><no/></td>
+			<td title="The challenge is proving possession of a shared secret, obfuscated by the current time, so no state *needs* to be updated"><no/></td>
 			<!-- PPP -->
 			<td title="PPP requires that a counter be increment to reject previously-used passwords."><yes/></td>
 			<!-- Email -->
@@ -270,7 +280,8 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 	can receive direct assistance.
 	<br/><br/>
 	<b>NOTICE:</b> a stronger security rank is not neccesarily better (or even feasible) for a particular application. For
-	example, an air-gapped machine cannot use SQRL authentication, and a stateless machine cannot use H-OTP authentication.
+	example, an air-gapped machine (or misconfigured router) cannot use SQRL authentication, and a stateless machine cannot
+	use H-OTP authentication.
 	<br/><br/>
 	<b>NOTICE:</b> you are not required (or even encouraged) to use all these forms of authentication. While they are each
 	deemed secure in their own right, there is greater security in <u>knowing</u> which authentication methods are active
@@ -293,9 +304,12 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 	technical proficiency, compared to the other available options).
 </arena>
 
+</div>
 
 </div>
 
+<script src="tabby/classList.js"></script>
+<script src="tabby/tabby.js"></script>
 <script src="widget.js"></script>
 
 </div>

@@ -5,7 +5,7 @@
  * widget.js
  */
 
-function startPageSync()
+function qrauth_sqrlClick()
 {
 	if (window.XMLHttpRequest)
 	{
@@ -21,8 +21,13 @@ function startPageSync()
 	syncQuery.onreadystatechange = function()
 	{
 		if ( syncQuery.readyState == 4 )
+		{
 			document.location.href = 'demo.htm';
+		}
 	}
 
 	syncQuery.send();
 }
+
+tabby.init();
+
