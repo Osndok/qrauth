@@ -1,0 +1,201 @@
+
+qrauth
+qrlogin
+sqrl-linux
+git-the-sqrl
+
+Must:
+* support sqrl (to some degree, or expandable therefor)
+* support totp (for offline usage)
+* be clock-skew resistant
+* not show qr code unless keypair challenge fails
+* use (bare?) GIT repository as authentication SoA
+* detect (or correct?) mismatched usernames on SQRL activation
+* provide a high degree of accountability wrt tracing changes to permissions and access
+
+Should:
+* support transparent sqrl linkage (scan qr, then login)
+* support "perfect paper passwords"
+* support hotp (for bad-clock-and-no-network usage?)
+* have an encrypted-at-rest strategy
+
+Could:
+* have separate otp credentials for 'trusted' and 'untrusted' access levels? (WAN/PROXY) qrauth-session-enforcement?
+* support solidpass-like CRAM mechanism (enter password on [or no-pass from] your phone)
+* support a "standard" CRAM, like CRAM-MD5
+
+Wont:
+
+------
+
+In particular, it is neccesary to replicate the SoA repositories to enact uniformity of
+login (one machine must have a writable secret repo and a reachable hostname/ip);
+
+------
+
+Pubkey -> OTP example
+http://dhavalanswers.org/wordpress/yanagi/2015/01/12/ssh-authentication-either-ssh-keys-or-one-time-password/
+
+------ SoAs --------------
+
+/var/qrauth/secret.git - *very* sensitive! exposed (or reversible) credential elements, passwords, etc.
+/var/qrauth/privy.git  - contains less-sensitive elements; public keys, *HASHED* password, etc.
+/var/qrauth/local/     - contains unshared, pre-commit, and locally-assertable facts (e.g. time minimas)
+
+alternate names:
+/mnt/qrauth/secret.git
+/mnt/qrauth-secret/git
+
+------- Definitions -------
+
+SoA - Start-of-authority, the origination of all authoritative login and configuration information; usually a privledged user or history-retaining git repository
+
+------- User/Group/Connectivity Layers --------
+
+Layer0 - Local-UNIX, sub-layer
+	* this package intends to replace/augment (but not *interfere* with) existing unix user infrastructure
+	* if too many users to use layer1, personal workstations might use this (layer0)
+
+Layer1 - UNIX, maintenance crew, inner-circle, primary-layer
+	* large-but-finite in number, login information distributed to all devices in a machine-group (for offline use)
+	* users who *might* need to login to a particular machine, even if the general authnet is down
+	* not limited to unix gurus, but even in-business persons that need to use their workstations
+	* When used as a connectivity level, this means that qrauthd is running [and/or responsive]
+
+Layer2 - machine-group, cluster, LAN
+	* When used as a connectivity level, this means that we can access at least one machine that can write to the group's secret repo
+
+Layer3 - Global, Meta, BigData, super-layer
+	* infinite users (more than can be tracked by one machine)
+	* delegates to superior service for authentication
+	* not available offline
+	* (generally) unix-level login not allowed
+	* think... super-scalar-webapp... a database of millions of users
+
+
+------- Protection Levels -----------
+
+SECRET
+	* Highly sensitive information that should never be exposed to machines (or users) lower than the SECRET class.
+	* A secret user record usually contains enough information to login as that user
+	* A secret repo usually contains enough information to login as *ANYONE* on the system, including *reversible* password hashes, private keys, etc.
+	* A secret operation usually reveals enough information to login as the user it is operating against
+
+PRIVY
+	* Contains somewhat-sensitive information that should not be *generally* disclosed, but is safe enough to distribute to all machines in a cluster
+	* Generally includes *HASHED* passwords, public keys, etc.
+	* If an unauthorized party gained access to this ring, it would be *significant* work to gain a login for *any* user
+	* Examples: pubkeys, username list
+	* Might include: read-access to any/all user's hash-based otp *counter* (reveals account existence and number of uses)
+
+PUBLIC
+	* Non-sensitive information, or information that is generally not useful without vastly expanded access
+	* Values that are more important for security features or diagnostics (e.g login failures) than to be kept secret
+	* Examples might include:
+		** currently accepted "head" reference for both secret & privy repos,
+		** current & accepted time,
+		** a machine's perception of time & network reliability
+		** if a username (or ip address) is currently locked out
+
+------- Localities --------
+
+LOCAL, PHYSICAL   - user at the keyboard, process on this machine
+LAN,   NET_LOCAL  - user/process from machine on the local subnet
+WAN,   NET_REMOTE - user/process from "somewhere" far, far away; direct, but can include 'tunnels'
+PROXY, NET_PROXY  - user/process hidden behind another machine/process which may be a MITM.
+
+-------independent bins-------------------
+
+sbin/qrauth-ssh-keys ${USER}
+	* P:users/${USER}/pubkey-*
+	* prints the authorized_keys file for a user; see AuthorizedKeysCommand in ssh documentation
+	* does not depend on qrauthd or any other binary!!! reads directly from git repo(s)
+	* if user exists, and has authorized_keys file (matching mode, etc) it is printed too (but with a logged warning?)
+	* maybe normalize average lookup times, and sleep when dne?
+
+sbin/qrauth-init [--force]
+	* ?: fails if --force is not applied, and cannot verify that reachability of ip/hostname
+	* prints (and requests the user verify) the public ip & hostname
+	* git init --shared --bare
+	* generates secret pub/private keypair *in-repo* (P: machines/qrauth-secret/pubkey1); (S: machines/qrauth-secret/privkey1)
+	* generates privy pub/private keypair *in-repo* (P: machines/qrauth-privy/pubkey1 & machines/qrauth-privy/privkey1)
+	* prints own ip/hostname into the 'secret' contact info (which is in the privy repo); P:machines/qrauth-secret/network1)
+	* writes default preferences (layer3 => no-shell-login)
+
+sbin/qrauth-config [-l|--local] [-r|-w|-d] <key> [value comment...]
+	* an easier mechanism to update privy config file (than fork/edit/commit/push/delete)
+	* of neccesity, does not interact with qrauthd (so usable offline); but qrauthd might "react" to it's changes
+	* key cannot contain an equals sign, minus-sign, or whitespace
+
+sbin/qrauth-check  [-u user]
+	* provides advice on a particular user's login methods
+	* e.g. 'missing sqrl'
+	* e.g. 'missing totp' (if network is down)
+	* Summarizes: "You are in layer3, so you will not be able to log into this machine without the central auth server."
+	* !!!: ALSO CHECKS, for misconfigured pam/ssh ?!?
+
+?: libexec/qrauth-layer3-login --symlink--> /usr/sbin/nologin
+
+-------soft-dependent bins--------------
+
+sbin/qrauth-login
+	* drop-in replacement for 'login' command
+	* will use qrauthd, if available, but *MUST* work without that process
+	* will use remote secret writing, if available, but *MUST* work without that too
+	* INCLUDING login mechanisms that require state, such as "hotp", or "ppp" logins!
+
+sbin/qrauth-update [totp|hotp|ppp|sqrl|ssh|cram] [user]
+	* might error-out if cannot write-persist required repo
+	* depends on qrauthd for write-persistant check, otherwise prints warning
+
+sbin/qrauth-grant [-u <user> <group>|-g <group> <permission>]
+	* "user" can be 'self'
+	* might error-out if cannot write-persist required repo
+	* depends on qrauthd for write-persistant check, otherwise prints warning
+
+sbin/qrauth-assert [-u user] <[-g <group>|-p <permission>] ...>
+	* if user is not specified, the current UNIX user (returned by getuid/getpwuid) is used
+	* returns EXIT_SUCCESS if user has specified groups/permissions
+	* might error-out if cannot write-persist required repo
+	* depends on qrauthd for write-persistant check, otherwise prints warning
+
+
+-------dependent bins------------------
+
+qrauthd
+	* maintains secure P2P-ring connections machine group
+	* maintains machine-local state [reliable net/clock; write-persist privy/secret repos]
+	* tracks local session information
+	* uniform access to 'secret' information
+	* ?: access to read/write stuffs
+	* NOT required to login (!!!)
+	* (forked? nobody-ed) public/remote access features (SQRL)
+	* notices local refs/head[s?]/master update, or does not need to
+	* thoughoufair for privledged subsystem writes (adding users?), if supported
+	* responds to local requests via socket: /tmp/.S_qrauthd
+	* ???: should auto-replicate privy (& secret) git repos?
+	* ???: should maintain trust-foreclosing machine authentication
+
+bin/qrauth-session [--level[=<level>]] [--is-remote|--is-local]
+	* prints information about the current login/session (keyed from QR_SESS environment variable?)
+	* stored in qrauthd ?
+	* !: report/fail if level-check *and* qrauthd down *and* user could kill that process
+
+bin/qrauth-bless [-s|--secret] [-m <machine>|-ip <ip_address>] <duration>
+	* should be marked DANGEROUS, and print a warning (with delay? backwards typing? log activity?)
+	* temporarily "blesses" access to the given machine name (from recent qrauth activity) or ip address (even more danger?)
+	* once the machine's qrauthd process connects, the shared secret will be sufficient
+	* always requires a timeout? or a default timeout (1 hour?)
+	* if desired, could bless a subnet, or totally-open (contemporaneous)
+
+bin/qrauth-connect [user@]<hostname|ip_address>
+	* verifies hostname & ip (like init)
+	* can be considered the counterpart to the 'bless' command
+	* unlike most other commands, this does not require an initialized privy repo
+	* used once to initialize the privy (and possibly *secret*) git repos connections from the specified server
+	* once connected, updates should be automatic
+	* tries an ssh connection first (which would not require a remote 'blessing')
+
+bin/qrauth-state
+	* used to get (or set?) machine local state flags
+

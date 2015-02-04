@@ -1,0 +1,187 @@
+
+#qrauth .outer
+{
+	width: 700px;
+	color: black;
+	background-color: white;
+	padding: 10px;
+	/*box-sizing: border-box;*/
+	position: relative;
+}
+
+#qrauth methods
+{
+	display:block;
+	width:100%;
+	box-sizing: border-box;
+	z-index: 3;
+}
+
+#qrauth methods prompt
+{
+	padding: 5px;
+	height: 1px;
+}
+
+#qrauth methods method
+{
+	border-left : 1px solid darkgray;
+	border-top  : 1px solid darkgray;
+	border-right: 1px solid darkgray;
+
+	color: darkgray;
+	background-color: white;
+
+	padding: 5px;
+	display:inline-block;
+	box-sizing: border-box;
+	cursor: pointer;
+
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+#qrauth methods method.selected
+{
+	color: black;
+	font-weight: bold;
+	border: 2px solid black;
+	border-bottom: none;
+	padding: 5px;
+	position:relative;
+	top:2px;
+}
+
+#qrauth arena,
+#qrauth table
+{
+	color: black;
+	background-color: white;
+}
+
+#qrauth arena
+{
+	border: 2px solid black;
+	border-radius: 10px;
+
+	margin-bottom: 10px;
+
+	/* can't be relative, and keep the tab overlap :(
+	position: relative;
+	*/
+
+	width:100%;
+	height: 410px;
+	padding: 10px;
+	display: block;
+	box-sizing:border-box;
+
+	z-index: 2;
+}
+
+#qrauth arena.overview
+{
+	height: 500px;
+}
+
+#qrauth liner
+{
+	position:relative;
+	
+}
+
+#qrauth left
+{
+	height: 240px;
+
+	position: absolute;
+	width: 205px;
+	left:10px;
+	top:55px;
+
+	margin: 10px;
+	box-sizing:border-box;
+}
+
+#qrauth right
+{
+	height: 240px;
+
+	position: absolute;
+	right:10px;
+	width: 66%;
+	top:55px;
+
+	padding: 15px;
+	box-sizing:border-box;
+
+	border-left: 1px dashed lightgray;
+
+}
+
+#qrauth lower
+{
+	position: relative;
+	top: 257px;
+}
+
+#qrauth input,
+#qrauth textarea
+{
+	color: black;
+	background-color: lightgray;
+}
+
+#qrauth .rsa textarea
+{
+	width: 100%;
+	height: 100px;
+}
+
+#qrauth .sqrl left
+{
+	text-align: center;
+	background-color: white;
+}
+
+#qrauth .sqrl img
+{
+	margin: 17px 10px 20px 10px;
+}
+
+#qrauth .sqrl hostname
+{
+	margin-top: 10px;
+	font-size: 16px;
+	/*font-weight: bold;*/
+	font-family: monospace;
+}
+
+#qrauth table
+{
+	/*border-spacing: 10px;*/
+	border-collapse: collapse;
+	
+}
+
+#qrauth td,
+#qrauth th
+{
+	padding: 10px;
+	border: 1px dashed gray;
+}
+
+#qrauth yes:after
+{
+	content:"Yes";
+	color: green;
+	font-weight: bold;
+}
+
+#qrauth no:after
+{
+	content:"NO";
+	color: red;
+	font-weight: bold;
+}
+

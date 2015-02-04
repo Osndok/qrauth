@@ -1,0 +1,189 @@
+
+<div id="qrauth">
+<link rel="stylesheet" type="text/css" href="widget.css"/>
+
+<div class="outer">
+
+<methods>
+	<prompt>Login method:</prompt>
+	<method key="legacy">Legacy</method>
+	<method key="sqrl" class="selected">SQRL</method>
+	<method key="otp">OTP</method>
+	<method key="ppp">PPP</method>
+	<method key="rsa">RSA</method>
+	<method key="email">Email</method>
+	<method key="overview">Overview</method>
+</methods>
+
+<arena class="sqrl active">
+	<left>
+		<a href="sqrl://xxx.example.com/sqrl?aosenutaosuentoaheusnth" onClick="window.setTimeout( startPageSync, 1 );">
+			<img src="sqrl.png"/>
+		</a>
+		<br/>
+		<hostname>allogy.com</hostname>
+		<noscript>
+			<input type="submit" value="Continue">
+		</noscript>
+	</left>
+	<right>
+		<b>SQRL</b> is a new authentication mechanism that does not require this server to
+		keep any secret information (like passwords). It is secure, quick, and reliable, but
+		<u>does require a special client program</u> in order for it to work.
+		<br/><br/>
+		When using an untrusted computer, SQRL can be used directly from your mobile device
+		(by scanning the qr code) to minimize the risk of an account takeover, or directly
+		from your personal workstation (by clicking on the qr code).
+		<br/><br/>
+	</right>
+	<lower>
+		It is not neccesary to create a new identity per-website, as the SQRL protocol
+		automatically segregates your online identities.
+		See <a href="https://www.grc.com/sqrl/sqrl.htm">the main sqrl page at grc.com</a>
+		for more information.
+		<br/><br/>
+		If allowed by the server, one can also *create* a new account by trying to login
+		by this mechanism.
+	</lower>
+</arena>
+
+<arena class="rsa">
+	<label for="username">Username (or RSA public key):</label>
+	<br/>
+	<input name="username"/><!--input type="submit" value="Submit"/-->
+	<br/>
+	<br/>
+	Challenge:<br/>
+	<pre>
+echo T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64
+	</pre>
+	<label for="response">Response:</label>
+	<br/>
+	<textarea name="response"></textarea>
+	<br/>
+	<input type="submit" value="Submit"/>
+</arena>
+
+<arena class="overview">
+	<table>
+		<tr>
+			<th>Method:</th>
+			<th><a href="http://en.wikipedia.org/wiki/SQRL">SQRL</a></th>
+			<th><a href="http://en.wikipedia.org/wiki/RSA_(cryptosystem)">RSA</a></th>
+			<th><a href="http://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm">T-OTP</a></th>
+			<th><a href="http://en.wikipedia.org/wiki/HMAC-based_One-time_Password_Algorithm">H-OTP</a></th>
+			<th><a href="https://www.grc.com/ppp.htm">PPP</a></th>
+			<th>Email</th>
+			<th>Password</th>
+		</tr>
+		<tr>
+			<th>Secrets on Server</th>
+			<!-- SQRL -->
+			<td title="In SQRL, only the public key is revealed to (or stored on) the server."><no/></td>
+			<!-- RSA -->
+			<td title="In RSA, the server does not require the private key to verify that *you* have it."><no/></td>
+			<!-- TOTP -->
+			<td title="The server must have the same secret (and time) to generate the same response as you."><yes/></td>
+			<!-- HOTP -->
+			<td title="The server must have the same secret (and counter) to generate the same response as you."><yes/></td>
+			<!-- PPP -->
+			<td title="The server must have the same secret (and counter) to generate the same response as you."><yes/></td>
+			<!-- Email -->
+			<td title="The shared secret is usually temporary, and emailed in the form of a link."><no/></td>
+			<!-- Password -->
+			<td title="Passwords can be salted and hashed, relieving some burden of secret-keeping."><yes/>*</td>
+		</tr>
+		<tr>
+			<th>Login Requires State Update</th>
+			<!-- SQRL -->
+			<td title="The challenge is proving possition of a private key, so no state *needs* to be updated"><no/></td>
+			<!-- RSA -->
+			<td title="The challenge is proving possition of a private key, so no state *needs* to be updated"><no/></td>
+			<!-- TOTP -->
+			<td title="The challenge is proving possition of a shared secret, obfuscated by the current time, so no state *needs* to be updated"><no/></td>
+			<!-- HOTP -->
+			<td title="HOTP requires that a counter be increment after each successful authentication attempt"><yes/></td>
+			<!-- PPP -->
+			<td title="PPP requires that a counter be increment to reject previously-used passwords."><yes/></td>
+			<!-- Email -->
+			<td><no/></td>
+			<!-- Password -->
+			<td><no/></td>
+		</tr>
+		<tr>
+			<th>Requires Network Access</th>
+			<!-- SQRL -->
+			<td title="The SQRL challenge is domain-specific, and requires that the browser, the auth server, and (when applicable) your mobile device all have network access."><yes/></td>
+			<!-- RSA -->
+			<td><no/></td>
+			<!-- TOTP -->
+			<td title="Does, however, require an accurate clock."><no/>*</td>
+			<!-- HOTP -->
+			<td><no/></td>
+			<!-- PPP -->
+			<td><no/></td>
+			<!-- Email -->
+			<td><yes/></td>
+			<!-- Password -->
+			<td><no/></td>
+		</tr>
+		<tr>
+			<th>Requires 3rd Party</th>
+			<!-- SQRL -->
+			<td><no/></td>
+			<!-- RSA -->
+			<td><no/></td>
+			<!-- TOTP -->
+			<td><no/></td>
+			<!-- HOTP -->
+			<td><no/></td>
+			<!-- PPP -->
+			<td><no/></td>
+			<!-- Email -->
+			<td title="Unless you count the email provider"><no/>*</td>
+			<!-- Password -->
+			<td><no/></td>
+		</tr>
+		<tr>
+			<th>Requires Separate Username</th>
+			<!-- SQRL -->
+			<td><no/></td>
+			<!-- RSA -->
+			<td title="If the public key is presented in addition to the response, then no. A username would not be required.">***</td>
+			<!-- TOTP -->
+			<td><yes/></td>
+			<!-- HOTP -->
+			<td title="Some devices (such as the yubikey) prefix a usable 'username'."><yes/>*</td>
+			<!-- PPP -->
+			<td><yes/></td>
+			<!-- Email -->
+			<td title="On the theory that the email address, itself, can be used as a username."><no/>*</td>
+			<!-- Password -->
+			<td><yes/>*</td>
+		</tr>
+		<tr>
+			<th>Per-site Setup</th>
+			<!-- SQRL -->
+			<td><no/></td>
+			<!-- RSA -->
+			<td title="In theory, a published key could be obtained from a key server"><yes/>*</td>
+			<!-- TOTP -->
+			<td title="In theory, the same secret could be shared across many sites, but would allow each site to impersonate you"><yes/>*</td>
+			<!-- HOTP -->
+			<td title="Not counting centralized systems (such as the yubikey) in which case network requirement is YES."><yes/>*</td>
+			<!-- PPP -->
+			<td><yes/></td>
+			<!-- Email -->
+			<td><no/></td>
+			<!-- Password -->
+			<td title="On the recommendation that one have separate passwords for each site."><yes/>*</td>
+		</tr>
+	</table>
+</arena>
+
+
+</div>
+
+<script src="widget.js"></script>
+
+</div>
