@@ -77,11 +77,8 @@
 	box-sizing:border-box;
 
 	z-index: 2;
-}
 
-#qrauth arena.overview
-{
-	height: 500px;
+	overflow-y: auto;
 }
 
 #qrauth liner
@@ -136,6 +133,7 @@
 {
 	width: 100%;
 	height: 100px;
+	margin-bottom: 10px;
 }
 
 #qrauth .sqrl left
@@ -147,6 +145,11 @@
 #qrauth .sqrl img
 {
 	margin: 17px 10px 20px 10px;
+}
+
+#qrauth .ppp img
+{
+	float: right;
 }
 
 #qrauth .sqrl hostname
@@ -162,6 +165,17 @@
 	/*border-spacing: 10px;*/
 	border-collapse: collapse;
 	
+}
+
+#qrauth .ppp table
+{
+	margin: 20px;
+	width: 635px;
+}
+
+#qrauth .otp table
+{
+	margin: 10px 10px 0 88px;
 }
 
 #qrauth td,
