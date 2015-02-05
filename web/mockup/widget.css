@@ -1,12 +1,29 @@
 
-#qrauth .outer
+#qrauth
 {
 	width: 700px;
 	color: black;
 	background-color: white;
+	
+}
+
+#qrauth .outer
+{
 	padding: 10px;
 	/*box-sizing: border-box;*/
 	position: relative;
+}
+
+#qrauth warning
+{
+	color: black;
+	border: 2px solid red;
+	
+	padding: 15px;
+	margin: 15px;
+	display: block;
+	position: relative;
+	top: 15px;
 }
 
 #qrauth methods
@@ -151,7 +168,7 @@
 
 #qrauth #sqrl img
 {
-	margin: 17px 10px 20px 10px;
+	margin: 17px 10px 15px 10px;
 }
 
 #qrauth #ppp img
@@ -165,6 +182,11 @@
 	font-size: 16px;
 	/*font-weight: bold;*/
 	font-family: monospace;
+}
+
+#qrauth #sqrl noscript input
+{
+	margin-top:10px;
 }
 
 #qrauth table

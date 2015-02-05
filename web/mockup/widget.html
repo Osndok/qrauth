@@ -2,17 +2,38 @@
 <div id="qrauth">
 <link rel="stylesheet" type="text/css" href="widget.css"/>
 
+<noscript>
+
+	<!--
+	This image allows us to connect the sessions *late* (after the api call that generates this markup),
+	and is akin to the "attach_session" api call, except that it works without javascript, because it is
+	an image request. Marked as 'unsafe' because GETs should be safe, and this one arguably is NOT.
+
+	If the session *is* now attached, this will return an image with a visual prompt to refresh the page,
+	otherwise it will be a 1x1 transparent "nothing" image.
+	-->
+	<img src="https://services.allogy.com/qrauth/v1/noscript/unsafe_attach/notice.png"/>
+
+	<warning>
+		<b><u>NOTICE:</u></b> most authentication workflows will have a degraded experience without javascript,
+		and a few have yet to be implemented to support "no-javascript". Hereafter, it is presumed that you
+		know that you have javascript disabled on your browser, and it might cause some usability issues.
+	</warning>
+
+</noscript>
+
+<!-- NB: due to overlapping divs, you cannot safely insert elements at the top of the 'outer' div -->
 <div class="outer">
 
 <methods class="tabs">
 	<prompt>Login method:</prompt>
-	<a data-tab="#legacy"   href="noscript/legacy">Legacy</a>
-	<a data-tab="#sqrl"     href="noscript/sqrl" class="active">SQRL</a>
-	<a data-tab="#otp"      href="noscript/otp">OTP</a>
-	<a data-tab="#ppp"      href="noscript/ppp">PPP</a>
-	<a data-tab="#rsa"      href="noscript/rsa">RSA</a>
-	<a data-tab="#email"    href="noscript/email">Email</a>
-	<a data-tab="#overview" href="noscript/overview">Overview</a>
+	<a data-tab="#legacy"   target="_blank" href="noscript/legacy">Legacy</a>
+	<a data-tab="#sqrl"     target="_blank" href="noscript/sqrl" class="active">SQRL</a>
+	<a data-tab="#otp"      target="_blank" href="noscript/otp">OTP</a>
+	<a data-tab="#ppp"      target="_blank" href="noscript/ppp">PPP</a>
+	<a data-tab="#rsa"      target="_blank" href="noscript/rsa">RSA</a>
+	<a data-tab="#email"    target="_blank" href="noscript/email">Email</a>
+	<a data-tab="#overview" target="_blank" href="noscript/overview">Overview</a>
 </methods>
 
 <div class="tabs-content">
@@ -29,7 +50,8 @@ Legacy login goes here...
 		<br/>
 		<hostname>allogy.com</hostname>
 		<noscript>
-			<input type="submit" value="Continue">
+			<br/>
+			<input type="submit" value="Authentication Sent">
 		</noscript>
 	</left>
 	<right>
