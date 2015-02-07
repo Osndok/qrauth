@@ -53,6 +53,19 @@ create table personlog
 	important      BOOLEAN NOT NULL DEFAULT 'f',
 );
 
+
+--
+-- For some methods (such as SQRL, RSA, and yubikey), a username is not strictly required... therefor
+-- we let the user decide if they should further restrict the authentication method to require a username
+-- by the 'requireUsername' flag... which defaults to false for creating-an-account safety (as they may not
+-- *have* a username yet!).
+--
+-- For yubikey, the pubkey shall be the static prefix of the key.
+--
+-- For ssh keys (like RSA) the type, secret, and comment fields shall be the same format as the commonly available
+-- id_rsa.pub file (e.g. type = 'ssh-rsa', comment = 'user@host").
+--
+
 create table method
 (
 	id             SERIAL,
