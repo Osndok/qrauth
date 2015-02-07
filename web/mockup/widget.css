@@ -1,10 +1,10 @@
 
 #qrauth
 {
-	width: 700px;
+	width: 800px;
 	color: black;
 	background-color: white;
-	
+	clear: both;
 }
 
 #qrauth .outer
@@ -113,10 +113,10 @@
 
 #qrauth left
 {
-	height: 240px;
+	height: 232px;
 
 	position: absolute;
-	width: 205px;
+	width: 210px;
 	left:10px;
 	top:55px;
 
@@ -126,11 +126,11 @@
 
 #qrauth right
 {
-	height: 240px;
+	height: 232px;
 
 	position: absolute;
+	left: 30%;
 	right:10px;
-	width: 66%;
 	top:55px;
 
 	padding: 15px;
@@ -143,7 +143,9 @@
 #qrauth lower
 {
 	position: relative;
-	top: 257px;
+	top: 237px;
+	display:block;
+	padding: 10px;
 }
 
 #qrauth input,
@@ -153,30 +155,30 @@
 	background-color: lightgray;
 }
 
-#qrauth #rsa textarea
+#qrauth_rsa textarea
 {
 	width: 100%;
 	height: 100px;
 	margin-bottom: 10px;
 }
 
-#qrauth #sqrl left
+#qrauth_sqrl left
 {
 	text-align: center;
 	background-color: white;
 }
 
-#qrauth #sqrl img
+#qrauth_sqrl img
 {
 	margin: 17px 10px 15px 10px;
 }
 
-#qrauth #ppp img
+#qrauth_ppp img
 {
 	float: right;
 }
 
-#qrauth #sqrl hostname
+#qrauth_sqrl hostname
 {
 	margin-top: 10px;
 	font-size: 16px;
@@ -184,7 +186,7 @@
 	font-family: monospace;
 }
 
-#qrauth #sqrl noscript input
+#qrauth_sqrl noscript input
 {
 	margin-top:10px;
 }
@@ -196,15 +198,27 @@
 	
 }
 
-#qrauth #ppp table
+#qrauth_ppp table
 {
-	margin: 20px;
-	width: 635px;
+	margin: 20px 0;
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
 }
 
-#qrauth #otp table
+#qrauth_otp table
 {
-	margin: 10px 10px 0 88px;
+	margin: 10px 10px 0 134px;
+}
+
+#qrauth_overview table
+{
+	text-align: center;
+}
+
+#qrauth_overview th.password
+{
+	font-size: small;
 }
 
 #qrauth td,

@@ -27,22 +27,27 @@
 
 <methods class="tabs">
 	<prompt>Login method:</prompt>
-	<a data-tab="#legacy"   target="_blank" href="noscript/legacy">Legacy</a>
-	<a data-tab="#sqrl"     target="_blank" href="noscript/sqrl" class="active">SQRL</a>
-	<a data-tab="#otp"      target="_blank" href="noscript/otp">OTP</a>
-	<a data-tab="#ppp"      target="_blank" href="noscript/ppp">PPP</a>
-	<a data-tab="#rsa"      target="_blank" href="noscript/rsa">RSA</a>
-	<a data-tab="#email"    target="_blank" href="noscript/email">Email</a>
-	<a data-tab="#overview" target="_blank" href="noscript/overview">Overview</a>
+	<a data-tab="#qrauth_options"  target="_blank" href="noscript/options">Options</a>
+	<a data-tab="#qrauth_sqrl"     target="_blank" href="noscript/sqrl" class="active">SQRL</a>
+	<a data-tab="#qrauth_otp"      target="_blank" href="noscript/otp">OTP</a>
+	<a data-tab="#qrauth_ppp"      target="_blank" href="noscript/ppp">PPP</a>
+	<a data-tab="#qrauth_rsa"      target="_blank" href="noscript/rsa">RSA</a>
+	<a data-tab="#qrauth_openid"   target="_blank" href="noscript/openid">OpenID</a>
+	<a data-tab="#qrauth_email"    target="_blank" href="noscript/email">Email</a>
+	<a data-tab="#qrauth_overview" target="_blank" href="noscript/overview">Overview</a>
 </methods>
 
 <div class="tabs-content">
 
-<arena id="legacy">
-Legacy login goes here...
+<arena id="qrauth_options">
+	Options panel goes here...
+	<ul>
+		<li>login straight to account maintenance</li>
+		<li>set desired session length</li>
+	</ul>
 </arena>
 
-<arena id="sqrl" class="active">
+<arena id="qrauth_sqrl" class="active">
 	<left>
 		<a href="sqrl://xxx.example.com/sqrl?aosenutaosuentoaheusnth" onClick="window.setTimeout( qrauth_sqrlClick, 1 );">
 			<img src="sqrl.png"/>
@@ -66,7 +71,7 @@ Legacy login goes here...
 	</right>
 	<lower>
 		It is not neccesary to create a new identity per-website, as the SQRL protocol
-		automatically isolates your online identities per-site.
+		automatically isolates your online identities per-domain.
 		See <a href="https://www.grc.com/sqrl/sqrl.htm">the main sqrl page at grc.com</a>
 		for more information.
 		<br/><br/>
@@ -76,7 +81,7 @@ Legacy login goes here...
 </arena>
 
 
-<arena id="otp">
+<arena id="qrauth_otp">
 	<table>
 		<tr>
 			<th>Prompt</th>
@@ -107,31 +112,30 @@ Legacy login goes here...
 </arena>
 
 
-<arena id="ppp">
+<arena id="qrauth_ppp">
 	<table>
 		<tr>
-			<th>Step</th>
-			<th>Prompt</th>
-			<th>Response</th>
-			<th>Action</th>
+			<th colspan="2">Step</th>
+			<th class="field">Response</th>
+			<th class="action">Action</th>
 		</tr>
 		<tr>
-			<td>1</td>
-			<td><label for="username">Provide username:</label></td>
-			<td><input name="username"/></td>
-			<td><input type="submit" value="Submit"/></td>
+			<td class="num">1</td>
+			<td class="instr"><label for="username">Provide username:</label></td>
+			<td class="field"><input name="username"/></td>
+			<td class="action"><input type="submit" value="Submit"/></td>
 		</tr>
 		<tr>
-			<td>2</td>
-			<td>Receive challenge:</td>
-			<td>Sheet 4: A9</td>
-			<td>Locate Password</td>
+			<td class="num">2</td>
+			<td class="instr">Receive challenge:</td>
+			<td class="field">Sheet 4: A9</td>
+			<td class="action">Locate Password</td>
 		</tr>
 		<tr>
-			<td>3</td>
-			<td>Provide response:</td>
-			<td><input name="password"/></td>
-			<td><input type="submit" value="Submit"/></td>
+			<td class="num">3</td>
+			<td class="instr">Provide response:</td>
+			<td class="field"><input name="password"/></td>
+			<td class="action"><input type="submit" value="Submit"/></td>
 		</tr>
 	</table>
 	<img src="blackspy.png"/>
@@ -143,7 +147,7 @@ Legacy login goes here...
 	<a href="https://www.grc.com/ppp.htm">the PPP page on grc.com</a>.
 </arena>
 
-<arena id="rsa">
+<arena id="qrauth_rsa">
 	<label for="username">Username (or RSA public key):</label>
 	<br/>
 	<textarea name="username"></textarea>
@@ -160,11 +164,15 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 	<input type="submit" value="Submit"/>
 </arena>
 
-<arena id="email">
+<arena id="qrauth_openid">
+	OpenID goes here...
+</arena>
+
+<arena id="qrauth_email">
 	Email goes here...
 </arena>
 
-<arena id="overview">
+<arena id="qrauth_overview">
 	<table>
 		<tr>
 			<th>Method:</th>
@@ -173,8 +181,9 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<th><a href="http://en.wikipedia.org/wiki/HMAC-based_One-time_Password_Algorithm">H-OTP</a></th>
 			<th><a href="http://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm">T-OTP</a></th>
 			<th><a href="https://www.grc.com/ppp.htm">PPP</a></th>
+			<th><a href="http://en.wikipedia.org/wiki/OpenID">OpenID</a></th>
 			<th>Email</th>
-			<th>Password</th>
+			<th class="password">Password</th>
 		</tr>
 		<tr>
 			<th>Secrets on Server</th>
@@ -188,13 +197,15 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<td title="The server must have the same secret (and time) to generate the same response as you."><yes/></td>
 			<!-- PPP -->
 			<td title="The server must have the same secret (and counter) to generate the same response as you."><yes/></td>
+			<!-- OpenID -->
+			<td title="In OpenID, the *originating* server usually has secrets, but not the relying party."><no/></td>
 			<!-- Email -->
 			<td title="The shared secret is usually temporary, and emailed in the form of a link."><no/></td>
 			<!-- Password -->
 			<td title="Passwords can be salted and hashed, relieving some burden of secret-keeping."><yes/>*</td>
 		</tr>
 		<tr>
-			<th>Login Requires State Update</th>
+			<th>Requires State Update</th>
 			<!-- SQRL -->
 			<td title="The challenge is proving possession of a private key, so no state *needs* to be updated"><no/></td>
 			<!-- RSA -->
@@ -205,6 +216,8 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<td title="The challenge is proving possession of a shared secret, obfuscated by the current time, so no state *needs* to be updated"><no/></td>
 			<!-- PPP -->
 			<td title="PPP requires that a counter be increment to reject previously-used passwords."><yes/></td>
+			<!-- OpenID -->
+			<td><no/></td>
 			<!-- Email -->
 			<td><no/></td>
 			<!-- Password -->
@@ -222,6 +235,8 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<td title="Does, however, require an accurate clock."><no/>*</td>
 			<!-- PPP -->
 			<td><no/></td>
+			<!-- OpenID -->
+			<td title="OpenID relies on being able to redirect you to an authenticating party, over the network."><yes/></td>
 			<!-- Email -->
 			<td><yes/></td>
 			<!-- Password -->
@@ -239,13 +254,15 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<td><no/></td>
 			<!-- PPP -->
 			<td><no/></td>
+			<!-- OpenID -->
+			<td><yes/></td>
 			<!-- Email -->
 			<td title="Ordinarily, email must be transferred unencrypted to a your email-provider."><yes/></td>
 			<!-- Password -->
 			<td><no/></td>
 		</tr>
 		<tr>
-			<th>Requires Separate Username</th>
+			<th>Requires Username</th>
 			<!-- SQRL -->
 			<td><no/></td>
 			<!-- RSA -->
@@ -256,13 +273,15 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<td><yes/></td>
 			<!-- PPP -->
 			<td><yes/></td>
+			<!-- OpenID -->
+			<td title="Strictly speaking, the relying-party need not assign a username; in practice the 'user@host' format is used.">***</td>
 			<!-- Email -->
 			<td title="On the theory that the email address, itself, can be used as a username."><no/>*</td>
 			<!-- Password -->
 			<td><yes/>*</td>
 		</tr>
 		<tr>
-			<th>Per-site Setup</th>
+			<th>Per-domain Setup</th>
 			<!-- SQRL -->
 			<td><no/></td>
 			<!-- RSA -->
@@ -273,6 +292,8 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<td title="In theory, the same secret could be shared across many sites, but would allow each site to impersonate you"><yes/>*</td>
 			<!-- PPP -->
 			<td><yes/></td>
+			<!-- OpenID -->
+			<td><no/></td>
 			<!-- Email -->
 			<td><no/></td>
 			<!-- Password -->
@@ -290,10 +311,21 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<td title="If a hardware token, it can be easily lost or stolen. If on a locked phone, it is more secure. Casual observation of a value is useless only seconds later.">4</td>
 			<!-- PPP -->
 			<td title="Commonly, 'something you have' can be easily lost or stolen; also someone might see 'the next password' on the card, which remains valid for some time.">5</td>
+
+			<!-- OpenID -->
+			<td title="OpenID requires a 3rd party, is often setup insecurly, and almost always relies on a password as it's start-of-trust.">
+				6
+			</td>
+
 			<!-- Email -->
-			<td title="The email service requires the cooperation and descretion of a 3rd party.">6</td>
+			<td title="The email service requires the cooperation and descretion of a 3rd party, messages usually linger for some time and are expected to still work.">
+				7
+			</td>
+
 			<!-- Password -->
-			<td title="Static passwords are commonly shared, lost, written down, guessable, and brute-forced. Also, they are commonly reset at the proof of an email address.">7</td>
+			<td title="Static passwords are commonly shared, lost, written down, guessable, and brute-forced. Also, they are commonly reset at the proof of an email address.">
+				8
+			</td>
 		</tr>
 	</table>
 	<br/>
