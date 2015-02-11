@@ -1,17 +1,40 @@
 
-qrauth
-qrlogin
-sqrl-linux
-git-the-sqrl
+qrauth - the *q*uest for *r*eal *auth*entication
+
+--
+
+Design goals (in order of priority):
+
+# provide a shell-level authentication system that works even in the face of network outages and process failures.
+## ...that is secure, reliable, transparent, and flexible.
+# provide a means by which to replicate and audit shell-level authentication policies
+## ...that is secure and reliable.
+# provide a web authentication mechanism which unifies shell-level accounts and web-level accounts
+## ...that is secure, convenient, and flexible.
+# provide a 3rd-party-capable single-sign-on mechanism
+## ...that is secure and reliable.
+
+--
+
+Motivations:
+* promote the acceptance of SQRL and the demise of passwords
+* discourage high-overhead (yet oddly common) "register and account and verify your email address" workflow
+* serve the community by providing security and semi-public single-sign-on
+* promote own business through affero licensing exceptions
+
+--
 
 Must:
+* not interfere with lower-level authentication mechanisms
 * support sqrl (to some degree, or expandable therefor)
 * support totp (for offline usage)
 * be clock-skew resistant
-* not show qr code unless keypair challenge fails
+* not show qr code or other 'challenge' unless keypair challenge fails
 * use (bare?) GIT repository as authentication SoA
 * detect (or correct?) mismatched usernames on SQRL activation
 * provide a high degree of accountability wrt tracing changes to permissions and access
+* refuse shell-to-insecure-web linkage ("qrl://" protocol)
+* web: only support https connections (redirect browser GET requests?, 400 POST requests)
 
 Should:
 * support transparent sqrl linkage (scan qr, then login)
@@ -23,8 +46,16 @@ Could:
 * have separate otp credentials for 'trusted' and 'untrusted' access levels? (WAN/PROXY) qrauth-session-enforcement?
 * support solidpass-like CRAM mechanism (enter password on [or no-pass from] your phone)
 * support a "standard" CRAM, like CRAM-MD5
+* support basic notification to verified email addresses
+* support email address verification
+* reveal username to tenants (cross-site publishing personalities?)
+* support user-to-user btc donations
 
 Wont:
+* support static passwords
+* support person-to-person messaging or communications
+* yield email address to tenants (mutable notifications only? localizable templates only?)
+* reveal actual person::id to tenants (only tenantperson::id)
 
 ------
 

@@ -8,3 +8,6 @@ bin/qrauth-ssh-keys: src/qrauth-ssh-keys.c
 test: bin/qrauth-ssh-keys
 	DEBUG=1 bin/qrauth-ssh-keys $(shell whoami)
 
+prereqs:
+	sudo yum install libgit2-devel json-c-devel
+

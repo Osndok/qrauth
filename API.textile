@@ -1,0 +1,60 @@
+
+------
+
+API 0 - affero license compliance
+
+* GET /api/affero/hash
+** "f572d396fae9206628714fb2ce00f72e94f2258f" (the git source-control identifier of the commit that is running)
+** baked into the war file at compile time
+
+* GET /api/affero/source
+** (valid redirect or direct-asset-fetch) ... maybe cached, but derived from locally-accessible git repo?
+** "exception:${license_number}" - where ${license_number} is provided by (and purchased from) Allogy
+** "non-compliant" & http-status=500 - admission that this instance is not setup to comply with the affero license
+
+------
+
+API 1 - qrauthd to web (i.e. sqrl login for anyone's shell)
+
+1st... map username -> [ sqrl delegate servers ]
+
+* POST /api/shell/nut/json
+** HOSTNAME -> where they are trying to get shell access to
+** TENANT_SECRET -> the very long and absolutely-must-be-unique secret that identifiers the owner of this machine
+** { qr_url:"sqrl://*****", link_url:"sqrl://*****", poll_url:"https://*****" }
+
+* POST /api/shell/poll/$HOSTNAME/$NUT/json
+** HOSTNAME -> where they are trying to get shell access to
+** TENANT_SECRET -> the very long and absolutely-must-be-unique secret that identifiers the owner of this machine
+** { shell:t/f, username:bob, uid:123, groups: { "wheel":321, "disk":987}} 
+** {} <-- empty object means try again
+** { shell:false, passed:true } <--- valid sqrl auth, no user account
+** { shell:false, passed:true, uid:212 } <--- valid sqrl auth, user account w/o username
+
+FLAW: if (in the future) we support 3rd/4th party sqrl delegates, wouldn't we be revealing TENANT_SECRET
+FLAW: need a "socialist millionaires" protocol that is easy to implement over HTTP (resulting in tenant session ticket)
+
+Client MUST still verify username
+Client MUST emit a warning if uids do not match (but use system-level uid?)
+Server MUST beware of too many outstanding sqrl requests or unreachable server (DoS & fail-safe)
+MAYBE use more shell-friendly encoding than json (but groups list?)
+CONSIDER if we support multiple sqrl servers, then don't we need separate tenant-secrets?
+CONSIDER use of tenantperson::id as a uid (risk of overflow? tenant migration?)
+CONSIDER pre-shell mitm effects such as SSH interception (can sqrl or protocol help? show host key pattern?)
+
+????
+
+* GET /api/shell/nut/$HOSTNAME/props
+** QR_URL="sqrl://*****"\nLINK_URL="sqrl://*****"\nPOLL_URL="https://*****"\n
+
+* GET /api/shell/poll/$HOSTNAME/$NUT/props
+** SHELL="[true|false]"\nUSERNAME=bob\nUID=123\nGROUPS="wheel(321),disk(987)"\n 
+** "" <-- (empty string, no quotes) means try again
+** [analogs of json objects above may indicate
+
+
+------
+
+API 2 - web to qrauthd (i.e. internal synchronization of shell-level user accounts)
+
+

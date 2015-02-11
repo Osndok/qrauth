@@ -1,0 +1,7 @@
+TODO:
+* add user locale db field
+* add user email db field
+* can the current nuts table be used to verify email addresses?
+* maybe: add user unixUid db field (? or start sequence number really high?)
+* add tenant, hostname, and ip to nut table
+* add shellApiKey (non hashed) to tenant table; UNIQUE
