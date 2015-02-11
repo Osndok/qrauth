@@ -15,10 +15,11 @@ create table person
 	created      TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	globalLogout TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-	-- NB: username is initially *NULLABLE* !!! and therefore optional, but probably not *changable* (once assigned)
-	username VARCHAR(255) UNIQUE,
+	displayName    VARCHAR(255),
 
-	level TINYINT NOT NULL,
+	-- NB: username is initially *NULLABLE* !!! and therefore optional, but probably not *changable* (once assigned)
+	username       VARCHAR(255) UNIQUE,
+	verifiedEmail  VARCHAR(255) UNIQUE,
 
 	lastAttempt    TIMESTAMP WITHOUT TIMEZONE,
 	lastSuccess    TIMESTAMP WITHOUT TIMEZONE,
@@ -27,8 +28,6 @@ create table person
 
 	deathMessage   VARCHAR(255),
 	deadline       TIMESTAMP WITHOUT TIMEZONE,
-
-	config         VARCHAR(2550) NOT NULL DEFAULT '{}',
 );
 
 --
@@ -81,6 +80,8 @@ create table method
 	deathMessage   VARCHAR(255),
 	deadline       TIMESTAMP WITHOUT TIMEZONE,
 
+	domain         VARCHAR(255),
+
 	type           VARCHAR(10) NOT NULL,
 	secret         VARCHAR(255),
 	comment        VARCHAR(255),
@@ -100,6 +101,11 @@ create table method
 create table tenant
 (
 	id             SERIAL,
+
+	name           VARCHAR(255) UNIQUE,
+	nameRedux      VARCHAR(255) UNIQUE,
+	domainByLine   VARCHAR(255),
+
 	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	contact        INTEGER REFERENCES person(id),
 	hashedApiKeyPrimary   VARCHAR(255) UNIQUE NOT NULL,
@@ -115,7 +121,27 @@ create table tenant
 
 	anonRegister   BOOLEAN NOT NULL DEFAULT 'f',
 
+	shellKey              VARCHAR(255) UNIQUE,
+	qrauthHostPort        VARCHAR(255),
+
 	fieldDescriptions VARCHAR(25000) NOT NULL DEFAULT '{}',
+);
+
+--
+-- tenantsync is a sqs-moderated queue (clumping queue) synchronization mechanism to the
+-- git-based fail-safe authentication layer. Some fields (such as name & email) are here
+-- because they are required by git, and may not be accurate (i.e. informational, don't
+-- send emails thereto).
+--
+create table tenantsync
+(
+	id             BIGSERIAL,
+	tenant_id      INTEGER REFERENCES tenant(id),
+	effectiveTime  TIMESTAMP WITHOUT TIMEZONE NOT NULL,
+	userName       VARCHAR(255) NOT NULL,
+	userEmail      VARCHAR(255) NOT NULL,
+	authMethod     VARCHAR(255) NOT NULL,
+	requestString  VARCHAR(255) NOT NULL
 );
 
 --

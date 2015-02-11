@@ -1,3 +1,23 @@
+Must:
+* setup web project as https-only tapestry servlet
+* allow shell user to login
+* allow web user to login
+* allow web configuration
+** username restriction function (no dictionary words, or singular proper: 'bob', dirty-word filter? >4 chars)
+** allow setting username to desired string (if available and unrestricted)
+** allow setting username by clicking list of (probably-available) generated ones
+
+* sync to git via qrauthd
+** write tenantsync record
+** enqueue tenant_id as sqs message with 'clumping' delay (modulous 5 seconds?)
+** moderate self to not enqueue tenant_id during till live-line
+** username@tentant-domain (rather than email?) or username@auth.provider.com (invalid, but more correct?)
+
+* support sqrl (to some degree, or expandable therefor)
+* support totp (for offline usage)
+* be clock-skew resistant
+
+
 TODO:
 * add user locale db field
 * add user email db field
@@ -12,3 +32,21 @@ TODO:
 * tenant qrauthd connection field ?!?! UNIQUE? domain-restricted?
 * claimable tenant-specific (and global) group-name system
 * note that tenant death message may be visible to other tenants (when considering ban)
+
+
+Should:
+* support transparent sqrl linkage (scan qr, then login)
+* support "perfect paper passwords"
+* support hotp (for bad-clock-and-no-network usage?)
+* have an encrypted-at-rest strategy
+
+Could:
+* have separate otp credentials for 'trusted' and 'untrusted' access levels? (WAN/PROXY) qrauth-session-enforcement?
+* support solidpass-like CRAM mechanism (enter password on [or no-pass from] your phone)
+* support a "standard" CRAM, like CRAM-MD5
+* support basic notification to verified email addresses
+* support email address verification
+* reveal username to tenants (cross-site publishing personalities?)
+* support user-to-user btc donations
+* allow users to upload a large-ish image, crop to 128px square, upload to S3, and have it available as userImageUrl field
+

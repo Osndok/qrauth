@@ -77,6 +77,7 @@ SOCKET-level protocol (not HTTP)
 (1a) web presents self as authenticating as a particular person, all fields required
 > ${HOSTNAME}
 < web
+< auth.domain.com
 < ${HASHED_TENANT_API_KEY}
 {{ INSERT SMP NEGOTIATION: where X=SERVER_SSL_FINGERPRINT+SHELL_KEY; web is alice, qrauthd is Bob }}
 > OK
@@ -125,7 +126,19 @@ NB: when checking /user/* or /group/* (no trailing path), qrauthd must *also* ch
 ------------
 
 API 3 - tenant utilities
-(!) all methods require posting API_KEY (unhashed; as all the clients know the hashed value)
+
+* POST /api/tenant/create
+** PRIMARY={very-unique-ascii-string-or-guid}
+** SECONDARY={another-very-unique-ascii-string-or-guid}
+** After this call, you may use PRIMARY as your API_KEY... or SECONDARY if PRIMARY is exposed or expired
+
+* POST /api/tenant/rekey
+** SECONDARY={your-current-secondary-api-key-which-now-becomes-primary}
+** NEXT_KEY={very-unique-ascii-string-or-guid}
+** After this call, which proves that you know your secondary key (which should not have been wrapped up in your deployment),
+** the secondary key becomes your primary, and the provided NEXT_KEY becomes your SECONDARY... thus, "shifting" them.
+
+(!) all following methods require posting API_KEY (unhashed)
 
 * POST /api/tenant/user/recent
 * POST /api/tenant/user/named/$NAMES_CSV
