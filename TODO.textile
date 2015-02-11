@@ -5,3 +5,8 @@ TODO:
 * maybe: add user unixUid db field (? or start sequence number really high?)
 * add tenant, hostname, and ip to nut table
 * add shellApiKey (non hashed) to tenant table; UNIQUE
+* 'shell' boolean in tenantperson (default false)
+* specify, wherever possible, that 'root' user never is authenticated (e.g. listing authorized pubkeys, sync'ing accounts, etc)
+* can we get an ever-updating list of all available upstream-packaged-users? or even common system users?
+* tenant domain field
+* tenant qrauthd connection field ?!?! UNIQUE? domain-restricted?

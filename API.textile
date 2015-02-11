@@ -14,25 +14,29 @@ API 0 - affero license compliance
 
 ------
 
-API 1 - qrauthd to web (i.e. sqrl login for anyone's shell)
+API 1 - qrauthd to web (i.e. generally-available sqrl login for shell access)
 
-1st... map username -> [ sqrl delegate servers ]
+?: 1st... map username -> [ sqrl delegate servers ]
 
-* POST /api/shell/nut/json
+* GET /api/shell/nut/$HOSTNAME/json
 ** HOSTNAME -> where they are trying to get shell access to
-** TENANT_SECRET -> the very long and absolutely-must-be-unique secret that identifiers the owner of this machine
-** { qr_url:"sqrl://*****", link_url:"sqrl://*****", poll_url:"https://*****" }
+** Generates a SQRL, RSA, or SHELL/CRAM consumable NUT *WITHOUT-DELAY*
+** { blob:"OPAQUEBASE64ISHTOKEN", qr_url:"sqrl://*****", link_url:"sqrl://*****", poll_url:"https://*****" }
+
+* POST /api/shell/session/$HOSTNAME
+** RESPONSE -> "${NUT.blob}:${API_HASH}:${DIGEST}" where DIGEST=sha1(NUT.blob+SHELL_KEY), & API_HASH is pre-hashed tenant api key
+** *Consumes* NUT (success or failure)
+** Activates and returns a shell-level authentication ticket (for this tenant) on success
+** { ticket:"OPAQUE-ASCII-TOKEN", expires:102394123094 }
 
 * POST /api/shell/poll/$HOSTNAME/$NUT/json
 ** HOSTNAME -> where they are trying to get shell access to
-** TENANT_SECRET -> the very long and absolutely-must-be-unique secret that identifiers the owner of this machine
-** { shell:t/f, username:bob, uid:123, groups: { "wheel":321, "disk":987}} 
+** TICKET   -> a shell-level authentication ticket (from the above shell/session command)
+** NB: NUT is *consumed* if polling succeeds (that is, if return is success and other than empty object)
+** { shell:true, username:bob, uid:123, groups: { "wheel":321, "disk":987}} 
 ** {} <-- empty object means try again
 ** { shell:false, passed:true } <--- valid sqrl auth, no user account
 ** { shell:false, passed:true, uid:212 } <--- valid sqrl auth, user account w/o username
-
-FLAW: if (in the future) we support 3rd/4th party sqrl delegates, wouldn't we be revealing TENANT_SECRET
-FLAW: need a "socialist millionaires" protocol that is easy to implement over HTTP (resulting in tenant session ticket)
 
 Client MUST still verify username
 Client MUST emit a warning if uids do not match (but use system-level uid?)
@@ -42,19 +46,77 @@ CONSIDER if we support multiple sqrl servers, then don't we need separate tenant
 CONSIDER use of tenantperson::id as a uid (risk of overflow? tenant migration?)
 CONSIDER pre-shell mitm effects such as SSH interception (can sqrl or protocol help? show host key pattern?)
 
-????
+* POST /api/shell/blessed/${USER}
+** HOSTNAME -> where they are trying to get shell access to
+** TICKET   -> a shell-level authentication ticket (from the above shell/session command)
+** { shell:true, username:bob, uid:123, groups: { "wheel":321, "disk":987}} 
+** { shell:false, uid: 1234 } - a valid user, of this tenant, but no shell access
+** { shell:false } - never heard of 'em
+** NB: this may be consulted before *or* after the user has passed other checks, and is the fallback for lack of git repo updating
+** NB: if local data (e.g. from previous connections) indicate the user *does* have shell access, then in the face of a network failure or server error one must assume the user *DOES* have shell access
+** NB: the status codes shall also be distinct for true (200) and false (202)
+** NB: an invalid username will generate a 400 error response
 
-* GET /api/shell/nut/$HOSTNAME/props
-** QR_URL="sqrl://*****"\nLINK_URL="sqrl://*****"\nPOLL_URL="https://*****"\n
+??: should 'blessed' and 'poll' return list of active rsa pubkeys too?
 
-* GET /api/shell/poll/$HOSTNAME/$NUT/props
-** SHELL="[true|false]"\nUSERNAME=bob\nUID=123\nGROUPS="wheel(321),disk(987)"\n 
-** "" <-- (empty string, no quotes) means try again
-** [analogs of json objects above may indicate
-
+* POST /api/shell/pubkeys/$HOSTNAME[/$USER]
+** HOSTNAME -> where they are trying to get shell access to
+** TICKET   -> a shell-level authentication ticket (from the above shell/session command)
+** Returns stream of one or all public keys that have shell-level access to this host, can be used as a pull-replication from web.
+** e.g."/user/bob/pubkey-123\nssh-rsa 1203498 bob@example.com\n"
+** NB: this should never return a pubkey for 'root' (or any system user), if it does... don't trust *any* of the public keys returned.
+** NB: the post condition of this call are broad and sweeping (basically re-writing the entire login authorization)
+** This means that you must *REALLY-TRUST* the originating server, and the PKI that is security your link to it... THINK FIRST!
 
 ------
 
-API 2 - web to qrauthd (i.e. internal synchronization of shell-level user accounts)
+API 2 - web (or localhost) to qrauthd (i.e. internal synchronization of shell-level user accounts)
 
+(1a) web presents self as authenticating as a particular person, all fields required
+> ${HOSTNAME}
+< web
+< ${HASHED_TENANT_API_KEY}
+{{ INSERT SMP NEGOTIATION: where X=SERVER_SSL_FINGERPRINT+SHELL_KEY; web is alice, qrauthd is Bob }}
+> OK
+
+(1b) unix socket identity (kernel answers: "who's calling?")
+> ${HOSTNAME}
+< socket        < service calls getsockopt(..., SO_PEERCRED, ...) to identify the caller, omits per-request identity?
+> OK
+
+(1c) local process identifies via local filesystem (deprecated)
+> ${HOSTNAME}
+< fscram
+< ${USER}
+> ${CHALLENGE}  > A short blob of ascii text (no whitespace), that the user is to write to a /tmp file
+< /tmp/${WHERE} < Where $USER wrote $CHALLENGE, and where you can read it (and verify both the contents and the owner of the file)
+> OK            > $USER can now delete the file (qrauthd may not be able to)
+
+...hereafter, the conversation takes the form:
+< 149123409877                                          < the effective-time (commit-time) of the following request
+< Bob Jones
+< bjones@example.com
+< method:1:totp:120394123498:120394123498:1024982349328 < (method  #1, type, modified, login, expire)
+< ${REQUEST}
+> ${RESPONSE}
+
+NB: EVERY request, EVEN READ REQUESTS indicate who is doing the reading!!!!
+
+[in general, both REQUEST and RESPONSE are one-line, as follows]
+
+< exist:privy:/group/name[:key]
+> FALSE
+
+NB: when checking /user/* or /group/* (no trailing path), qrauthd must *also* check /etc/passwd and /etc/group (via SSSD)
+
+< set:secret:/user/bob/props:key:value
+> OK
+
+< read:privy:/user/bob/otp-h-yubi-1.counter[:key]
+> OK
+
+?: should we allow reading from 'secret' repo? or just have web assume that it's db is correct (no updating from shell-side?)
+
+< bye
+> BYE   > server closes socket
 
