@@ -72,6 +72,8 @@ CONSIDER pre-shell mitm effects such as SSH interception (can sqrl or protocol h
 
 API 2 - web (or localhost) to qrauthd (i.e. internal synchronization of shell-level user accounts)
 
+SOCKET-level protocol (not HTTP)
+
 (1a) web presents self as authenticating as a particular person, all fields required
 > ${HOSTNAME}
 < web
@@ -119,4 +121,53 @@ NB: when checking /user/* or /group/* (no trailing path), qrauthd must *also* ch
 
 < bye
 > BYE   > server closes socket
+
+------------
+
+API 3 - tenant utilities
+(!) all methods require posting API_KEY (unhashed; as all the clients know the hashed value)
+
+* POST /api/tenant/user/recent
+* POST /api/tenant/user/named/$NAMES_CSV
+* POST /api/tenant/user/id/$UIDS_CSV
+** returns username,uid(tenantperson::id),tenant-fields
+** expensive?: tenant-group memberships(name->id),group-derived permissions
+** maybe: user's number of banned sites
+** maximum number of UIDs?
+** performance-oriented; async fetch of tenant (by api key) & listed tenant-person; filters out those whose tenant_id is not the provided one
+** returns status of 404 if no match (200 if *any* match)
+
+* POST /api/tenant/user/ban/$UIDS_CSV
+* POST /api/tenant/user/unban/$UIDS_CSV
+** MESSAGE - required
+** Sets (or clears) the deadline and deathmessage, a banned user is effectively preventing the specified users from accessing the tenant's site
+** Might (one day?) influence blacklisted ip address logic (if one ip is banned by many distinct tenants?)
+
+* POST /api/tenant/user/banned
+** Lists the users that have a deathMessage (or passed deadline)
+
+* POST /api/tenant/user/set/id/$UID (bulk setting fields)
+* POST /api/tenant/user/set/id/$UIDS_CSV/$key/$value (set single field; enforces nice keys and values)
+
+* POST /api/tenant/group/named/$NAMES_CSV
+* POST /api/tenant/group/id/$UIDS_CSV
+** returns groupname,gid(tenantgroup::id),tenant-fields,uids in group
+** returns status of 404 if no match (200 if *any* match)
+
+* POST /api/tenant/group/set/id/$GID (bulk setting fields)
+* POST /api/tenant/group/set/id/$GID/$key/$value (set single field; enforces nice keys and values)
+** NB: setting name & description may transparently fail (or be tenant-specific) if you don't *own* the group name.
+
+* POST /api/tenant/group/list
+** lists group names, descriptions, permissions, GIDs, and if you 'own' it (or if then name is 'well-known')
+
+* POST /api/tenant/group/create/$NAME (with name, description, and fields; optional members UID list?)
+** returns; GID & if you currently 'own' it
+
+* POST /api/tenant/group/permission/set/$GID/$key
+* POST /api/tenant/group/permission/clear/$GID/$key
+** sets (or clears) the given permission key for the specified group
+
+* POST /api/tenant/group/member/$GID/$UID
+* POST /api/tenant/group/nonmember/$GID/$UID
 
