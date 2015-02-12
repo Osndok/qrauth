@@ -1,17 +1,25 @@
 Must:
 * setup web project as https-only tapestry servlet
-* allow shell user to login
-* allow web user to login
-* allow web configuration
-** username restriction function (no dictionary words, or singular proper: 'bob', dirty-word filter? >4 chars)
-** allow setting username to desired string (if available and unrestricted)
-** allow setting username by clicking list of (probably-available) generated ones
+* shell login poc (prints qr code, username, auth variables grants 'nobody')
+* shell uid/gid lookup
+* document runtime dependencies for later packaging (qrencode)
+* allow web user creation
+* allow basic web user login
 
 * sync to git via qrauthd
 ** write tenantsync record
 ** enqueue tenant_id as sqs message with 'clumping' delay (modulous 5 seconds?)
 ** moderate self to not enqueue tenant_id during till live-line
-** username@tentant-domain (rather than email?) or username@auth.provider.com (invalid, but more correct?)
+** username@tentant-domain (rather than email?) or username@auth.provider.com (invalid? more correct?)
+** *actual* email address (if available)? spammers scraping by granting everyone shell access?
+
+* allow web configuration
+** username restriction function (no dictionary words, or singular proper: 'bob', dirty-word filter? >4 chars)
+** allow setting username to desired string (if available and unrestricted)
+** allow setting username by clicking list of (probably-available) generated ones
+** safe & understandable auth method setup
+* build out auth methods
+* allow shell user to login (using all auth methods)
 
 * support sqrl (to some degree, or expandable therefor)
 * support totp (for offline usage)

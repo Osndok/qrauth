@@ -118,6 +118,7 @@ NB: when checking /user/* or /group/* (no trailing path), qrauthd must *also* ch
 < read:privy:/user/bob/otp-h-yubi-1.counter[:key]
 > OK
 
+?: Rather than OK, it is also permissable to write "FAIL:${message}"
 ?: should we allow reading from 'secret' repo? or just have web assume that it's db is correct (no updating from shell-side?)
 
 < bye
@@ -125,7 +126,16 @@ NB: when checking /user/* or /group/* (no trailing path), qrauthd must *also* ch
 
 ------------
 
-API 3 - tenant utilities
+API 3 - qrauthd replication helper
+
+UDP PROTOCOL
+
+< "hashes"
+> "${privy_hash}:${secret_hash}"   > NB: either (or both?) can be empty string (e.g. if there is an error, or no secret access)
+
+------------
+
+API 4 - tenant utilities
 
 * POST /api/tenant/create
 ** PRIMARY={very-unique-ascii-string-or-guid}
@@ -158,6 +168,7 @@ API 3 - tenant utilities
 
 * POST /api/tenant/user/banned
 ** Lists the users that have a deathMessage (or passed deadline)
+** This *might* be the only way to see the users, as they will surly be hidden from other common lists.
 
 * POST /api/tenant/user/set/id/$UID (bulk setting fields)
 * POST /api/tenant/user/set/id/$UIDS_CSV/$key/$value (set single field; enforces nice keys and values)
@@ -183,4 +194,28 @@ API 3 - tenant utilities
 
 * POST /api/tenant/group/member/$GID/$UID
 * POST /api/tenant/group/nonmember/$GID/$UID
+
+* POST /api/tenant/sync/all
+** prompts the synchronizer to re-write all current permissions (useful in debugging or lapse in shell git sync service)
+
+-------------------
+
+API 5 - Standard Login & account maintenance
+
+* POST /api/tenant/login
+** API_KEY (unhashed)
+** SESSION_ID (hashed)
+** returns either (1) the json login info, (2) the html that would allow this connection, or (3) if the session should be destroyed
+
+* POST /api/tenant/logout
+** API_KEY (unhashed)
+** SESSION_ID (hashed)
+** marks the session as obsolete (and depending on the user preferences, might logout all his/her sessions)
+** not to be called automatically, or on idle timeout... only on user-request
+
+* GET /user/account
+* GET /api/tenant/user/account
+** Not really an API call (no auth needed?)
+** The first can be provided as a link (e.g. in a new window) to provide account maintenance
+** The second will return an html blob which can be added to your page for account maintenance (an iframe)
 

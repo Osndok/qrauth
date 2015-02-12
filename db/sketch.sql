@@ -92,6 +92,48 @@ create table method
 
 
 --
+-- A group is (as one would expect) a collection of users. Some groups
+-- are widely known & available, most are tenant-specific. Membership
+-- and emdued permissions are almost always tenant-specific.
+--
+
+create table group
+(
+	id             SERIAL,
+	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+	displayName    VARCHAR(255) NOT NULL,
+
+	-- NB: nameRedux acts much like the groups 'username', except that it is not nullable.
+	nameRedux       VARCHAR(255) UNIQUE NOT NULL,
+
+	deathMessage   VARCHAR(255),
+	deadline       TIMESTAMP WITHOUT TIMEZONE,
+
+	-- null indicates 'well-known' (and shows in default list?), not-null indicates responsibility
+	-- that is the only reason we don't have on-delete-set-null :)
+	owner          INTEGER REFERENCES tenant(id),
+	
+);
+
+create table tenantgroup
+(
+	id SERIAL,
+	created         TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	group_id        INTEGER NOT NULL REFERENCES group(id) ON DELETE CASCADE,
+	tenant_id       INTEGER NOT NULL REFERENCES tenant(id) ON DELETE CASCADE,
+	permissions_csv VARCHAR(2550) NOT NULL DEFAULT '',
+);
+
+create table tenantgroupmember
+(
+	id SERIAL,
+	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	tenantgroup_id INTEGER NOT NULL REFERENCES tenantgroup(id) ON DELETE CASCADE,
+	person_id      INTEGER NOT NULL REFERENCES person(id)      ON DELETE CASCADE
+);
+
+--
 -- Since the api-key is effectively a server-to-server password (or shared secret), we absolutely
 -- *MUST* have it hashed. However, since it is also a primary lookup key... we cannot have it
 -- salted. :( To compromise, we will provide a method of automatically rolling over to new
@@ -142,12 +184,15 @@ create table tenantsync
 	userEmail      VARCHAR(255) NOT NULL,
 	authMethod     VARCHAR(255) NOT NULL,
 	requestString  VARCHAR(255) NOT NULL
+	clearTime      TIMESTAMP WITHOUT TIMEZONE,
 );
+
+INDEX idx_tenantsync_clearTime ON tenantsync(clearTime);
 
 --
 -- the tenant-person record is totally at the control of the tenant (or the holder of his/her api key)
--- the tenant can read and write every json field, even the 'authAdmin' flag (which is one of three fields we help 
--- them out with), even if the user/person is logged off!
+-- the tenant can read and write every json field, even the 'authAdmin' flag (which is one of very few fields
+-- that we help them with), even if the user/person is logged off!
 --
 -- for the sake of transparency, we may grant users *read-only* access to this record... particularly with the
 -- upsurge of privacy-related issues, and that subordinate sites might wholly rely on this mechanism as their
@@ -168,10 +213,14 @@ create table tenantsync
 
 create table tenantperson
 (
+	id SERIAL,
+
 	person_id      INTEGER NOT NULL REFERENCES person(id),
 	tenant_id      INTEGER NOT NULL REFERENCES tenant(id),
 
 	authAdmin      BOOLEAN NOT NULL DEFAULT 'f',
+	shellAccess    BOOLEAN NOT NULL DEFAULT 'f',
+
 	deathMessage   VARCHAR(255),
 	deadline       TIMESTAMP WITHOUT TIMEZONE,
 
@@ -221,10 +270,11 @@ INDEX idx_tenantside_session ON tenantsession(session_id);
 
 create table nuts
 (
-	id            SERIAL,
+	id            BIGSERIAL,
 	created       TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deadline      TIMESTAMP WITHOUT TIMEZONE NOT NULL,
 	encodedString VARCHAR(255) NOT NULL UNIQUE,
+	tenant_id     INTEGER REFERENCES tenant(id),
 	person_id     INTEGER REFERENCES person(id),
 );
 
