@@ -1,3 +1,9 @@
+
 /bin
+/.idea
+
+*.iml
 .*swp
+
+/*/target
 
