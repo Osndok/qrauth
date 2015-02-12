@@ -17,3 +17,6 @@ prereqs:
 war:
 	( cd java ; TZ=UTC mvn -Drelease.version=$(VERSION) package )
 
+run:
+	( cd java ; TZ=UTC mvn -Drelease.version=$(VERSION) -pl qrauth-common install ; TZ=UTC mvn -Drelease.version=$(VERSION) -pl qrauth-server jetty:run )
+
