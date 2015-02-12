@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<modules>
-		<!--module>qrauth-common</module-->
+		<module>qrauth-common</module>
 		<module>qrauth-server</module>
 	</modules>
 
@@ -12,6 +12,9 @@
 	<artifactId>qrauth-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>${release.version}</version>
+
+	<name>qrauth-parent</name>
+	<url>https://redmine.allogy.com/projects/qrauth</url>
 
 	<scm>
 		<connection>scm:git:ssh://devel.allogy.com/projects/qrauth.git</connection>
@@ -48,6 +51,7 @@
 
 	<properties>
 		<release.version>snapshot</release.version>
+		<com.allogy.web.port>8216</com.allogy.web.port>
 	</properties>
 
 </project>

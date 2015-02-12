@@ -1,0 +1,105 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.allogy.qrauth</groupId>
+		<artifactId>qrauth-parent</artifactId>
+		<version>${release.version}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>qrauth-common</artifactId>
+	<version>${release.version}</version>
+	<packaging>jar</packaging>
+
+	<name>qrauth-common</name>
+	<url>https://redmine.allogy.com/projects/qrauth</url>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/templates</directory>
+				<includes>
+					<include>*.java</include>
+				</includes>
+				<filtering>true</filtering>
+				<targetPath>${project.build.directory}/generated-sources/java/com/allogy/qrauth/common</targetPath>
+			</resource>
+		</resources>
+
+		<plugins>
+			
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.1.12</version>
+
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<configuration>
+					<dateFormat>yyyy-MM-dd HH:mm:ss z</dateFormat>
+				</configuration>
+
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.allogy.qrauth.common.Version</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/java/</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<properties>
+		<build.timestamp>${maven.build.timestamp}</build.timestamp>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss z</maven.build.timestamp.format>
+	</properties>
+
+</project>

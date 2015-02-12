@@ -2,9 +2,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
 
 	<modelVersion>4.0.0</modelVersion>
-    <groupId>com.allogy.qrauth</groupId>
-    <artifactId>qrauth-server</artifactId>
-    <version>${release.version}</version>
 
 	<parent>
 		<groupId>com.allogy.qrauth</groupId>
@@ -13,10 +10,15 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
+	<artifactId>qrauth-server</artifactId>
+	<version>${release.version}</version>
+
 	<packaging>war</packaging>
 
-    <name>qrauth-server Tapestry 5 Application</name>
-        <dependencies>
+	<name>qrauth-server</name>
+	<url>https://redmine.allogy.com/projects/qrauth</url>
+
+	<dependencies>
         <!-- To set up an application with a database, change the artifactId below to
              tapestry-hibernate, and add a dependency on your JDBC driver. You'll also
              need to add Hibernate configuration files, such as hibernate.cfg.xml. -->
@@ -132,10 +134,17 @@ of testing facilities designed for use with TestNG (http://testng.org/), so it's
                         <append>true</append>
                     </requestLog>
                     <systemProperties>
-                        <systemProperty>
+
+						<systemProperty>
                             <name>tapestry.execution-mode</name>
                             <value>development</value>
                         </systemProperty>
+
+						<systemProperty>
+							<name>jetty.port</name>
+							<value>${com.allogy.web.port}</value>
+						</systemProperty>
+
                     </systemProperties>
                 </configuration>
             </plugin>
