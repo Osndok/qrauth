@@ -1,9 +1,10 @@
 
-/bin
 /.idea
 
 *.iml
 .*swp
 
-/*/target
+target
+
+resolvedPom.xml
 

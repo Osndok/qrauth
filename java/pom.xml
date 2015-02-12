@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<modules>
+		<!--module>qrauth-common</module-->
+		<module>qrauth-server</module>
+	</modules>
+
+	<groupId>com.allogy.qrauth</groupId>
+	<artifactId>qrauth-parent</artifactId>
+	<packaging>pom</packaging>
+	<version>${release.version}</version>
+
+	<scm>
+		<connection>scm:git:ssh://devel.allogy.com/projects/qrauth.git</connection>
+		<developerConnection>scm:git:ssh://devel.allogy.com/projects/qrauth.git</developerConnection>
+	</scm>
+
+	<parent>
+		<groupId>com.allogy</groupId>
+		<artifactId>allogy-maven-pom</artifactId>
+		<version>6.0</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.sap.prd.mobile.ios.maven.plugins</groupId>
+				<artifactId>resolve-pom-maven-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<id>resolve-pom-props</id>
+						<goals>
+							<goal>resolve-pom-props</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		
+	</dependencies>
+
+	<properties>
+		<release.version>snapshot</release.version>
+	</properties>
+
+</project>
