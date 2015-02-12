@@ -28,6 +28,8 @@ create table person
 
 	deathMessage   VARCHAR(255),
 	deadline       TIMESTAMP WITHOUT TIMEZONE,
+
+	preferences    VARCHAR(2048) NOT NULL DEFAULT '{}',
 );
 
 --
