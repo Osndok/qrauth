@@ -16,6 +16,8 @@ import org.apache.tapestry5.services.javascript.StackExtension;
 import org.apache.tapestry5.services.javascript.StackExtensionType;
 import org.slf4j.Logger;
 
+import com.allogy.qrauth.common.Version;
+
 /**
  * This module is automatically included as part of the Tapestry IoC Registry, it's a good place to
  * configure and extend Tapestry, or to place your own service definitions.
@@ -42,7 +44,7 @@ public class AppModule
     	// versions. This overrides Tapesty's default (a random hexadecimal
     	// number), but may be further overriden by DevelopmentModule or QaModule 
     	// by adding the same key in the contributeApplicationDefaults method.
-        configuration.override(SymbolConstants.APPLICATION_VERSION, "0.0-SNAPSHOT");
+        configuration.override(SymbolConstants.APPLICATION_VERSION, Version.FULL);
 		configuration.override(SymbolConstants.PRODUCTION_MODE, false);
     }
 
