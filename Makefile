@@ -1,8 +1,8 @@
 
 TOOLS=qrauth-ssh-keys
 
-#TODO: append '-snapshot' if not sitting on a release commit (or not in a git directory)
-VERSION=$(shell cat .version)
+#ERSION=$(shell cat .version)
+VERSION=$(shell bin/version_or_snapshot.sh)
 
 target/qrauth-ssh-keys: src/qrauth-ssh-keys.c
 	rm -fv $@
