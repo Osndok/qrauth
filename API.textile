@@ -219,3 +219,21 @@ API 5 - Standard Login & account maintenance
 ** The first can be provided as a link (e.g. in a new window) to provide account maintenance
 ** The second will return an html blob which can be added to your page for account maintenance (an iframe)
 
+---------------------
+
+API 6 - Internal coordination calls (these are used, but don't use these)
+
+* POST /api/internal/attach
+** SESSION_ID=(pre-hashed by the tenant's calling code)
+** Detects if user is logged in or not, and (if so) attaches session authentication.
+** '{online:false}'
+** '{online:true, username:bob}'
+
+* GET /api/noscript/unsafe/attach/$SESSION_ID/notice.png
+** A variant of the 'attach' api call that works with browsers lacking javascript
+** "unsafe" because GET directly effects attachment state, and "GETs should be SAFE"
+** If not logged in, returns a 1x1 transparent PNG.
+** If logged in, attaches session and returns a large-ish visual indication to reload the page (which should notice the attachment)
+
+---------------------
+
