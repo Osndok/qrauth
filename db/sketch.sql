@@ -112,11 +112,11 @@ create table tenant
 	nameRedux      VARCHAR(255) UNIQUE,
 	url            VARCHAR(255),
 
-	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	contact        INTEGER REFERENCES person(id),
 	hashedApiKeyPrimary   VARCHAR(255) UNIQUE NOT NULL,
 	hashedApiKeySecondary VARCHAR(255) UNIQUE NOT NULL,
 
+	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	lastAttempt    TIMESTAMP WITHOUT TIMEZONE,
 	lastSuccess    TIMESTAMP WITHOUT TIMEZONE,
 	attempts       INTEGER   NOT NULL DEFAULT 0,
@@ -125,7 +125,7 @@ create table tenant
 	deathMessage   VARCHAR(255),
 	deadline       TIMESTAMP WITHOUT TIMEZONE,
 
-	anonRegister   BOOLEAN NOT NULL DEFAULT 'f',
+	newUsers   BOOLEAN NOT NULL DEFAULT 't',
 
 	shellKey              VARCHAR(255) UNIQUE,
 	qrauthHostPort        VARCHAR(255),
@@ -145,7 +145,7 @@ create table group
 	id             SERIAL,
 	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-	displayName    VARCHAR(255) NOT NULL,
+	name    VARCHAR(255) NOT NULL,
 
 	-- NB: nameRedux acts much like the groups 'username', except that it is not nullable.
 	nameRedux       VARCHAR(255) UNIQUE NOT NULL,
@@ -165,6 +165,9 @@ create table tenantgroup
 	created         TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	group_id        INTEGER NOT NULL REFERENCES group(id) ON DELETE CASCADE,
 	tenant_id       INTEGER NOT NULL REFERENCES tenant(id) ON DELETE CASCADE,
+
+	customName VARCHAR(255),
+
 	permissions_csv VARCHAR(2550) NOT NULL DEFAULT '',
 );
 
@@ -185,7 +188,7 @@ create table tenantgroupmember
 create table tenantsync
 (
 	id             BIGSERIAL,
-	tenant_id      INTEGER REFERENCES tenant(id),
+	tenant_id      INTEGER REFERENCES tenant(id) NOT NULL,
 	effectiveTime  TIMESTAMP WITHOUT TIMEZONE NOT NULL,
 	userName       VARCHAR(255) NOT NULL,
 	userEmail      VARCHAR(255) NOT NULL,
@@ -233,6 +236,9 @@ create table tenantperson
 
 	config         VARCHAR(2550) NOT NULL DEFAULT '{}',
 
+	--TODO: add attemptable fields
+
+	(!!!) cannot easily be accomplished with current hibernate entity organization?
 	PRIMARY KEY (persion_id, tenant_id)
 );
 
@@ -275,7 +281,7 @@ INDEX idx_tenantside_session ON tenantsession(session_id);
 -- once they would no longer be accepted.
 --
 
-create table nuts
+create table nut
 (
 	id            BIGSERIAL,
 	created       TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -285,14 +291,17 @@ create table nuts
 	person_id     INTEGER REFERENCES person(id),
 );
 
+
 -- a place to persist timing infos, mostly to *try* and avoid timing attacks by measuring our own performance
-create table stats
+create table TimingStat
 (
 	id SERIAL,
 	name,
 	min,
 	max,
 	count,
-	sum
+	sum,
+	recent_csv
 );
+
 

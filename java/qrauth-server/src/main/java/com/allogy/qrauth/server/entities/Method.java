@@ -15,7 +15,7 @@ class Method extends Attemptable implements Mortal
 {
 
 	@ManyToOne(optional = false)
-	public Person person;
+	public DBUser DBUser;
 
 	/**
 	 * The maximum number of milliseconds that this authentication method will sustain a session from

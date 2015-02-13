@@ -17,11 +17,18 @@ class LogEntry
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long id;
 
+	@Override
+	public
+	String toString()
+	{
+		return "["+getClass().getSimpleName() + ":" + id + "]";
+	}
+
 	@Column(nullable = false, columnDefinition = Usual.INSERT_TIME, updatable = false)
 	public Date time;
 
 	@ManyToOne
-	public Person person;
+	public DBUser DBUser;
 
 	@ManyToOne
 	public Method method;
@@ -30,7 +37,7 @@ class LogEntry
 	public Tenant tenant;
 
 	@NonVisual
-	@Column(nullable = false, length=25)
+	@Column(nullable = false, length = 25)
 	public String actionKey;
 
 	@Column(nullable = false)

@@ -28,7 +28,7 @@ class Tenant extends Attemptable implements Mortal
 	public String urlRedux;
 
 	@ManyToOne
-	public Person contact;
+	public DBUser contact;
 
 	@Column(nullable = false, unique = true)
 	public String hashedApiKeyPrimary;
@@ -39,8 +39,8 @@ class Tenant extends Attemptable implements Mortal
 	@Column(unique = true)
 	public String unhashedShellKey;
 
-	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
-	public boolean anonRegister;
+	@Column(nullable = false, columnDefinition = Usual.TRUE_BOOLEAN)
+	public boolean newUsers;
 
 	@Column(unique = true)
 	public String qrauthHostAndPort;

@@ -13,7 +13,7 @@ import java.util.Set;
  */
 @Entity
 public
-class Person extends Attemptable implements Mortal
+class DBUser extends Attemptable implements Mortal
 {
 
 	@NonVisual
@@ -31,13 +31,6 @@ class Person extends Attemptable implements Mortal
 	@NonVisual
 	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_2k, length = 2000)
 	public String preferencesJson;
-
-	@Override
-	public
-	String toString()
-	{
-		return "["+getClass().getSimpleName() + ":" + id + "]";
-	}
 
 	/* -------------------- Mortal Implementation ------------------ */
 

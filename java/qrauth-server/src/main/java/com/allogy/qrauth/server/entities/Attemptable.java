@@ -15,11 +15,21 @@ class Attemptable
 	/**
 	 * id is provided in the Attemptable superclass so that we have the option of a low-contest background update
 	 * mechanism if we find no compelling security reason to use a blocking update, and scaling seems to require it.
+	 *
+	 * If it were not so convenient to lump-in db types that deserve Long ids, it would be more effecient to use an
+	 * Integer here :(
 	 */
 	@Id
 	@NonVisual
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Integer id;
+	public Long id;
+
+	@Override
+	public
+	String toString()
+	{
+		return "["+getClass().getSimpleName() + ":" + id + "]";
+	}
 
 	@Column(nullable = false, columnDefinition = Usual.INSERT_TIME, insertable = false, updatable = false)
 	public Date created;
