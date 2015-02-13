@@ -13,7 +13,7 @@
 # new release (by either a branch or tag). Many advanced git users
 # may find this script totally unnecessary.
 #
-SCRIPT_VERSION="1.3.5"
+SCRIPT_VERSION="1.3.6"
 # For updates or examples please visit: http://www.osndok.com/git-release/
 #
 # BUGS:
@@ -215,7 +215,7 @@ do
 	BUILD_ONLY="true"
     ;;
 "--build-needed")
-	if git show --name-only HEAD | egrep -q "($build_file|$version_file)" ; then
+	if git show --name-only HEAD | egrep -q "^($build_file|$version_file)" ; then
 		echo "FALSE"
 		exit 1
 	else
