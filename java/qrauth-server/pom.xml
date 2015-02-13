@@ -26,14 +26,30 @@
 			<version>${project.version}</version>
 		</dependency>
 
-        <!-- To set up an application with a database, change the artifactId below to
-             tapestry-hibernate, and add a dependency on your JDBC driver. You'll also
-             need to add Hibernate configuration files, such as hibernate.cfg.xml. -->
+		<dependency>
+			<groupId>org.apache.tapestry</groupId>
+			<artifactId>tapestry-hibernate</artifactId>
+			<version>${tapestry-release-version}</version>
+		</dependency>
+
         <dependency>
             <groupId>org.apache.tapestry</groupId>
             <artifactId>tapestry-core</artifactId>
             <version>${tapestry-release-version}</version>
         </dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${pgsql-version}</version>
+		</dependency>
+
+		<!-- for db migrations at *runtime* -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>${flyway-version}</version>
+		</dependency>
 
         <!-- Include the Log4j implementation for the SLF4J logging framework -->
         <dependency>
@@ -128,7 +144,44 @@ of testing facilities designed for use with TestNG (http://testng.org/), so it's
                 </configuration>
             </plugin>
 
-			<!-- Run the application using "mvn jetty:run" -->
+			<!--
+			To generate the current sql structure from the "entities" package, run:
+				make sql
+			...or:
+				( cd qrauth-server ; mvn compile -X hibernate3:hbm2ddl );
+			... output file will appear here: java/qrauth-server/target/hibernate3/sql/structure.sql
+			-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>hibernate3-maven-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>hbm2ddl</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<components>
+						<component>
+							<name>hbm2ddl</name>
+							<implementation>jpaconfiguration</implementation>
+						</component>
+					</components>
+					<componentProperties>
+						<persistenceunit>Default</persistenceunit>
+						<outputfilename>structure.sql</outputfilename>
+						<drop>false</drop>
+						<create>true</create>
+						<export>false</export>
+						<format>true</format>
+					</componentProperties>
+				</configuration>
+			</plugin>
+
+			<!-- Run the web application using "mvn jetty:run" -->
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
@@ -195,6 +248,8 @@ of testing facilities designed for use with TestNG (http://testng.org/), so it's
         <testng-release-version>6.5.2</testng-release-version>
         <easymock-release-version>3.0</easymock-release-version>
         <slf4j-release-version>1.7.10</slf4j-release-version>
+		<pgsql-version>9.3-1101-jdbc41</pgsql-version>
+		<flyway-version>3.0</flyway-version>
+	</properties>
 
-    </properties>
 </project>

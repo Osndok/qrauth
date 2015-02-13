@@ -13,7 +13,8 @@ create table person
 (
 	id           SERIAL,
 	created      TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	globalLogout TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+	globalLogout TIMESTAMP WITHOUT TIMEZONE NOT NULL,
 
 	displayName    VARCHAR(255),
 
@@ -29,7 +30,7 @@ create table person
 	deathMessage   VARCHAR(255),
 	deadline       TIMESTAMP WITHOUT TIMEZONE,
 
-	preferences    VARCHAR(2048) NOT NULL DEFAULT '{}',
+	preferencesJson    VARCHAR(2048) NOT NULL DEFAULT '{}',
 );
 
 --
@@ -40,11 +41,11 @@ create table person
 -- Although this is called 'personlog', we may allow tenants to *read* this log if they are also the subject.
 --
 
-create table personlog
+create table LogEntry
 (
 	id BIGSERIAL,
 	time TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	person_id      INTEGER NOT NULL REFERENCES person(id),
+	person_id      INTEGER REFERENCES person(id),
 	method_id      INTEGER REFERENCES method(id),
 	tenant_id      INTEGER REFERENCES tenant(id),
 	actionKey      VARCHAR( 25) NOT NULL,
@@ -70,8 +71,10 @@ create table personlog
 create table method
 (
 	id             SERIAL,
-	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
 	person_id      INTEGER   NOT NULL REFERENCES person(id),
+
+	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	lastAttempt    TIMESTAMP WITHOUT TIMEZONE,
 	lastSuccess    TIMESTAMP WITHOUT TIMEZONE,
 	attempts       INTEGER   NOT NULL DEFAULT 0,
@@ -87,9 +90,47 @@ create table method
 	type           VARCHAR(10) NOT NULL,
 	secret         VARCHAR(255),
 	comment        VARCHAR(255),
+	lock           VARCHAR(255),
 
 	pubkey VARCHAR(2048) UNIQUE,
 
+);
+
+
+--
+-- Since the api-key is effectively a server-to-server password (or shared secret), we absolutely
+-- *MUST* have it hashed. However, since it is also a primary lookup key... we cannot have it
+-- salted. :( To compromise, we will provide a method of automatically rolling over to new
+-- api keys without service interuption.
+--
+
+create table tenant
+(
+	id             SERIAL,
+
+	name           VARCHAR(255) UNIQUE,
+	nameRedux      VARCHAR(255) UNIQUE,
+	url            VARCHAR(255),
+
+	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	contact        INTEGER REFERENCES person(id),
+	hashedApiKeyPrimary   VARCHAR(255) UNIQUE NOT NULL,
+	hashedApiKeySecondary VARCHAR(255) UNIQUE NOT NULL,
+
+	lastAttempt    TIMESTAMP WITHOUT TIMEZONE,
+	lastSuccess    TIMESTAMP WITHOUT TIMEZONE,
+	attempts       INTEGER   NOT NULL DEFAULT 0,
+	successes      INTEGER   NOT NULL DEFAULT 0,
+
+	deathMessage   VARCHAR(255),
+	deadline       TIMESTAMP WITHOUT TIMEZONE,
+
+	anonRegister   BOOLEAN NOT NULL DEFAULT 'f',
+
+	shellKey              VARCHAR(255) UNIQUE,
+	qrauthHostPort        VARCHAR(255),
+
+	fieldDescriptions VARCHAR(25000) NOT NULL DEFAULT '{}',
 );
 
 
@@ -133,42 +174,6 @@ create table tenantgroupmember
 	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	tenantgroup_id INTEGER NOT NULL REFERENCES tenantgroup(id) ON DELETE CASCADE,
 	person_id      INTEGER NOT NULL REFERENCES person(id)      ON DELETE CASCADE
-);
-
---
--- Since the api-key is effectively a server-to-server password (or shared secret), we absolutely
--- *MUST* have it hashed. However, since it is also a primary lookup key... we cannot have it
--- salted. :( To compromise, we will provide a method of automatically rolling over to new
--- api keys without service interuption.
---
-
-create table tenant
-(
-	id             SERIAL,
-
-	name           VARCHAR(255) UNIQUE,
-	nameRedux      VARCHAR(255) UNIQUE,
-	domainByLine   VARCHAR(255),
-
-	created        TIMESTAMP WITHOUT TIMEZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	contact        INTEGER REFERENCES person(id),
-	hashedApiKeyPrimary   VARCHAR(255) UNIQUE NOT NULL,
-	hashedApiKeySecondary VARCHAR(255) UNIQUE NOT NULL,
-
-	lastAttempt    TIMESTAMP WITHOUT TIMEZONE,
-	lastSuccess    TIMESTAMP WITHOUT TIMEZONE,
-	attempts       INTEGER   NOT NULL DEFAULT 0,
-	successes      INTEGER   NOT NULL DEFAULT 0,
-
-	deathMessage   VARCHAR(255),
-	deadline       TIMESTAMP WITHOUT TIMEZONE,
-
-	anonRegister   BOOLEAN NOT NULL DEFAULT 'f',
-
-	shellKey              VARCHAR(255) UNIQUE,
-	qrauthHostPort        VARCHAR(255),
-
-	fieldDescriptions VARCHAR(25000) NOT NULL DEFAULT '{}',
 );
 
 --
