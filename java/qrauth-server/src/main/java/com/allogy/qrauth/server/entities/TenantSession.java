@@ -61,7 +61,7 @@ class TenantSession implements Mortal
 	 * WARNING: The fact of this field being non-null is sufficient to (at least temporarily) authenticate a Person!
 	 */
 	@ManyToOne(optional = true)
-	public DBUser DBUser;
+	public DBUser user;
 
 	/**
 	 * The time that we noticed who is associated with this session. The null-ness of this field should always match

@@ -12,28 +12,42 @@ import java.util.Date;
  */
 @Entity
 public
-class Nut extends Attemptable implements Mortal
+class Nut /* extends Attemptable */ implements Mortal
 {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	public Long id;
+
+	@Override
+	public
+	String toString()
+	{
+		return "["+getClass().getSimpleName() + ":" + id + "]";
+	}
+
+	@Column(nullable = false, columnDefinition = Usual.INSERT_TIME, insertable = false, updatable = false)
+	public Date created;
+
 	/**
 	 * Pursuant to the SQRL specification, we must be able to remember and compare the originating ip address.
 	 */
 	@ManyToOne(optional = false)
 	public TenantIP tenantIP;
 
-	@Column(unique = true)
+	@Column(nullable = false, unique = true, length = 25)
 	public String stringValue;
 
 	@ManyToOne
 	public Tenant tenant;
 
 	@ManyToOne
-	public DBUser DBUser;
+	public DBUser user;
 
 	public
 	boolean isClaimable()
 	{
-		return (DBUser == null
-					&& attempts < 10
+		return (user == null
+				/*	&& attempts < 10 */
 					&& (deadline == null || deadline.getTime() > System.currentTimeMillis())
 		);
 	}

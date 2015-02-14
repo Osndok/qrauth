@@ -151,8 +151,8 @@ API 4 - tenant utilities
 (!) all following methods require posting API_KEY (unhashed)
 
 * POST /api/tenant/user/recent
-* POST /api/tenant/user/named/$NAMES_CSV
-* POST /api/tenant/user/id/$UIDS_CSV
+* POST /api/tenant/user/named/$NAME
+* POST /api/tenant/user/id/$UIDS
 ** returns username,uid(tenantperson::id),tenant-fields
 ** expensive?: tenant-group memberships(name->id),group-derived permissions
 ** maybe: user's number of banned sites
@@ -171,10 +171,10 @@ API 4 - tenant utilities
 ** This *might* be the only way to see the users, as they will surly be hidden from other common lists.
 
 * POST /api/tenant/user/set/id/$UID (bulk setting fields)
-* POST /api/tenant/user/set/id/$UIDS_CSV/$key/$value (set single field; enforces nice keys and values)
+* POST /api/tenant/user/set/id/$UIDS/$key/$value (set single field; enforces nice keys and values)
 
-* POST /api/tenant/group/named/$NAMES_CSV
-* POST /api/tenant/group/id/$UIDS_CSV
+* POST /api/tenant/group/named/$NAMES
+* POST /api/tenant/group/id/$UIDS
 ** returns groupname,gid(tenantgroup::id),tenant-fields,uids in group
 ** returns status of 404 if no match (200 if *any* match)
 
@@ -205,6 +205,7 @@ API 5 - Standard Login & account maintenance
 * POST /api/tenant/login
 ** API_KEY (unhashed)
 ** SESSION_ID (hashed)
+** USER_IP
 ** returns either (1) the json login info, (2) the html that would allow this connection, or (3) if the session should be destroyed
 
 * POST /api/tenant/logout

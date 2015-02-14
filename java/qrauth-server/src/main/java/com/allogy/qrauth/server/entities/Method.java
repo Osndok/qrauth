@@ -15,7 +15,7 @@ class Method extends Attemptable implements Mortal
 {
 
 	@ManyToOne(optional = false)
-	public DBUser DBUser;
+	public DBUser user;
 
 	/**
 	 * The maximum number of milliseconds that this authentication method will sustain a session from
@@ -25,7 +25,7 @@ class Method extends Attemptable implements Mortal
 	public Integer millisGranted;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, length = 10)
+	@Column(nullable = false, columnDefinition = "VARCHAR(15)", length = 15)
 	public MethodType type;
 
 	public String secret;
@@ -34,7 +34,7 @@ class Method extends Attemptable implements Mortal
 	/**
 	 * A place to stash SQRL's id-lock challange.
 	 */
-	public String lock;
+	public String idRecoveryLock;
 
 	@Column(unique = true, length = 2048)
 	public String pubKey;

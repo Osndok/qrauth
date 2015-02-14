@@ -4,6 +4,7 @@ import org.apache.tapestry5.beaneditor.NonVisual;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,20 +18,27 @@ class DBUser extends Attemptable implements Mortal
 {
 
 	@NonVisual
-	@Column(nullable=false, columnDefinition = Usual.TIMESTAMP)
+	@Column(nullable = false, columnDefinition = Usual.TIMESTAMP)
 	public Date globalLogout;
 
 	public String displayName;
 
-	@Column(nullable=false, unique=true)
+	@Column(nullable = true, unique = true)
 	public String username;
 
-	@Column(unique=true)
+	@Column(unique = true)
 	public String verifiedEmail;
 
 	@NonVisual
 	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_2k, length = 2000)
 	public String preferencesJson;
+
+	@ManyToOne(optional = true)
+	public TenantIP lastLoginIP;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+	@MapKey(name = "type")
+	public Map<MethodType, Method> methods;
 
 	/* -------------------- Mortal Implementation ------------------ */
 

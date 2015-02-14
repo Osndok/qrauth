@@ -36,7 +36,7 @@ class TenantSync
 	public String userName;
 
 	@Column(nullable = false)
-	public String userEmail;
+	public String userAtHost;
 
 	@Column(nullable = false)
 	public String authMethod;

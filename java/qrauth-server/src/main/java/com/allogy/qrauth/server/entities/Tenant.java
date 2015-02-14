@@ -28,7 +28,7 @@ class Tenant extends Attemptable implements Mortal
 	public String urlRedux;
 
 	@ManyToOne
-	public DBUser contact;
+	public DBUser primaryContact;
 
 	@Column(nullable = false, unique = true)
 	public String hashedApiKeyPrimary;
@@ -47,6 +47,9 @@ class Tenant extends Attemptable implements Mortal
 
 	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_25k, length = 25000)
 	public String fieldDescriptionsJson;
+
+	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_25k, length = 25000)
+	public String permissionsDescriptionsJson;
 
 	/* -------------------- Mortal Implementation ------------------ */
 

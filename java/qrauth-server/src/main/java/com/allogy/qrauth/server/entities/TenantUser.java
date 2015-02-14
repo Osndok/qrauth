@@ -16,7 +16,7 @@ public
 class TenantUser extends Attemptable implements Mortal
 {
 	@ManyToOne(optional = false)
-	public DBUser DBUser;
+	public DBUser user;
 
 	@ManyToOne(optional = false)
 	public Tenant tenant;
@@ -52,7 +52,7 @@ class TenantUser extends Attemptable implements Mortal
 	 * Tenant knows about them.
 	 */
 	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_2k, length = 2000)
-	public String config;
+	public String configJson;
 
 	/* -------------------- Mortal Implementation ------------------ */
 

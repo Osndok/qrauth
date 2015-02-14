@@ -6,10 +6,11 @@ package com.allogy.qrauth.server.entities;
 public
 enum MethodType
 {
-	TOTP,
-	HOTP,
-	YUBI,
-	PPP,
+	SQRL,
 	RSA,
-	SQRL
+	TIME_OTP,
+	HASH_OTP,
+	STATIC_OTP,
+	YUBIKEY,
+	PPP,
 }

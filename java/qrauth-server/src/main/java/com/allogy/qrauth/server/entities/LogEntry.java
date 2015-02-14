@@ -28,7 +28,7 @@ class LogEntry
 	public Date time;
 
 	@ManyToOne
-	public DBUser DBUser;
+	public DBUser user;
 
 	@ManyToOne
 	public Method method;

@@ -31,6 +31,6 @@ class TenantGroupMember
 	public TenantGroup tenantGroup;
 
 	@ManyToOne(cascade = CascadeType.REMOVE, optional = false)
-	public DBUser DBUser;
+	public DBUser user;
 
 }
