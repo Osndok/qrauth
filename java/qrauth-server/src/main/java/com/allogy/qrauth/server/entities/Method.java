@@ -39,6 +39,18 @@ class Method extends Attemptable implements Mortal
 	@Column(unique = true, length = 2048)
 	public String pubKey;
 
+	/**
+	 * This idea is that (particularly for the yubikey, which has two operating modes:
+	 * short press & long press), we can have one of them *work* yet silently raise an
+	 * alarm tenant-side (or plausibly lock/disable an account). For that matter, we
+	 * could set up any number of "working" one-time-passwords that would do the same.
+	 *
+	 * Requires build out of (or attachment to) a good notification system tenant-side.
+	 * For now, this will only result in the 'alarm' flag being set to true.
+	 */
+	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
+	public boolean silentAlarm;
+
 	/* -------------------- Mortal Implementation ------------------ */
 
 	@NonVisual

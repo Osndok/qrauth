@@ -206,6 +206,7 @@ API 5 - Standard Login & account maintenance
 ** API_KEY (unhashed)
 ** SESSION_ID (hashed)
 ** USER_IP
+** {uid:12345, username:bob, alarm:false, security_rank:4, groups:{...}, permissions:[...]}
 ** returns either (1) the json login info, (2) the html that would allow this connection, or (3) if the session should be destroyed
 
 * POST /api/tenant/logout

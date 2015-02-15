@@ -11,7 +11,7 @@ enum MethodType
 	/**15-chars-max| RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | GROUP         */
 	SQRL           (   1  , false    , true     , false     , true    , false , true     , QR_ONLY       ),
 	RSA            (   2  , false    , false    , false     , false   , false , true     , RSA_CRAM      ),
-	YUBIKEY_SECRET (   3  , false    , true     , false     , false   , false , false    , USER_AND_PASS ),
+	YUBIKEY_CUSTOM (   3  , false    , true     , false     , false   , false , false    , USER_AND_PASS ),
 	HMAC_OTP       (   4  , false    , true     , false     , false   , false , false    , USER_AND_PASS ),
 	TIME_OTP       (   5  , false    , false    , false     , false   , true  , false    , USER_AND_PASS ),
 	PAPER_PASSWORDS(   7  , false    , true     , false     , false   , false , false    , PPP_CRAM      ),
@@ -24,7 +24,7 @@ enum MethodType
 	SALTED_PASSWORD(  11  , true     , false    , false     , false   , false , false    , USER_AND_PASS ),
 	;
 
-	public static final int FIRST_QUESTIONABLE_RANK=10;
+	private static final int FIRST_QUESTIONABLE_RANK=10;
 
 	private final
 	int rank;
@@ -140,5 +140,11 @@ enum MethodType
 	MethodGroup getMethodGroup()
 	{
 		return methodGroup;
+	}
+
+	public
+	boolean isQuestionable()
+	{
+		return rank >= FIRST_QUESTIONABLE_RANK;
 	}
 }
