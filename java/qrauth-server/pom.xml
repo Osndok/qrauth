@@ -51,7 +51,19 @@
 			<version>${flyway-version}</version>
 		</dependency>
 
-        <!-- Include the Log4j implementation for the SLF4J logging framework -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>4.3.8.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>4.3.8.Final</version>
+		</dependency>
+
+		<!-- Include the Log4j implementation for the SLF4J logging framework -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>

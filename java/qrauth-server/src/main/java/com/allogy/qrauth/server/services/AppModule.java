@@ -2,18 +2,18 @@ package com.allogy.qrauth.server.services;
 
 import java.io.IOException;
 
+import com.allogy.qrauth.server.services.impl.DatabaseMigratorImpl;
 import org.apache.tapestry5.*;
+import org.apache.tapestry5.hibernate.HibernateConfigurer;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.OrderedConfiguration;
 import org.apache.tapestry5.ioc.ServiceBinder;
 import org.apache.tapestry5.ioc.annotations.Contribute;
 import org.apache.tapestry5.ioc.annotations.Local;
+import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.apache.tapestry5.ioc.services.ApplicationDefaults;
 import org.apache.tapestry5.ioc.services.SymbolProvider;
 import org.apache.tapestry5.services.*;
-import org.apache.tapestry5.services.javascript.JavaScriptStack;
-import org.apache.tapestry5.services.javascript.StackExtension;
-import org.apache.tapestry5.services.javascript.StackExtensionType;
 import org.slf4j.Logger;
 
 import com.allogy.qrauth.common.Version;
@@ -22,16 +22,13 @@ import com.allogy.qrauth.common.Version;
  * This module is automatically included as part of the Tapestry IoC Registry, it's a good place to
  * configure and extend Tapestry, or to place your own service definitions.
  */
-public class AppModule
+public
+class AppModule
 {
-    public static void bind(ServiceBinder binder)
+    public static
+	void bind(ServiceBinder binder)
     {
-        // binder.bind(MyServiceInterface.class, MyServiceImpl.class);
-
-        // Make bind() calls on the binder object to define most IoC services.
-        // Use service builder methods (example below) when the implementation
-        // is provided inline, or requires more initialization than simply
-        // invoking the constructor.
+        binder.bind(DatabaseMigrator.class, DatabaseMigratorImpl.class);
     }
 
     public static void contributeFactoryDefaults(
@@ -57,7 +54,20 @@ public class AppModule
         // you can extend this list of locales (it's a comma separated series of locale names;
         // the first locale name is the default when there's no reasonable match).
         configuration.add(SymbolConstants.SUPPORTED_LOCALES, "en");
+
+		//Since we want the database migrator to run *before* hibernate scans the database, and
+		//we want to reuse the...
     }
+
+	public static
+	void contributeHibernateSessionSource(OrderedConfiguration<HibernateConfigurer> configuration,
+										  @Symbol(SymbolConstants.PRODUCTION_MODE)
+										  final
+										  boolean productionMode
+	)
+	{
+		configuration.add("qrauth", new DatabaseMigratorImpl.PropertiesHandoff(productionMode));
+	}
 
 	/**
 	 * Use annotation or method naming convention: <code>contributeApplicationDefaults</code>
