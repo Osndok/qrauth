@@ -58,7 +58,7 @@
         pubKey varchar(2048) unique,
         secret varchar(255),
         silentAlarm BOOLEAN DEFAULT 'f' not null,
-        type VARCHAR(15) not null,
+        variety VARCHAR(15) not null,
         user_id int8 not null,
         primary key (id)
     );

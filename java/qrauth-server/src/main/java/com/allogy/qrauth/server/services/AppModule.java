@@ -3,8 +3,11 @@ package com.allogy.qrauth.server.services;
 import java.io.IOException;
 
 import com.allogy.qrauth.server.services.impl.DatabaseMigratorImpl;
+import com.allogy.qrauth.server.services.impl.NutsImpl;
 import org.apache.tapestry5.*;
 import org.apache.tapestry5.hibernate.HibernateConfigurer;
+import org.apache.tapestry5.hibernate.HibernateConstants;
+import org.apache.tapestry5.hibernate.HibernateSymbols;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.OrderedConfiguration;
 import org.apache.tapestry5.ioc.ServiceBinder;
@@ -29,6 +32,7 @@ class AppModule
 	void bind(ServiceBinder binder)
     {
         binder.bind(DatabaseMigrator.class, DatabaseMigratorImpl.class);
+		binder.bind(Nuts            .class, NutsImpl            .class);
     }
 
     public static void contributeFactoryDefaults(
@@ -55,8 +59,8 @@ class AppModule
         // the first locale name is the default when there's no reasonable match).
         configuration.add(SymbolConstants.SUPPORTED_LOCALES, "en");
 
-		//Since we want the database migrator to run *before* hibernate scans the database, and
-		//we want to reuse the...
+		configuration.add(HibernateSymbols.EARLY_START_UP, "true");
+		configuration.add(HibernateSymbols.DEFAULT_CONFIGURATION, "false");
     }
 
 	public static

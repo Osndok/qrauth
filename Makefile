@@ -8,10 +8,12 @@ MVN= TZ=UTC mvn -Drelease.version=$(VERSION)
 
 target/qrauth-ssh-keys: src/qrauth-ssh-keys.c
 	rm -fv $@
+	mkdir -p target
 	gcc -Wall -Werror -Wfatal-errors $^ -lgit2 -o $@
 
 test: target/qrauth-ssh-keys
 	DEBUG=1 target/qrauth-ssh-keys $(shell whoami)
+	( cd java ; $(MVN) test )
 
 prereqs:
 	sudo yum install libgit2-devel json-c-devel
@@ -28,4 +30,7 @@ run:
 sql:
 	( cd java ; $(MVN) -pl qrauth-common install )
 	( cd java ; $(MVN) -pl qrauth-server clean compile -X hibernate3:hbm2ddl )
+
+clean:
+	rm -rf target java/target java/*/target
 

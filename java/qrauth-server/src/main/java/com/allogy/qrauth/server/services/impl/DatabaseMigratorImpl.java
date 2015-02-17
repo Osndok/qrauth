@@ -46,37 +46,38 @@ class DatabaseMigratorImpl implements DatabaseMigrator
 		{
 			try
 			{
-				kludgy_do_database_migration(productionMode);
+				final
+				Properties p;
+				{
+					final
+					InputStream in = new FileInputStream(DB_CONFIG_FILE);
+
+					try
+					{
+						p = new Properties();
+						p.load(in);
+					}
+					finally
+					{
+						in.close();
+					}
+				}
+
+				kludgy_do_database_migration(productionMode, p);
+
+				configuration.addProperties(p);
 			}
 			catch (IOException e)
 			{
 				log.error("failure in database migration logic", e);
 			}
 
-			configuration.configure(new File(DB_CONFIG_FILE));
 		}
 	}
 
 	private static
-	void kludgy_do_database_migration(boolean productionMode) throws IOException
+	void kludgy_do_database_migration(final boolean productionMode, final Properties p) throws IOException
 	{
-		final
-		Properties p;
-		{
-			final
-			InputStream in = new FileInputStream(DB_CONFIG_FILE);
-
-			try
-			{
-				p = new Properties();
-				p.load(in);
-			}
-			finally
-			{
-				in.close();
-			}
-		}
-
 		final
 		String prefix = "hibernate.connection.";
 

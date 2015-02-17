@@ -3,7 +3,6 @@ package com.allogy.qrauth.server.entities;
 import org.apache.tapestry5.beaneditor.NonVisual;
 
 import javax.persistence.*;
-import java.lang.invoke.MethodType;
 import java.util.Date;
 
 /**
@@ -26,7 +25,7 @@ class Method extends Attemptable implements Mortal
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, columnDefinition = "VARCHAR(15)", length = 15)
-	public MethodType type;
+	public MethodVariety variety;
 
 	public String secret;
 	public String comment;

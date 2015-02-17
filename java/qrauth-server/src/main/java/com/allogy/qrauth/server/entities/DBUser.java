@@ -5,7 +5,6 @@ import org.apache.tapestry5.beaneditor.NonVisual;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * User: robert
@@ -37,8 +36,8 @@ class DBUser extends Attemptable implements Mortal
 	public TenantIP lastLoginIP;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-	@MapKey(name = "type")
-	public Map<MethodType, Method> methods;
+	@MapKey(name = "variety")
+	public Map<MethodVariety, Method> methods;
 
 	/* -------------------- Mortal Implementation ------------------ */
 

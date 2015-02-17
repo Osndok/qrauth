@@ -6,7 +6,7 @@ import static com.allogy.qrauth.server.entities.MethodGroup.*;
  * Created by robert on 2/13/15.
  */
 public
-enum MethodType
+enum MethodVariety
 {
 	/**15-chars-max| RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | GROUP         */
 	SQRL           (   1  , false    , true     , false     , true    , false , true     , QR_ONLY       ),
@@ -51,7 +51,16 @@ enum MethodType
 	MethodGroup methodGroup;
 
 	private
-	MethodType(int rank, boolean deadlineRequired, boolean stateful, boolean thirdParty, boolean network, boolean clock, boolean leakSafe, MethodGroup methodGroup)
+	MethodVariety(
+					 int rank,
+					 boolean deadlineRequired,
+					 boolean stateful,
+					 boolean thirdParty,
+					 boolean network,
+					 boolean clock,
+					 boolean leakSafe,
+					 MethodGroup methodGroup
+	)
 	{
 		this.rank = rank;
 		this.deadlineRequired = deadlineRequired;
