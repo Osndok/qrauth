@@ -27,6 +27,14 @@ class Tenant extends Attemptable implements Mortal
 	@Column(unique = true)
 	public String urlRedux;
 
+	/**
+	 * Since (ultimately, in theory) we are going to allow anyone to create a Tenant account...
+	 * We don't *expected* that any special info will be leaked to tenants, but...
+	 * We should probably at least track the origin ip, for accountability.
+	 */
+	@ManyToOne
+	public TenantIP tenantIP;
+
 	@ManyToOne
 	public DBUser primaryContact;
 
@@ -44,6 +52,9 @@ class Tenant extends Attemptable implements Mortal
 
 	@Column(unique = true)
 	public String qrauthHostAndPort;
+
+	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_2k, length = 2000)
+	public String config;
 
 	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_25k, length = 25000)
 	public String fieldDescriptionsJson;

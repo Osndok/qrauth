@@ -27,7 +27,7 @@ class HashingImpl implements Hashing
 	static
 	{
 		log = LoggerFactory.getLogger(Hashing.class);
-		PEPPER = DatabaseMigratorImpl.getHashingPepper();
+		PEPPER = Config.get().getHashingPepper();
 
 		if (PEPPER.isEmpty())
 		{

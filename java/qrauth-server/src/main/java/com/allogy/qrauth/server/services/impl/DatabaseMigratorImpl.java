@@ -20,55 +20,11 @@ import java.util.Properties;
 public
 class DatabaseMigratorImpl implements DatabaseMigrator
 {
-	private static final String  QRAUTH_CONFIG_FILE = System.getProperty("QRAUTH_CONFIG_FILE", "/etc/qrauth.props");
 	private static final boolean DB_NO_MIGRATE      = Boolean.getBoolean("DB_NO_MIGRATE");
 	private static final boolean DB_MIGRATE_FATAL   = Boolean.getBoolean("DB_MIGRATE_FATAL");
 
-	private static final
-	Properties properties;
-
-	static
-	{
-		try
-		{
-			final
-			InputStream in = new FileInputStream(QRAUTH_CONFIG_FILE);
-
-			try
-			{
-				properties = new Properties();
-				properties.load(in);
-			}
-			finally
-			{
-				in.close();
-			}
-		}
-		catch (IOException e)
-		{
-			//Failure to configure the database should be fatal, and we need the connection information before we can even hope to do so.
-			throw new AssertionError(e);
-		}
-	}
-
 	private static
 	boolean migrationSuccessful;
-
-	/**
-	 * A bit kludgy, but convenient to be here b/c the migrator and hibernate need the external database password, etc.
-	 * @return
-	 */
-	public static
-	String getTapestryHMACPassphrase()
-	{
-		return properties.getProperty("tapestry.hmac-passphrase", "");
-	}
-
-	public static
-	String getHashingPepper()
-	{
-		return properties.getProperty("hashing.pepper", "");
-	}
 
 	public static
 	class PropertiesHandoff implements HibernateConfigurer
@@ -86,6 +42,9 @@ class DatabaseMigratorImpl implements DatabaseMigrator
 		public
 		void configure(Configuration configuration)
 		{
+			final
+			Properties properties=Config.get().getProperties();
+
 			try
 			{
 				kludgy_do_database_migration(productionMode, properties);

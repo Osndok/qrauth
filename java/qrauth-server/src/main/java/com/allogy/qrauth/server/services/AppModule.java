@@ -2,10 +2,7 @@ package com.allogy.qrauth.server.services;
 
 import java.io.IOException;
 
-import com.allogy.qrauth.server.services.impl.DBTimingImpl;
-import com.allogy.qrauth.server.services.impl.DatabaseMigratorImpl;
-import com.allogy.qrauth.server.services.impl.HashingImpl;
-import com.allogy.qrauth.server.services.impl.NutsImpl;
+import com.allogy.qrauth.server.services.impl.*;
 import org.apache.tapestry5.*;
 import org.apache.tapestry5.hibernate.HibernateConfigurer;
 import org.apache.tapestry5.hibernate.HibernateConstants;
@@ -36,7 +33,9 @@ class AppModule
         binder.bind(DatabaseMigrator.class, DatabaseMigratorImpl.class);
 		binder.bind(DBTiming        .class, DBTimingImpl        .class);
 		binder.bind(Hashing         .class, HashingImpl         .class);
+		binder.bind(Network         .class, NetworkImpl         .class);
 		binder.bind(Nuts            .class, NutsImpl            .class);
+		binder.bind(Policy          .class, PolicyImpl          .class);
     }
 
     public static void contributeFactoryDefaults(
@@ -81,7 +80,7 @@ class AppModule
 		configuration.add(HibernateSymbols.EARLY_START_UP, "true");
 		configuration.add(HibernateSymbols.DEFAULT_CONFIGURATION, "false");
 
-		configuration.add(SymbolConstants.HMAC_PASSPHRASE, DatabaseMigratorImpl.getTapestryHMACPassphrase());
+		configuration.add(SymbolConstants.HMAC_PASSPHRASE, Config.get().getTapestryHMACPassphrase());
     }
 
 	public static

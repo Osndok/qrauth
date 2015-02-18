@@ -81,6 +81,7 @@
         lastAttempt TIMESTAMP WITHOUT TIME ZONE,
         lastSuccess TIMESTAMP WITHOUT TIME ZONE,
         successes INTEGER DEFAULT 0 not null,
+        config VARCHAR(2000) DEFAULT '{}' not null,
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
         fieldDescriptionsJson VARCHAR(25000) DEFAULT '{}' not null,
@@ -95,6 +96,7 @@
         url varchar(255) unique,
         urlRedux varchar(255) unique,
         primaryContact_id int8,
+        tenantIP_id int8,
         primary key (id)
     );
 
@@ -248,6 +250,11 @@
         add constraint FK9519D4CAE679742B 
         foreign key (primaryContact_id) 
         references DBUser;
+
+    alter table Tenant 
+        add constraint FK9519D4CA35152060 
+        foreign key (tenantIP_id) 
+        references TenantIP;
 
     alter table TenantGroup 
         add constraint FKD2BB9FD5117A4914 
