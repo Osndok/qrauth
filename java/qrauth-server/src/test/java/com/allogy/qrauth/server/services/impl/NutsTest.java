@@ -11,16 +11,16 @@ import java.util.Arrays;
  */
 @Test
 public
-class NutsImplTest extends TestCase
+class NutsTest extends TestCase
 {
 	@Test
 	public
 	void testNutGeneration()
 	{
 		final
-		Nuts nuts=new NutsImpl();
+		Nuts nuts=One.registry.getService(Nuts.class);
 
-		for (int i=0; i<1000; i++)
+		for (int i=0; i<100; i++)
 		{
 			generateAndTestOneNut(nuts);
 		}

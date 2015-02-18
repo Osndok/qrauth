@@ -65,6 +65,12 @@ class DatabaseMigratorImpl implements DatabaseMigrator
 	}
 
 	public static
+	String getHashingPepper()
+	{
+		return properties.getProperty("hashing.pepper", "");
+	}
+
+	public static
 	class PropertiesHandoff implements HibernateConfigurer
 	{
 		private final

@@ -30,6 +30,10 @@ class Nut /* extends Attemptable */ implements Mortal
 
 	/**
 	 * Pursuant to the SQRL specification, we must be able to remember and compare the originating ip address.
+	 * Note that, for us, this means the tenant must provide the IP address of the original requestor; so there
+	 * might actually be a bit of 3rd-party verification (network wise), or CRAM (that they have to commit to
+	 * an IP address)... but all of this is a bit questionable anyway, as network addresses can (and do) change,
+	 * especially on a mobile device.
 	 */
 	@ManyToOne(optional = false)
 	public TenantIP tenantIP;

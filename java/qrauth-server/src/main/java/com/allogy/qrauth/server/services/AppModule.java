@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.allogy.qrauth.server.services.impl.DBTimingImpl;
 import com.allogy.qrauth.server.services.impl.DatabaseMigratorImpl;
+import com.allogy.qrauth.server.services.impl.HashingImpl;
 import com.allogy.qrauth.server.services.impl.NutsImpl;
 import org.apache.tapestry5.*;
 import org.apache.tapestry5.hibernate.HibernateConfigurer;
@@ -34,6 +35,7 @@ class AppModule
     {
         binder.bind(DatabaseMigrator.class, DatabaseMigratorImpl.class);
 		binder.bind(DBTiming        .class, DBTimingImpl        .class);
+		binder.bind(Hashing         .class, HashingImpl         .class);
 		binder.bind(Nuts            .class, NutsImpl            .class);
     }
 
