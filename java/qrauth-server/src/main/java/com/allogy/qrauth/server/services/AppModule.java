@@ -78,6 +78,8 @@ class AppModule
 
 		configuration.add(HibernateSymbols.EARLY_START_UP, "true");
 		configuration.add(HibernateSymbols.DEFAULT_CONFIGURATION, "false");
+
+		configuration.add(SymbolConstants.HMAC_PASSPHRASE, DatabaseMigratorImpl.getTapestryHMACPassphrase());
     }
 
 	public static

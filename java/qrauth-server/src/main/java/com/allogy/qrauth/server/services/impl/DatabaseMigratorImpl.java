@@ -8,7 +8,6 @@ import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,12 +20,49 @@ import java.util.Properties;
 public
 class DatabaseMigratorImpl implements DatabaseMigrator
 {
-	private static final String  DB_CONFIG_FILE   = System.getProperty("DB_CONFIG_FILE", "/etc/qrauth-database.props");
-	private static final boolean DB_NO_MIGRATE    = Boolean.getBoolean("DB_NO_MIGRATE");
-	private static final boolean DB_MIGRATE_FATAL = Boolean.getBoolean("DB_MIGRATE_FATAL");
+	private static final String  QRAUTH_CONFIG_FILE = System.getProperty("QRAUTH_CONFIG_FILE", "/etc/qrauth.props");
+	private static final boolean DB_NO_MIGRATE      = Boolean.getBoolean("DB_NO_MIGRATE");
+	private static final boolean DB_MIGRATE_FATAL   = Boolean.getBoolean("DB_MIGRATE_FATAL");
+
+	private static final
+	Properties properties;
+
+	static
+	{
+		try
+		{
+			final
+			InputStream in = new FileInputStream(QRAUTH_CONFIG_FILE);
+
+			try
+			{
+				properties = new Properties();
+				properties.load(in);
+			}
+			finally
+			{
+				in.close();
+			}
+		}
+		catch (IOException e)
+		{
+			//Failure to configure the database should be fatal, and we need the connection information before we can even hope to do so.
+			throw new AssertionError(e);
+		}
+	}
 
 	private static
 	boolean migrationSuccessful;
+
+	/**
+	 * A bit kludgy, but convenient to be here b/c the migrator and hibernate need the external database password, etc.
+	 * @return
+	 */
+	public static
+	String getTapestryHMACPassphrase()
+	{
+		return properties.getProperty("tapestry.hmac-passphrase", "");
+	}
 
 	public static
 	class PropertiesHandoff implements HibernateConfigurer
@@ -46,32 +82,14 @@ class DatabaseMigratorImpl implements DatabaseMigrator
 		{
 			try
 			{
-				final
-				Properties p;
-				{
-					final
-					InputStream in = new FileInputStream(DB_CONFIG_FILE);
+				kludgy_do_database_migration(productionMode, properties);
 
-					try
-					{
-						p = new Properties();
-						p.load(in);
-					}
-					finally
-					{
-						in.close();
-					}
-				}
-
-				kludgy_do_database_migration(productionMode, p);
-
-				configuration.addProperties(p);
+				configuration.addProperties(properties);
 			}
 			catch (IOException e)
 			{
 				log.error("failure in database migration logic", e);
 			}
-
 		}
 	}
 

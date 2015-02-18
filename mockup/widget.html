@@ -29,21 +29,26 @@
 	<prompt>Login method:</prompt>
 	<a data-tab="#qrauth_options"  target="_blank" href="noscript/options">Options</a>
 	<a data-tab="#qrauth_sqrl"     target="_blank" href="noscript/sqrl" class="active">SQRL</a>
+	<!-- Part of me thinks this tab should simply be called 'password', but then it would interfer with PPP, conceptually. -->
 	<a data-tab="#qrauth_otp"      target="_blank" href="noscript/otp">OTP</a>
 	<a data-tab="#qrauth_ppp"      target="_blank" href="noscript/ppp">PPP</a>
 	<a data-tab="#qrauth_rsa"      target="_blank" href="noscript/rsa">RSA</a>
 	<a data-tab="#qrauth_openid"   target="_blank" href="noscript/openid">OpenID</a>
-	<a data-tab="#qrauth_email"    target="_blank" href="noscript/email">Email</a>
+	<!--a data-tab="#qrauth_email"    target="_blank" href="noscript/email">Email</a-->
 	<a data-tab="#qrauth_overview" target="_blank" href="noscript/overview">Overview</a>
 </methods>
 
 <div class="tabs-content">
 
 <arena id="qrauth_options">
+	<!--
+	NB: we can't have any truly impactful options here, as these options are inherently sensitive to cross-site posting attacks
+	-->
 	Options panel goes here...
 	<ul>
 		<li>login straight to account maintenance</li>
 		<li>set desired session length</li>
+		<li>create an account, if one does not exist</li>
 	</ul>
 </arena>
 
@@ -94,7 +99,7 @@
 			<td>&nbsp;</td>
 		</tr>
 		<tr>
-			<td>One-time password:</td>
+			<td>Password:</td>
 			<td><input name="password"/></td>
 			<td><input type="submit" value="Submit"/></td>
 		</tr>
@@ -109,6 +114,9 @@
 	<br/><br/>
 	For the system that uses one-time passwords on a <b><u>printed card</u></b>, please use
 	the "PPP" (Perfect Paper Passwords) tab instead.
+	<br/><br/>
+	For legacy systems that rely on a static username and password, that can be entered here
+	for migration, but are not recommended for long-term use.
 </arena>
 
 
@@ -266,7 +274,7 @@ echo -n T4WqLtOhOxfXNqj6ve5hdWIm8dBP2r9 | openssl rsautl -sign -inkey ~/.ssh/id_
 			<!-- SQRL -->
 			<td><no/></td>
 			<!-- RSA -->
-			<td title="If the public key is presented in addition to the response, then no. A username would not be required.">***</td>
+			<td title="If the public key is presented in addition to the response, then no. A username would not be required."><no/></td>
 			<!-- HOTP -->
 			<td title="Some devices (such as the yubikey) prefix a usable 'username'."><yes/>*</td>
 			<!-- TOTP -->
