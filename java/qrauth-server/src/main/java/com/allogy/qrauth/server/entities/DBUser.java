@@ -4,6 +4,7 @@ import org.apache.tapestry5.beaneditor.NonVisual;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,9 +23,6 @@ class DBUser extends Attemptable implements Mortal
 
 	public String displayName;
 
-	@Column(nullable = true, unique = true)
-	public String username;
-
 	@Column(unique = true)
 	public String verifiedEmail;
 
@@ -38,6 +36,9 @@ class DBUser extends Attemptable implements Mortal
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
 	@MapKey(name = "variety")
 	public Map<MethodVariety, Method> methods;
+
+	@OneToMany(mappedBy = "user")
+	public List<Username> usernames;
 
 	/* -------------------- Mortal Implementation ------------------ */
 

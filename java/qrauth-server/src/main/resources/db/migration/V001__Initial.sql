@@ -23,7 +23,6 @@
         displayName varchar(255),
         globalLogout TIMESTAMP WITHOUT TIME ZONE not null,
         preferencesJson VARCHAR(2000) DEFAULT '{}' not null,
-        username varchar(255) unique,
         verifiedEmail varchar(255) unique,
         lastLoginIP_id int8,
         primary key (id)
@@ -170,6 +169,7 @@
         shellAccess BOOLEAN DEFAULT 'f' not null,
         tenant_id int8 not null,
         user_id int8 not null,
+        username_id int8,
         primary key (id)
     );
 
@@ -182,6 +182,20 @@
         name varchar(255) not null unique,
         recent_csv VARCHAR(2000) DEFAULT '' not null,
         sum int8 not null,
+        primary key (id)
+    );
+
+    create table Username (
+        id  bigserial not null,
+        attempts INTEGER DEFAULT 0 not null,
+        created TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
+        lastAttempt TIMESTAMP WITHOUT TIME ZONE,
+        lastSuccess TIMESTAMP WITHOUT TIME ZONE,
+        successes INTEGER DEFAULT 0 not null,
+        deadline TIMESTAMP WITHOUT TIME ZONE,
+        deathMessage varchar(255),
+        stringValue varchar(255) unique,
+        user_id int8,
         primary key (id)
     );
 
@@ -292,6 +306,16 @@
         references DBUser;
 
     alter table TenantUser 
+        add constraint FK1756BFB5F35D7A40 
+        foreign key (username_id) 
+        references Username;
+
+    alter table TenantUser 
         add constraint FK1756BFB59C6CD340 
         foreign key (tenant_id) 
         references Tenant;
+
+    alter table Username 
+        add constraint FKF403ECF6E4D1151E 
+        foreign key (user_id) 
+        references DBUser;

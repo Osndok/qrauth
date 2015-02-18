@@ -8,7 +8,7 @@ import javax.persistence.ManyToOne;
 import java.util.Date;
 
 /**
- * This is entity is the crux of the system, as it represents the Tenant's view of a person.
+ * This entity is the crux of the system, as it represents the Tenant's view of a person.
  * For example, what the Tenant knows as the numeric id (UID) is actually this TenantPerson::id
  */
 @Entity
@@ -17,6 +17,15 @@ class TenantUser extends Attemptable implements Mortal
 {
 	@ManyToOne(optional = false)
 	public DBUser user;
+
+	/**
+	 * If not null, this is the first (and hopefully the only) username which has been (or will be)
+	 * handed off to this tenant for identification. This is more 'something to be known by', and
+	 * thus will often still point to old/disabled usernames, as it is more important for the
+	 * per-tenant identity to be consistent than to force all tenants to support multiple usernames.
+	 */
+	@ManyToOne
+	public Username username;
 
 	@ManyToOne(optional = false)
 	public Tenant tenant;
