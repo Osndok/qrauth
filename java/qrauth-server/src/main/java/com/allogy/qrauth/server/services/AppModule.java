@@ -45,11 +45,26 @@ class AppModule
     	// If existing assets change (or if the Tapestry version changes) you
     	// should also change this number, to force the browser to download new
     	// versions. This overrides Tapesty's default (a random hexadecimal
-    	// number), but may be further overriden by DevelopmentModule or QaModule 
+    	// number), but may be further overridden by DevelopmentModule or QaModule
     	// by adding the same key in the contributeApplicationDefaults method.
         configuration.override(SymbolConstants.APPLICATION_VERSION, Version.FULL);
 		configuration.override(SymbolConstants.PRODUCTION_MODE, false);
     }
+
+	/**
+	 * When in production mode, all pages & actions should be presumed as "secure" (using HTTPS).
+	 * Because this is a security-sensitive project, if left unset, Tapestry would render all links
+	 * to pages not specifically marked with the 'secure' annotation as http (insecure); commonly
+	 * known as a mixed security model (e.g. for blogs and whatnot).
+	 *
+	 * @url http://tapestry.apache.org/https.html
+	 * @param configuration
+	 */
+	public static
+	void contributeMetaDataLocator(MappedConfiguration<String,String> configuration)
+	{
+		configuration.add(MetaDataConstants.SECURE_PAGE, "true");
+	}
 
     public static void contributeApplicationDefaults(
             MappedConfiguration<String, Object> configuration)
