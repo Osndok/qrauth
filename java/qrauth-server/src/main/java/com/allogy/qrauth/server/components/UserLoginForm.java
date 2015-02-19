@@ -16,6 +16,9 @@ import org.apache.tapestry5.services.BaseURLSource;
 import org.apache.tapestry5.services.Request;
 import org.slf4j.Logger;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 /**
  * Dual-purpose:
  * (1) when delivering the login page logic to a tenant, and
@@ -27,9 +30,10 @@ public
 class UserLoginForm
 {
 	@Parameter
-	@Property
 	private
 	Tenant tenant;
+
+	//-------- end component parameters ---------
 
 	@Inject
 	private
@@ -52,16 +56,13 @@ class UserLoginForm
 	private
 	Request request;
 
-	@Parameter
 	private
 	TenantIP tenantIP;
 
-	@Parameter
 	@Property
 	private
 	Nut nut;
 
-	@Parameter
 	@Property
 	private
 	String base;
@@ -82,7 +83,7 @@ class UserLoginForm
 
 		base = baseURLSource.getBaseURL(productionMode) + contextPath;
 
-		log.debug("setup: {} -> {} -> {} & {} -> {}", tenantIP, nut, nut.stringValue, contextPath, base);
+		log.debug("setup: {} -> {} -> {} & {} -> {} -> {}", tenantIP, nut, nut.stringValue, contextPath, base);
 	}
 
 	@InjectPage

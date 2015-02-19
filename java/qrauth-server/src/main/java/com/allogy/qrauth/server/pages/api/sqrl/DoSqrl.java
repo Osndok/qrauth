@@ -9,11 +9,14 @@ import org.apache.tapestry5.annotations.PageActivationContext;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.apache.tapestry5.services.PageRenderLinkSource;
+import org.apache.tapestry5.services.Request;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 /**
@@ -30,6 +33,7 @@ class DoSqrl
 	DoSqrl with(Nut nut)
 	{
 		nutStringValue=nut.stringValue;
+		cachedUrl=null;
 		return this;
 	}
 
@@ -37,6 +41,7 @@ class DoSqrl
 	DoSqrl with(String nut)
 	{
 		nutStringValue=nut;
+		cachedUrl=null;
 		return this;
 	}
 
@@ -44,6 +49,7 @@ class DoSqrl
 	private
 	Logger log;
 
+	@Inject
 	private
 	Session session;
 
@@ -73,9 +79,33 @@ class DoSqrl
 		}
 
 		log.info("TRY: {}", nut);
+
+		if (log.isDebugEnabled())
+		{
+			for (String name : request.getParameterNames())
+			{
+				String value = request.getParameter(name);
+
+				log.debug("parameter: {} -> {}", name, value);
+			}
+		}
+
+		final
+		String client=request.getParameter("client");
+
+		final
+		String ids=request.getParameter("ids");
+
+		final
+		String server=request.getParameter("server");
+
 		return new ErrorResponse(500, "trying... " + nut);
 		//Remember to kill used nuts!
 	}
+
+	@Inject
+	private
+	Request request;
 
 	@Inject
 	@Symbol(SymbolConstants.PRODUCTION_MODE)
@@ -86,30 +116,58 @@ class DoSqrl
 	private
 	PageRenderLinkSource pageRenderLinkSource;
 
+	private static final
+	String SQRL_BASE=System.getenv("SQRL_BASE");
+
 	public
 	String getUrl() throws UnknownHostException
 	{
-		final
-		String url = pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toAbsoluteURI(false);
-
-		final
-		int firstColon = url.indexOf(':');
-
-		log.debug("firstColon={}, url={}", firstColon, url);
-
-		if (productionMode)
+		if (cachedUrl == null)
 		{
-			//TODO: should we support non-secure "qrl://"? We would have to change the tapestry app config too... :-/
-			return "sqrl" + url.substring(firstColon);
-		}
-		else
-		{
-			//Development machine generally does not have HTTPS/SSL/TLS, and has a special port (8216).
-			final
-			int secondColon = url.indexOf(':', firstColon + 1);
+			if (SQRL_BASE==null)
+			{
+				final
+				String url = pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toAbsoluteURI(false);
 
-			return "qrl://" + InetAddress.getLocalHost().getHostAddress() + url.substring(secondColon);
+				final
+				int firstColon = url.indexOf(':');
 
+				log.debug("firstColon={}, url={}", firstColon, url);
+
+				if (productionMode)
+				{
+					//TODO: should we support non-secure "qrl://"? We would have to change the tapestry app config too... :-/
+					cachedUrl = "sqrl" + url.substring(firstColon);
+				}
+				else
+				{
+					//Development machine generally does not have HTTPS/SSL/TLS, and has a special port (8216).
+					final
+					int secondColon = url.indexOf(':', firstColon + 1);
+
+					final
+					String domain = System.getenv("SQRL_HOST");
+
+					cachedUrl = "qrl://" + (domain == null ? InetAddress.getLocalHost().getHostAddress() : domain) + url.substring(secondColon);
+
+				}
+			}
+			else
+			{
+				cachedUrl=SQRL_BASE+pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toRedirectURI();
+			}
 		}
+
+		return cachedUrl;
 	}
+
+	private
+	String cachedUrl;
+
+	public
+	String getDomain() throws URISyntaxException
+	{
+		return new URI(cachedUrl).getHost();
+	}
+
 }

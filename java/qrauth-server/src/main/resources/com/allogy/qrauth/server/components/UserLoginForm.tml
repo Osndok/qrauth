@@ -60,7 +60,7 @@
 			<img src="${base}/api/sqrl/qr/${nut.stringValue}/sqrl.png"/>
 		</a>
 		<br/>
-		<hostname>allogy.com</hostname>
+		<hostname>${doSqrl.domain}</hostname>
 		<noscript>
 			<br/>
 			<input type="submit" value="Authentication Sent"/>
