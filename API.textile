@@ -140,11 +140,14 @@ API 4 - tenant utilities
 * POST /api/tenant/create
 ** PRIMARY={very-unique-ascii-string-or-guid}
 ** SECONDARY={another-very-unique-ascii-string-or-guid}
+** return: currently an undefined textual response (201 indicates success)
 ** After this call, you may use PRIMARY as your API_KEY... or SECONDARY if PRIMARY is exposed or expired
+** IMPORTANT!!! Keep your secondary key safe!
 
 * POST /api/tenant/rekey
-** SECONDARY={your-current-secondary-api-key-which-now-becomes-primary}
+** API_KEY={your-current-secondary-api-key-which-now-becomes-primary}
 ** NEXT_KEY={very-unique-ascii-string-or-guid}
+** status 202 indicates success
 ** After this call, which proves that you know your secondary key (which should not have been wrapped up in your deployment),
 ** the secondary key becomes your primary, and the provided NEXT_KEY becomes your SECONDARY... thus, "shifting" them.
 

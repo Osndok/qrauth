@@ -50,6 +50,12 @@ class AbstractAPICall
 		return new ErrorResponse(400, String.format("parameter named '%s' was expected, but not received\n", key));
 	}
 
+	protected
+	ErrorResponse missingOrInvalidParameter(String key)
+	{
+		return new ErrorResponse(400, String.format("parameter named '%s' was missing, or not a valid value\n", key));
+	}
+
 	protected final
 	Logger log;
 

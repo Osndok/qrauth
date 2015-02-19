@@ -12,6 +12,7 @@ import org.hibernate.criterion.Restrictions;
 public abstract
 class AbstractTenantAPICall extends AbstractAPICall
 {
+	public static final String PARAMETER_API_KEY="api_key";
 
 	protected
 	Tenant fromHashedAPIKey(final String hashedApiKey)
@@ -40,4 +41,19 @@ class AbstractTenantAPICall extends AbstractAPICall
 	protected
 	Hashing hashing;
 
+	protected
+	Tenant fromPostedApiKey()
+	{
+		final
+		String unhashedApiKey=request.getParameter(PARAMETER_API_KEY);
+
+		if (unhashedApiKey==null)
+		{
+			return null;
+		}
+		else
+		{
+			return fromUnhashedAPIKey(unhashedApiKey);
+		}
+	}
 }
