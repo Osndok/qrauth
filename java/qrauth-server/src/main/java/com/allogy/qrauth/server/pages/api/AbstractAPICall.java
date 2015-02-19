@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.pages.api;
 
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.services.DBTiming;
+import com.allogy.qrauth.server.services.Network;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.Response;
@@ -56,6 +57,12 @@ class AbstractAPICall
 		return new ErrorResponse(400, String.format("parameter named '%s' was missing, or not a valid value\n", key));
 	}
 
+	protected
+	ErrorResponse ipAddressIsBlacklisted()
+	{
+		return new ErrorResponse(403, network.bestEffortBanMessage());
+	}
+
 	protected final
 	Logger log;
 
@@ -64,5 +71,9 @@ class AbstractAPICall
 	{
 		log = LoggerFactory.getLogger(getClass());
 	}
+
+	@Inject
+	protected
+	Network network;
 
 }

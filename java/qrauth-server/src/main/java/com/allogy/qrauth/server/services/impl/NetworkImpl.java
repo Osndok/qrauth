@@ -8,6 +8,9 @@ import com.allogy.qrauth.server.services.DBTiming;
 import com.allogy.qrauth.server.services.Network;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.ioc.annotations.PostInjection;
+import org.apache.tapestry5.ioc.services.cron.IntervalSchedule;
+import org.apache.tapestry5.ioc.services.cron.PeriodicExecutor;
 import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.RequestGlobals;
 import org.hibernate.Criteria;
@@ -19,14 +22,17 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by robert on 2/18/15.
  */
 public
-class NetworkImpl implements Network
+class NetworkImpl implements Network, Runnable
 {
 	public static final boolean IN_CLUSTER = (System.getenv("HJ_PORT") != null);
+
+	private static final long PERIODIC_FLUSH_MILLIS = TimeUnit.MINUTES.toMillis(10);
 
 	private static final Logger log = LoggerFactory.getLogger(Network.class);
 
@@ -34,11 +40,18 @@ class NetworkImpl implements Network
 	private
 	DBTiming dbTiming;
 
+	@PostInjection
+	public
+	void serviceStarts(PeriodicExecutor periodicExecutor)
+	{
+		periodicExecutor.addJob(new IntervalSchedule(PERIODIC_FLUSH_MILLIS), "flush-banned-ip-cache", this);
+	}
+
 	public
 	TenantIP needIPForThisRequest(Tenant tenantFilter)
 	{
 		final
-		long startTime=System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 
 		final
 		String ipAddress = getIpAddress();
@@ -58,23 +71,22 @@ class NetworkImpl implements Network
 
 			log.debug("lookup({}, {}, {})", ipAddress, subnetWildcard, tenantFilter);
 
-			if (subnetWildcard==null)
+			if (subnetWildcard == null)
 			{
-				addressStringsToMatch=new Object[]{ipAddress};
+				addressStringsToMatch = new Object[]{ipAddress};
 			}
 			else
 			{
-				addressStringsToMatch=new Object[]{ipAddress, subnetWildcard};
+				addressStringsToMatch = new Object[]{ipAddress, subnetWildcard};
 			}
 		}
 
 		final
-		Session session=hibernateSessionManager.getSession();
+		Session session = hibernateSessionManager.getSession();
 
 		final
-		Criteria criteria=session.createCriteria(TenantIP.class)
-			.add(Restrictions.in("ipAddress", addressStringsToMatch))
-			;
+		Criteria criteria = session.createCriteria(TenantIP.class)
+								.add(Restrictions.in("ipAddress", addressStringsToMatch));
 
 		if (tenantFilter == null)
 		{
@@ -251,5 +263,125 @@ class NetworkImpl implements Network
 			;
 
 		return criteria.list();
+	}
+
+	@Override
+	public
+	boolean addressIsGenerallyBlocked()
+	{
+		final
+		String ipAddress = getIpAddress();
+		{
+			if (ipAddress == null)
+			{
+				return false;
+			}
+		}
+
+		final
+		String possibleCacheHit=STASHED_BAN_IPS[ipAddress.hashCode() % STASH_SIZE];
+		{
+			if (possibleCacheHit!=null && possibleCacheHit.equals(ipAddress))
+			{
+				//Bypass repeated database accesses
+				return true;
+			}
+		}
+
+		final
+		Object[] addressStringsToMatch;
+		{
+			final
+			String subnetWildcard = getSubnetWildcard(ipAddress);
+
+			log.debug("banned?({}, {})", ipAddress, subnetWildcard);
+
+			if (subnetWildcard==null)
+			{
+				addressStringsToMatch=new Object[]{ipAddress};
+			}
+			else
+			{
+				addressStringsToMatch=new Object[]{ipAddress, subnetWildcard};
+			}
+		}
+
+		final
+		Session session=hibernateSessionManager.getSession();
+
+		//TODO: we can significantly reduce the number of fields here...
+		final
+		Criteria criteria=session.createCriteria(TenantIP.class)
+			.add(Restrictions.in("ipAddress", addressStringsToMatch))
+			.add(Restrictions.isNull("tenant"))
+			;
+
+		final
+		List<TenantIP> list=criteria.list();
+
+		for (TenantIP tenantIP : list)
+		{
+			if (Death.hathVisited(tenantIP))
+			{
+				stashBanMessage(ipAddress, Death.noteMightSay(tenantIP, null));
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Together, these make up a sort of size-limited hash table.
+	 * @512, one array might fit into a single memory page.
+	 * @256, both arrays might fit into a single memory page.
+	 */
+	private static final
+	int STASH_SIZE = 200;
+
+	private final
+	String[] STASHED_BAN_IPS = new String[STASH_SIZE];
+
+	private final
+	String[] STASHED_BAN_MESSAGES = new String[STASH_SIZE];
+
+	private
+	void stashBanMessage(String ipAddress, String s)
+	{
+		STASHED_BAN_MESSAGES[ipAddress.hashCode() % STASH_SIZE] = s;
+		STASHED_BAN_IPS     [ipAddress.hashCode() % STASH_SIZE] = ipAddress;
+	}
+
+	@Override
+	public
+	String bestEffortBanMessage()
+	{
+		final
+		String ipAddress=getIpAddress();
+
+		final
+		String preferredBanMessage=STASHED_BAN_MESSAGES[ipAddress.hashCode() % STASH_SIZE];
+
+		if (preferredBanMessage==null)
+		{
+			return IP_IS_BANNED;
+		}
+		else
+		{
+			return preferredBanMessage;
+		}
+	}
+
+	@Override
+	public
+	void run()
+	{
+		log.debug("flush banned ip addresses");
+
+		for (int i=0; i<STASH_SIZE; i++)
+		{
+			STASHED_BAN_IPS[i]=null;
+			STASHED_BAN_MESSAGES[i]=null;
+		}
 	}
 }

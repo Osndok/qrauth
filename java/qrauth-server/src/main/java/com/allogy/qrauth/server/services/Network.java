@@ -11,6 +11,8 @@ import java.util.Collection;
 public
 interface Network
 {
+	public static final String IP_IS_BANNED="not allowed from your computer";
+
 	/**
 	 * Returns the most relevant TenantIP, even if it has to create it.
 	 *
@@ -31,4 +33,21 @@ interface Network
 	 * @return
 	 */
 	Collection<TenantIP> getExistingTenantIPsForThisOriginator();
+
+	/**
+	 * If this function returns true, then the authentication provider has decided to blacklist the ip address
+	 * of the current request. Further processing should be halted, and more information might be available
+	 * in the low-contention bestEffortBanMessage() function.
+	 *
+	 * @return true if (and only if) the provided address
+	 */
+	boolean addressIsGenerallyBlocked();
+
+	/**
+	 * Called immediately after addressIsGenerallyBlocked() to acquire the side-effect-stashed ban message.
+	 *
+	 * @return a user-presentable string that *might* contain a little more information that simply 'banned'.
+	 */
+	String bestEffortBanMessage();
+
 }

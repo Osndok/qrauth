@@ -20,6 +20,13 @@ class RekeyTenant extends AbstractTenantAPICall
 			return mustBePostRequest();
 		}
 
+		//NB: we can't use the tenant-specific block lists, because then if someone finds a primary api-key, the *first* thing
+		//    they would do is ban all the IPs of the previous administrators.
+		if (network.addressIsGenerallyBlocked())
+		{
+			return ipAddressIsBlacklisted();
+		}
+
 		final
 		String hashedSoonToBePrimaryKey;
 		{

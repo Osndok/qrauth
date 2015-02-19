@@ -36,7 +36,7 @@ class CreateTenant extends AbstractTenantAPICall
 
 		if (Death.hathVisited(ip))
 		{
-			return new ErrorResponse(403, Death.noteMightSay(ip, "not allowed from your computer"));
+			return new ErrorResponse(403, Death.noteMightSay(ip, Network.IP_IS_BANNED));
 		}
 
 		if (!isPostRequest())
@@ -126,10 +126,6 @@ class CreateTenant extends AbstractTenantAPICall
 
 		return tenant;
 	}
-
-	@Inject
-	private
-	Network network;
 
 	@Inject
 	private
