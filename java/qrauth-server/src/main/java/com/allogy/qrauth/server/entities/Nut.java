@@ -38,7 +38,7 @@ class Nut /* extends Attemptable */ implements Mortal
 	@ManyToOne(optional = false)
 	public TenantIP tenantIP;
 
-	@Column(nullable = false, unique = true, length = 25)
+	@Column(nullable = false, unique = true, length = 30)
 	public String stringValue;
 
 	@ManyToOne

@@ -1,6 +1,13 @@
 package com.allogy.qrauth.server.services.impl;
 
+import com.allogy.qrauth.server.entities.Nut;
+import com.allogy.qrauth.server.entities.Tenant;
+import com.allogy.qrauth.server.entities.TenantIP;
 import com.allogy.qrauth.server.services.Nuts;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.tapestry5.hibernate.HibernateSessionManager;
+import org.apache.tapestry5.hibernate.annotations.CommitAfter;
+import org.apache.tapestry5.ioc.annotations.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,5 +124,26 @@ class NutsImpl implements Nuts
 		}
 	}
 
+	@Override
+	public
+	Nut allocate(Tenant tenant, TenantIP tenantIP)
+	{
+		if (tenantIP==null) throw new NullPointerException();
 
+		final
+		Nut nut=new Nut();
+
+		nut.tenant=tenant;
+		nut.tenantIP=tenantIP;
+		nut.stringValue=toStringValue(generateBytes());
+
+		hibernateSessionManager.getSession().save(nut);
+		hibernateSessionManager.commit();
+
+		return nut;
+	}
+
+	@Inject
+	private
+	HibernateSessionManager hibernateSessionManager;
 }

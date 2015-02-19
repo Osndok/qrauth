@@ -67,7 +67,7 @@
         created TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
-        stringValue varchar(25) not null unique,
+        stringValue varchar(30) not null unique,
         tenant_id int8,
         tenantIP_id int8 not null,
         user_id int8,

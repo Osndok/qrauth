@@ -1,5 +1,7 @@
 package com.allogy.qrauth.server.pages.debug;
 
+import com.allogy.qrauth.server.entities.Nut;
+import com.allogy.qrauth.server.services.Network;
 import com.allogy.qrauth.server.services.Nuts;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.util.TextStreamResponse;
@@ -7,7 +9,7 @@ import org.apache.tapestry5.util.TextStreamResponse;
 import java.util.Arrays;
 
 /**
- * Created by robert on 2/16/15.
+ * TODO: delete this class
  */
 public
 class NutsDebug
@@ -22,6 +24,12 @@ class NutsDebug
 
 	Object onActivate(String stringValue)
 	{
+		if (stringValue.equals("allocate"))
+		{
+			Nut nut=nuts.allocate(null, network.needIPForThisRequest(null));
+			return new TextStreamResponse("text/plain", nut.toString()+" -> "+nut.stringValue+"\n");
+		}
+
 		final
 		byte[] bytes = nuts.fromStringValue(stringValue);
 
@@ -31,4 +39,8 @@ class NutsDebug
 	@Inject
 	private
 	Nuts nuts;
+
+	@Inject
+	private
+	Network network;
 }
