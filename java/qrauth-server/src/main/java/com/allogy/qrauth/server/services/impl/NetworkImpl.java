@@ -32,7 +32,7 @@ class NetworkImpl implements Network, Runnable
 {
 	public static final boolean IN_CLUSTER = (System.getenv("HJ_PORT") != null);
 
-	private static final long PERIODIC_FLUSH_MILLIS = TimeUnit.MINUTES.toMillis(10);
+	private static final long PERIODIC_FLUSH_MILLIS = TimeUnit.MINUTES.toMillis(5);
 
 	private static final Logger log = LoggerFactory.getLogger(Network.class);
 
