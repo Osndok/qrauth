@@ -29,7 +29,7 @@ class Affero
 {
 	Object onActivate()
 	{
-		return new ErrorResponse(404, "affero function not specified");
+		return new ErrorResponse(404, "affero function not specified\n");
 	}
 
 	Object onActivate(String mode)
@@ -49,7 +49,7 @@ class Affero
 		}
 		else
 		{
-			return new ErrorResponse(404, "invalid function");
+			return new ErrorResponse(404, "invalid function\n");
 		}
 	}
 
@@ -131,13 +131,13 @@ class Affero
 				}
 			}
 
-			sourceCodeResponse=new ErrorResponse(500, "non-compliant");
+			sourceCodeResponse=new ErrorResponse(500, "non-compliant\n");
 		}
 		catch (Throwable t)
 		{
 			LoggerFactory.getLogger(Affero.class)
 				.error("unable to generate affero compliance response", t);
-			sourceCodeResponse=new ErrorResponse(500, "non-compliant:error:"+t);
+			sourceCodeResponse=new ErrorResponse(500, "non-compliant:error:"+t+'\n');
 		}
 	}
 

@@ -32,6 +32,7 @@ class AppModule
     {
         binder.bind(DatabaseMigrator.class, DatabaseMigratorImpl.class);
 		binder.bind(DBTiming        .class, DBTimingImpl        .class);
+		binder.bind(Journal         .class, JournalImpl         .class);
 		binder.bind(Hashing         .class, HashingImpl         .class);
 		binder.bind(Network         .class, NetworkImpl         .class);
 		binder.bind(Nuts            .class, NutsImpl            .class);

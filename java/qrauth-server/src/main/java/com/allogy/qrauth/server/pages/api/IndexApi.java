@@ -10,6 +10,6 @@ class IndexApi
 {
 	Object onActivate()
 	{
-		return new ErrorResponse(404, "unknown api group or function");
+		return new ErrorResponse(404, "unknown api or function group\n");
 	}
 }
