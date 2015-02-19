@@ -1,0 +1,255 @@
+
+#qrauth
+{
+	width: 800px;
+	color: black;
+	background-color: white;
+	clear: both;
+}
+
+#qrauth .outer
+{
+	padding: 10px;
+	/*box-sizing: border-box;*/
+	position: relative;
+}
+
+#qrauth warning
+{
+	color: black;
+	border: 2px solid red;
+	
+	padding: 15px;
+	margin: 15px;
+	display: block;
+	position: relative;
+	top: 15px;
+}
+
+#qrauth methods
+{
+	display:block;
+	width:100%;
+	box-sizing: border-box;
+	z-index: 3;
+}
+
+#qrauth methods prompt
+{
+	padding: 5px;
+	height: 1px;
+}
+
+#qrauth methods a
+{
+	border-left : 1px solid darkgray;
+	border-top  : 1px solid darkgray;
+	border-right: 1px solid darkgray;
+
+	color: darkgray;
+	background-color: white;
+
+	padding: 5px;
+	display:inline-block;
+	box-sizing: border-box;
+	cursor: pointer;
+
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+
+	text-decoration: none;
+}
+
+#qrauth methods a.active
+{
+	color: black;
+	font-weight: bold;
+	border: 2px solid black;
+	border-bottom: none;
+	padding: 5px;
+	position:relative;
+	top:2px;
+}
+
+#qrauth arena,
+#qrauth table
+{
+	color: black;
+	background-color: white;
+}
+
+#qrauth arena
+{
+	border: 2px solid black;
+	border-radius: 10px;
+
+	margin-bottom: 10px;
+
+	/* can't be relative, and keep the tab overlap :(
+	position: relative;
+	*/
+
+	width:100%;
+	height: 410px;
+	padding: 10px;
+	display: none;
+	box-sizing:border-box;
+
+	z-index: 2;
+
+	overflow-y: auto;
+}
+
+#qrauth arena.active
+{
+	display: block;
+}
+
+#qrauth liner
+{
+	position:relative;
+	
+}
+
+#qrauth left
+{
+	height: 232px;
+
+	position: absolute;
+	width: 210px;
+	left:10px;
+	top:55px;
+
+	margin: 10px;
+	box-sizing:border-box;
+}
+
+#qrauth right
+{
+	height: 232px;
+
+	position: absolute;
+	left: 30%;
+	right:10px;
+	top:55px;
+
+	padding: 15px;
+	box-sizing:border-box;
+
+	border-left: 1px dashed lightgray;
+
+}
+
+#qrauth lower
+{
+	position: relative;
+	top: 237px;
+	display:block;
+	padding: 10px;
+}
+
+#qrauth input,
+#qrauth textarea
+{
+	color: black;
+	background-color: lightgray;
+}
+
+#qrauth_rsa textarea
+{
+	width: 100%;
+	height: 100px;
+	margin-bottom: 10px;
+}
+
+#qrauth_sqrl left
+{
+	text-align: center;
+	background-color: white;
+}
+
+#qrauth_sqrl left a
+{
+	text-decoration: none;
+}
+
+#qrauth_sqrl img
+{
+	margin: 7px 10px 15px 10px;
+}
+
+#qrauth_ppp img
+{
+	float: right;
+}
+
+#qrauth_sqrl hostname
+{
+	margin-top: 10px;
+	font-size: 16px;
+	/*font-weight: bold;*/
+	font-family: monospace;
+}
+
+#qrauth_sqrl noscript input
+{
+	margin-top:10px;
+}
+
+#qrauth table
+{
+	/*border-spacing: 10px;*/
+	border-collapse: collapse;
+	
+}
+
+#qrauth_ppp table
+{
+	margin: 20px 0;
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+}
+
+#qrauth_otp table
+{
+	margin: 10px 10px 0 134px;
+	width: 482px;
+}
+
+#qrauth_otp table input
+{
+	width: 100%;
+}
+
+#qrauth_overview table
+{
+	text-align: center;
+}
+
+#qrauth_overview th.password
+{
+	font-size: small;
+}
+
+#qrauth td,
+#qrauth th
+{
+	padding: 10px;
+	border: 1px dashed gray;
+}
+
+#qrauth yes:after
+{
+	content:"Yes";
+	color: green;
+	font-weight: bold;
+}
+
+#qrauth no:after
+{
+	content:"NO";
+	color: red;
+	font-weight: bold;
+}
+

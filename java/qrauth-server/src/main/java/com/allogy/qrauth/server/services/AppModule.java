@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.services;
 
 import java.io.IOException;
 
+import com.allogy.qrauth.server.entities.OutputStreamResponse;
 import com.allogy.qrauth.server.services.filters.HighLevelBanFilter;
 import com.allogy.qrauth.server.services.filters.LowLevelBanFilter;
 import com.allogy.qrauth.server.services.impl.*;
@@ -80,6 +81,9 @@ class AppModule
         // the first locale name is the default when there's no reasonable match).
         configuration.add(SymbolConstants.SUPPORTED_LOCALES, "en");
 
+		configuration.add(SymbolConstants.SECURE_ENABLED, "false"); //only secure, disable tapestry roaming (see below).
+		configuration.add(SymbolConstants.ENABLE_PAGELOADING_MASK, "false");
+
 		configuration.add(HibernateSymbols.EARLY_START_UP, "true");
 		configuration.add(HibernateSymbols.DEFAULT_CONFIGURATION, "false");
 
@@ -132,6 +136,19 @@ class AppModule
 				new StackExtension(StackExtensionType.STYLESHEET, "context:mybootstrap/css/bootstrap.css"), "before:tapestry.css");
 	}
 	*/
+
+	/**
+	 * Adds ComponentEventResultProcessors
+	 *
+	 * @param configuration the configuration where new ComponentEventResultProcessors are registered by the type they are processing
+	 * @param response the response that the event result processor handles
+	 * @url http://wiki.apache.org/tapestry/Tapestry5HowToCreateAComponentEventResultProcessor
+	 */
+	public static
+	void contributeComponentEventResultProcessor(MappedConfiguration<Class<?>, ComponentEventResultProcessor<?>> configuration, Response response)
+	{
+		configuration.add(OutputStreamResponse.class, new OutputStreamResponseResultProcessor(response));
+	}
 
     /**
      * This is a service definition, the service will be named "TimingFilter". The interface,

@@ -130,7 +130,14 @@ of testing facilities designed for use with TestNG (http://testng.org/), so it's
             <scope>provided</scope>
         </dependency>
 
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId> <!-- or "core"? -->
+			<version>3.2.0</version>
+		</dependency>
+
     </dependencies>
+
     <build>
         <finalName>qrauth-server</finalName>
         <plugins>
@@ -255,7 +262,7 @@ of testing facilities designed for use with TestNG (http://testng.org/), so it's
     </repositories>
 
     <properties>
-        <tapestry-release-version>5.4-beta-28</tapestry-release-version>
+        <tapestry-release-version>5.4-beta-26</tapestry-release-version>
         <servlet-api-release-version>2.5</servlet-api-release-version>
         <testng-release-version>6.5.2</testng-release-version>
         <easymock-release-version>3.0</easymock-release-version>
