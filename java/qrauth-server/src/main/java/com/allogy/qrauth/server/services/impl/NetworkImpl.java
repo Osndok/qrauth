@@ -19,8 +19,8 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -204,6 +204,19 @@ class NetworkImpl implements Network, Runnable
 	}
 
 	private
+	String getIpAddress(HttpServletRequest request)
+	{
+		if (IN_CLUSTER)
+		{
+			return request.getHeader("AI-Gateway-IP");
+		}
+		else
+		{
+			return request.getRemoteAddr();
+		}
+	}
+
+	private
 	String getSubnetWildcard(String ipAddress)
 	{
 		final
@@ -267,6 +280,25 @@ class NetworkImpl implements Network, Runnable
 
 	@Override
 	public
+	boolean addressCacheShowsBan(HttpServletRequest httpServletRequest)
+	{
+		final
+		String ipAddress = getIpAddress(httpServletRequest);
+		{
+			if (ipAddress == null)
+			{
+				return false;
+			}
+		}
+
+		final
+		String possibleCacheHit=STASHED_BAN_IPS[ipAddress.hashCode() % BAN_STASH_SIZE];
+
+		return (possibleCacheHit!=null && possibleCacheHit.equals(ipAddress));
+	}
+
+	@Override
+	public
 	boolean addressIsGenerallyBlocked()
 	{
 		final
@@ -279,12 +311,22 @@ class NetworkImpl implements Network, Runnable
 		}
 
 		final
-		String possibleCacheHit=STASHED_BAN_IPS[ipAddress.hashCode() % STASH_SIZE];
+		String possibleBanCacheHit=STASHED_BAN_IPS[ipAddress.hashCode() % BAN_STASH_SIZE];
 		{
-			if (possibleCacheHit!=null && possibleCacheHit.equals(ipAddress))
+			if (possibleBanCacheHit!=null && possibleBanCacheHit.equals(ipAddress))
 			{
 				//Bypass repeated database accesses
 				return true;
+			}
+		}
+
+		final
+		String possibleWhiteCacheHit=STASHED_WHITE_IPS[ipAddress.hashCode() % WHITE_STASH_SIZE];
+		{
+			if (possibleWhiteCacheHit!=null && possibleWhiteCacheHit.equals(ipAddress))
+			{
+				//Bypass repeated database accesses
+				return false;
 			}
 		}
 
@@ -328,6 +370,12 @@ class NetworkImpl implements Network, Runnable
 			}
 		}
 
+		/*
+		Now that we have incurred a database lookup to verify that this ip address is not banned, maybe we can
+		avoid another db round trip for the next request?
+		 */
+		stashWhiteList(ipAddress);
+
 		return false;
 	}
 
@@ -337,19 +385,39 @@ class NetworkImpl implements Network, Runnable
 	 * @256, both arrays might fit into a single memory page.
 	 */
 	private static final
-	int STASH_SIZE = 200;
+	int BAN_STASH_SIZE = 200;
 
 	private final
-	String[] STASHED_BAN_IPS = new String[STASH_SIZE];
+	String[] STASHED_BAN_IPS = new String[BAN_STASH_SIZE];
+
+	/**
+	 * This array mirrors the STASHED_BAN_IPS array, and acts as a sort of
+	 * lossy/fuzzy/best-effort map that operates in near-constant time.
+	 *
+	 * Note that the small possibilities of race conditions delivering the
+	 * wrong message are acceptable for the possibility of some DoS respite
+	 * under load.
+	 */
+	private final
+	String[] STASHED_BAN_MESSAGES = new String[BAN_STASH_SIZE];
+
+	private static final
+	int WHITE_STASH_SIZE = 1000;
 
 	private final
-	String[] STASHED_BAN_MESSAGES = new String[STASH_SIZE];
+	String[] STASHED_WHITE_IPS = new String[WHITE_STASH_SIZE];
+
+	private
+	void stashWhiteList(String ipAddress)
+	{
+		STASHED_WHITE_IPS[ipAddress.hashCode() % WHITE_STASH_SIZE] = ipAddress;
+	}
 
 	private
 	void stashBanMessage(String ipAddress, String s)
 	{
-		STASHED_BAN_MESSAGES[ipAddress.hashCode() % STASH_SIZE] = s;
-		STASHED_BAN_IPS     [ipAddress.hashCode() % STASH_SIZE] = ipAddress;
+		STASHED_BAN_MESSAGES[ipAddress.hashCode() % BAN_STASH_SIZE] = s;
+		STASHED_BAN_IPS[ipAddress.hashCode() % BAN_STASH_SIZE] = ipAddress;
 	}
 
 	@Override
@@ -357,12 +425,32 @@ class NetworkImpl implements Network, Runnable
 	String bestEffortBanMessage()
 	{
 		final
-		String ipAddress=getIpAddress();
+		String ipAddress = getIpAddress();
 
 		final
-		String preferredBanMessage=STASHED_BAN_MESSAGES[ipAddress.hashCode() % STASH_SIZE];
+		String preferredBanMessage = STASHED_BAN_MESSAGES[ipAddress.hashCode() % BAN_STASH_SIZE];
 
-		if (preferredBanMessage==null)
+		if (preferredBanMessage == null)
+		{
+			return IP_IS_BANNED;
+		}
+		else
+		{
+			return preferredBanMessage;
+		}
+	}
+
+	@Override
+	public
+	String bestEffortBanMessage(HttpServletRequest httpServletRequest)
+	{
+		final
+		String ipAddress = getIpAddress(httpServletRequest);
+
+		final
+		String preferredBanMessage = STASHED_BAN_MESSAGES[ipAddress.hashCode() % BAN_STASH_SIZE];
+
+		if (preferredBanMessage == null)
 		{
 			return IP_IS_BANNED;
 		}
@@ -376,12 +464,17 @@ class NetworkImpl implements Network, Runnable
 	public
 	void run()
 	{
-		log.debug("flush banned ip addresses");
+		log.trace("flushing banned ip addresses");
 
-		for (int i=0; i<STASH_SIZE; i++)
+		for (int i = 0; i < BAN_STASH_SIZE; i++)
 		{
-			STASHED_BAN_IPS[i]=null;
-			STASHED_BAN_MESSAGES[i]=null;
+			STASHED_BAN_IPS[i] = null;
+			STASHED_BAN_MESSAGES[i] = null;
+		}
+
+		for (int i = 0; i < WHITE_STASH_SIZE; i++)
+		{
+			STASHED_WHITE_IPS[i] = null;
 		}
 	}
 }

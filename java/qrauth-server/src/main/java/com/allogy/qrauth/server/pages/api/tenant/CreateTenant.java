@@ -34,10 +34,14 @@ class CreateTenant extends AbstractTenantAPICall
 			return new ErrorResponse(500, "no ip information");
 		}
 
+		/*
+		Moved to filter wrapping whole site...
+		--
 		if (Death.hathVisited(ip))
 		{
 			return new ErrorResponse(403, Death.noteMightSay(ip, Network.IP_IS_BANNED));
 		}
+		*/
 
 		if (!isPostRequest())
 		{

@@ -3,6 +3,7 @@ package com.allogy.qrauth.server.services;
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.TenantIP;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 /**
@@ -39,7 +40,7 @@ interface Network
 	 * of the current request. Further processing should be halted, and more information might be available
 	 * in the low-contention bestEffortBanMessage() function.
 	 *
-	 * @return true if (and only if) the provided address
+	 * @return true if (and only if) the provided address has a matching-but-dead TenantIP record in the database with a null tenant field
 	 */
 	boolean addressIsGenerallyBlocked();
 
@@ -49,5 +50,14 @@ interface Network
 	 * @return a user-presentable string that *might* contain a little more information that simply 'banned'.
 	 */
 	String bestEffortBanMessage();
+	String bestEffortBanMessage(HttpServletRequest httpServletRequest);
+
+	/**
+	 * This is a low-overhead opportunistic variant of addressIsGenerallyBlocked() which will never cause a
+	 * database lookup. Therefore, it is suitable for use in the low level per-request filters.
+	 *
+	 * @return true only if the provided address has a matching-but-dead TenantIP record in the database with a null tenant field
+	 */
+	boolean addressCacheShowsBan(HttpServletRequest request);
 
 }

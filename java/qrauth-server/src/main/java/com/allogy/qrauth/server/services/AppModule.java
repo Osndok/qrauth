@@ -2,6 +2,8 @@ package com.allogy.qrauth.server.services;
 
 import java.io.IOException;
 
+import com.allogy.qrauth.server.services.filters.HighLevelBanFilter;
+import com.allogy.qrauth.server.services.filters.LowLevelBanFilter;
 import com.allogy.qrauth.server.services.impl.*;
 import org.apache.tapestry5.*;
 import org.apache.tapestry5.hibernate.HibernateConfigurer;
@@ -92,6 +94,20 @@ class AppModule
 	)
 	{
 		configuration.add("qrauth", new DatabaseMigratorImpl.PropertiesHandoff(productionMode));
+	}
+
+	public static
+	void contributeHttpServletRequestHandler(OrderedConfiguration<HttpServletRequestFilter> configuration,
+											Network network)
+	{
+		configuration.add("low-level-ban", new LowLevelBanFilter(network), "first");
+	}
+
+	public static
+	void contributeMasterDispatcher(OrderedConfiguration<Dispatcher> configuration,
+									Network network)
+	{
+		configuration.add("high-level-ban", new HighLevelBanFilter(network), "before:RootPath");
 	}
 
 	/**
