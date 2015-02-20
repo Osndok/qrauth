@@ -3,6 +3,7 @@ package com.allogy.qrauth.server.components;
 import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.TenantIP;
+import com.allogy.qrauth.server.entities.TenantSession;
 import com.allogy.qrauth.server.pages.api.sqrl.DoSqrl;
 import com.allogy.qrauth.server.services.Network;
 import com.allogy.qrauth.server.services.Nuts;
@@ -30,8 +31,9 @@ public
 class UserLoginForm
 {
 	@Parameter
+	@Property
 	private
-	Tenant tenant;
+	TenantSession tenantSession;
 
 	//-------- end component parameters ---------
 
@@ -73,6 +75,19 @@ class UserLoginForm
 
 	void setupRender()
 	{
+		final
+		Tenant tenant;
+		{
+			if (tenantSession==null)
+			{
+				tenant=null;
+			}
+			else
+			{
+				tenant=tenantSession.tenant;
+			}
+		}
+
 		tenantIP = network.needIPForThisRequest(tenant);
 		nut = nuts.allocate(tenant, tenantIP);
 

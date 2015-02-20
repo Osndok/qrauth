@@ -24,8 +24,14 @@
 
 </noscript>
 
-<!-- NB: due to overlapping divs, you cannot safely insert elements at the top of the 'outer' div -->
-<div class="outer">
+<!-- NB: due to overlapping divs, you cannot safely insert elements at the top of the 'outer' form -->
+<form class="outer" method="POST" accept-charset="UTF-8" action="${base}/internal/auth/dispatch">
+
+<div style="display:none">
+	<input type="text" name="nut" value="${nut.stringValue}"/>
+	<input type="text" name="tenantSession" value="${tenantSession?.session_id}"/>
+
+</div>
 
 <methods class="tabs">
 	<prompt>Login method:</prompt>
@@ -63,7 +69,7 @@
 		<hostname>${doSqrl.domain}</hostname>
 		<noscript>
 			<br/>
-			<input type="submit" value="Authentication Sent"/>
+			<input type="submit" name="do_sqrl" value="Authentication Sent"/>
 		</noscript>
 	</left>
 	<right>
@@ -97,13 +103,13 @@
 		</tr>
 		<tr>
 			<td><label for="username">Username:</label></td>
-			<td><input name="username"/></td>
+			<td><input name="otp_username"/></td>
 			<td>&nbsp;</td>
 		</tr>
 		<tr>
 			<td>Password:</td>
-			<td><input name="password"/></td>
-			<td><input type="submit" value="Submit"/></td>
+			<td><input name="otp_password"/></td>
+			<td><input type="submit" name="do_otp" value="Submit"/></td>
 		</tr>
 	</table>
 	<br/>
@@ -131,9 +137,9 @@
 		</tr>
 		<tr>
 			<td class="num">1</td>
-			<td class="instr"><label for="username">Provide username:</label></td>
-			<td class="field"><input name="username"/></td>
-			<td class="action"><input type="submit" value="Submit"/></td>
+			<td class="instr"><label for="ppp_username">Provide username:</label></td>
+			<td class="field"><input name="ppp_username"/></td>
+			<td class="action"><input type="submit" name="do_ppp_1" value="Submit"/></td>
 		</tr>
 		<tr>
 			<td class="num">2</td>
@@ -144,8 +150,8 @@
 		<tr>
 			<td class="num">3</td>
 			<td class="instr">Provide response:</td>
-			<td class="field"><input name="password"/></td>
-			<td class="action"><input type="submit" value="Submit"/></td>
+			<td class="field"><input name="ppp_response"/></td>
+			<td class="action"><input type="submit" name="do_ppp_2" value="Submit"/></td>
 		</tr>
 	</table>
 	<img src="${base}${context:user/login/blackspy.png}"/>
@@ -160,17 +166,17 @@
 <arena id="qrauth_rsa">
 	<label for="username">Username (or RSA public key):</label>
 	<br/>
-	<textarea name="username"></textarea>
+	<textarea name="rsa_pubkey"></textarea>
 	<br/>
 	Challenge:<br/>
 	<pre>
-echo -n ${nut.stringValue} | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64
+echo -n ${nut.stringValue} | openssl pkeyutl -sign -inkey ~/.ssh/id_rsa | base64
 	</pre>
 	<label for="response">Response:</label>
 	<br/>
-	<textarea name="response"></textarea>
+	<textarea name="rsa_response"></textarea>
 	<br/>
-	<input type="submit" value="Submit"/>
+	<input type="submit" name="do_rsa" value="Submit"/>
 </arena>
 
 <arena id="qrauth_openid">
@@ -187,7 +193,7 @@ echo -n ${nut.stringValue} | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64
 
 </div>
 
-</div>
+</form>
 
 <script src="${base}${context:lib/tabby/classList.js}"></script>
 <script src="${base}${context:lib/tabby/tabby.js}"></script>

@@ -6,10 +6,17 @@ VERSION=$(shell bin/version_or_snapshot.sh)
 
 MVN= TZ=UTC mvn -Drelease.version=$(VERSION)
 
+tools: target/qrauth-ssh-keys target/qrauth-pubkey2ssh war
+
 target/qrauth-ssh-keys: src/qrauth-ssh-keys.c
 	rm -fv $@
 	mkdir -p target
 	gcc -Wall -Werror -Wfatal-errors $^ -lgit2 -o $@
+
+target/qrauth-pubkey2ssh: src/qrauth-pubkey2ssh.c
+	rm -fv $@
+	mkdir -p target
+	gcc -Wall -Werror -Wfatal-errors $^ -lcrypto -o $@
 
 test: target/qrauth-ssh-keys
 	DEBUG=1 target/qrauth-ssh-keys $(shell whoami)
