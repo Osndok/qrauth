@@ -58,6 +58,12 @@ class AbstractAPICall
 	}
 
 	protected
+	ErrorResponse invalidParameter(String key)
+	{
+		return new ErrorResponse(400, String.format("the value provided for the '%s' parameter was invalid\n", key));
+	}
+
+	protected
 	ErrorResponse ipAddressIsBlacklisted()
 	{
 		return new ErrorResponse(403, network.bestEffortBanMessage());
