@@ -1,5 +1,7 @@
 package com.allogy.qrauth.server.entities;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.allogy.qrauth.server.entities.MethodGroup.*;
 
 /**
@@ -18,13 +20,15 @@ enum MethodVariety
 	YUBIKEY_PUBLIC (   8  , false    , false    , true      , true    , false , true     , PASS_ONLY     ),
 	OPEN_ID        (   9  , false    , false    , true      , true    , false , true     , THIRD_PARTY   ),
 	/* --- line of mandatory deadlines ----------------------------------------------------------------- */
-	STATIC_OTP     (   9  , true     , true     , false     , false   , false , false    , USER_AND_PASS ),
+	STATIC_OTP     (  10  , true     , true     , false     , false   , false , false    , USER_AND_PASS ),
 	/* --- line of questionable security --------------------------------------------------------------- */
-	EMAILED_SECRET (  10  , true     , false    , true      , true    , false , false    , THIRD_PARTY   ),
-	SALTED_PASSWORD(  11  , true     , false    , false     , false   , false , false    , USER_AND_PASS ),
+	EMAILED_SECRET (  11  , true     , false    , true      , true    , false , false    , THIRD_PARTY   ),
+	SALTED_PASSWORD(  12  , true     , false    , false     , false   , false , false    , USER_AND_PASS ),
 	;
 
-	private static final int FIRST_QUESTIONABLE_RANK=10;
+	private static final int FIRST_QUESTIONABLE_RANK = 11;
+
+	private static final long FIRST_RANK_MILLIS = TimeUnit.DAYS.toMillis(7);
 
 	private final
 	int rank;
@@ -155,5 +159,11 @@ enum MethodVariety
 	boolean isQuestionable()
 	{
 		return rank >= FIRST_QUESTIONABLE_RANK;
+	}
+
+	public
+	long getDefaultLoginLength()
+	{
+		return FIRST_RANK_MILLIS/rank;
 	}
 }
