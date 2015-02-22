@@ -1,8 +1,7 @@
 package com.allogy.qrauth.server.helpers;
 
-import com.allogy.qrauth.server.entities.DBUser;
+import com.allogy.qrauth.server.entities.AuthMethod;
 import com.allogy.qrauth.server.entities.DBUserAuth;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.*;
 
@@ -216,13 +215,63 @@ class RSAHelper implements Closeable
 		}
 	}
 
+	private transient
+	String sshKeyBlob;
+
+	private transient
+	String sshComment;
+
 	public
-	DBUserAuth toDBUserAuth()
+	String getSshKeyBlob() throws IOException
+	{
+		if (sshKeyBlob==null)
+		{
+			splitSshFormat();
+		}
+
+		return sshKeyBlob;
+	}
+
+	private
+	void splitSshFormat() throws IOException
 	{
 		final
-		DBUserAuth a=new DBUserAuth();
+		String raw = getSshFormat().trim();
 
+		//TODO: strip out comments, etc.
+		if (raw.indexOf('\n') >= 0)
+		{
+			throw new IllegalArgumentException("cannot handle multi-line ssh-rsa keys");
+		}
 
+		final
+		String[] bits = raw.split(" ");
+
+		if (bits.length != 3)
+		{
+			for (int i=0; i<bits.length; i++)
+			{
+				System.err.println("bit["+i+"] = '"+bits[i]+"'");
+			}
+
+			throw new IllegalArgumentException("expecting only three key segments (type,key,comment), maybe remove spaces from comment?");
+		}
+
+		sshKeyBlob = bits[1];
+		sshComment = bits[2];
+	}
+
+	public
+	DBUserAuth toDBUserAuth() throws IOException
+	{
+		splitSshFormat();
+
+		final
+		DBUserAuth a = new DBUserAuth();
+
+		a.authMethod = AuthMethod.RSA;
+		a.pubKey = getSshKeyBlob();
+		a.comment = sshComment;
 
 		return a;
 	}

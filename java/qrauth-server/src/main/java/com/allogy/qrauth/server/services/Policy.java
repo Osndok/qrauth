@@ -7,4 +7,6 @@ public
 interface Policy
 {
 	boolean allowsAnonymousCreationOfNewTenants();
+
+	long getGlobalLogoutPeriod();
 }

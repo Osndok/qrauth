@@ -20,6 +20,7 @@ class PolicyImpl implements Policy, Runnable
 	private static final Long   SUPREME_TENANT_ID    = Config.get().getSupremeTenantID();
 	private static final long   UPDATE_PERIOD_MILLIS = TimeUnit.MINUTES.toMillis(5);
 	private static final Logger log                  = LoggerFactory.getLogger(Policy.class);
+	private static final long   GLOBAL_LOGOUT_PERIOD = TimeUnit.DAYS.toMillis(7);
 
 	private
 	JSONObject supremeTenantConfig = new JSONObject();
@@ -45,6 +46,13 @@ class PolicyImpl implements Policy, Runnable
 	boolean allowsAnonymousCreationOfNewTenants()
 	{
 		return bool("allowNewTenants", true);
+	}
+
+	@Override
+	public
+	long getGlobalLogoutPeriod()
+	{
+		return GLOBAL_LOGOUT_PERIOD;
 	}
 
 	private

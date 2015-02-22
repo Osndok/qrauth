@@ -2,7 +2,10 @@ package com.allogy.qrauth.server.services.impl;
 
 import com.allogy.qrauth.server.services.DatabaseMigrator;
 import org.apache.tapestry5.hibernate.HibernateConfigurer;
+import org.apache.tapestry5.hibernate.HibernateSessionManager;
+import org.apache.tapestry5.hibernate.HibernateSessionSource;
 import org.apache.tapestry5.ioc.annotations.EagerLoad;
+import org.apache.tapestry5.ioc.annotations.PostInjection;
 import org.flywaydb.core.Flyway;
 import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
@@ -25,6 +28,14 @@ class DatabaseMigratorImpl implements DatabaseMigrator
 
 	private static
 	boolean migrationSuccessful;
+
+	@PostInjection
+	public
+	void serviceStarts(HibernateSessionSource hibernateSessionSource)
+	{
+		//Call for Hibernate's load... which should sling back around and call the kludgy configurator.
+		hibernateSessionSource.getConfiguration();
+	}
 
 	public static
 	class PropertiesHandoff implements HibernateConfigurer
