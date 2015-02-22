@@ -1,5 +1,7 @@
 package com.allogy.qrauth.server.helpers;
 
+import com.allogy.qrauth.server.entities.DBUser;
+import com.allogy.qrauth.server.entities.DBUserAuth;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.*;
@@ -212,5 +214,16 @@ class RSAHelper implements Closeable
 			sshFile.delete();
 			sshFile=null;
 		}
+	}
+
+	public
+	DBUserAuth toDBUserAuth()
+	{
+		final
+		DBUserAuth a=new DBUserAuth();
+
+
+
+		return a;
 	}
 }

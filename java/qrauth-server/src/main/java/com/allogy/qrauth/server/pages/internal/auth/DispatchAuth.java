@@ -1,5 +1,6 @@
 package com.allogy.qrauth.server.pages.internal.auth;
 
+import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
@@ -127,18 +128,28 @@ class DispatchAuth extends AbstractAPICall
 			final
 			RSAHelper rsaHelper=new RSAHelper(pubKeyOrUsername);
 
-			if (rsaHelper.signatureIsValid(nut.stringValue, Base64.decodeBase64(base64Response)))
+			try
 			{
-
-				//TODO: create user & method (with new public key)
-				//return authSuccess();
-				return new ErrorResponse(500, "trying...");
+				if (rsaHelper.signatureIsValid(nut.stringValue, Base64.decodeBase64(base64Response)))
+				{
+					return createUserWithNewStipulation(rsaHelper.toDBUserAuth());
+				}
+				else
+				{
+					return new ErrorResponse(403, "signature problem");
+				}
 			}
-			else
+			finally
 			{
-				return new ErrorResponse(403, "signature problem");
+				rsaHelper.close();
 			}
 		}
+	}
+
+	private
+	Object createUserWithNewStipulation(DBUserAuth dbUserAuth)
+	{
+		return new ErrorResponse(500, "unimplemented");
 	}
 
 	private

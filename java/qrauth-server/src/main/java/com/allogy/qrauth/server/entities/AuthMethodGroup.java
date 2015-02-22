@@ -4,7 +4,7 @@ package com.allogy.qrauth.server.entities;
  * Roughly equivalent to the tabs in the user interface.
  */
 public
-enum MethodGroup
+enum AuthMethodGroup
 {
 	QR_ONLY,
 	USER_AND_PASS,

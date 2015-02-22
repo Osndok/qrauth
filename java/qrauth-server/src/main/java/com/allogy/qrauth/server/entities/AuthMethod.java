@@ -2,13 +2,13 @@ package com.allogy.qrauth.server.entities;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.allogy.qrauth.server.entities.MethodGroup.*;
+import static com.allogy.qrauth.server.entities.AuthMethodGroup.*;
 
 /**
  * Created by robert on 2/13/15.
  */
 public
-enum MethodVariety
+enum AuthMethod
 {
 	/**15-chars-max| RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | GROUP         */
 	SQRL           (   1  , false    , true     , false     , true    , false , true     , QR_ONLY       ),
@@ -52,18 +52,18 @@ enum MethodVariety
 	boolean leakSafe;
 
 	private final
-	MethodGroup methodGroup;
+	AuthMethodGroup authMethodGroup;
 
 	private
-	MethodVariety(
-					 int rank,
-					 boolean deadlineRequired,
-					 boolean stateful,
-					 boolean thirdParty,
-					 boolean network,
-					 boolean clock,
-					 boolean leakSafe,
-					 MethodGroup methodGroup
+	AuthMethod(
+				  int rank,
+				  boolean deadlineRequired,
+				  boolean stateful,
+				  boolean thirdParty,
+				  boolean network,
+				  boolean clock,
+				  boolean leakSafe,
+				  AuthMethodGroup authMethodGroup
 	)
 	{
 		this.rank = rank;
@@ -73,7 +73,7 @@ enum MethodVariety
 		this.network = network;
 		this.clock = clock;
 		this.leakSafe = leakSafe;
-		this.methodGroup = methodGroup;
+		this.authMethodGroup = authMethodGroup;
 	}
 
 	/**
@@ -150,9 +150,9 @@ enum MethodVariety
 	}
 
 	public
-	MethodGroup getMethodGroup()
+	AuthMethodGroup getAuthMethodGroup()
 	{
-		return methodGroup;
+		return authMethodGroup;
 	}
 
 	public

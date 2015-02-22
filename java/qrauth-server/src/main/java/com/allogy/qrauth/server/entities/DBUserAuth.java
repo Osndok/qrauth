@@ -10,7 +10,7 @@ import java.util.Date;
  */
 @Entity
 public
-class Method extends Attemptable implements Mortal
+class DBUserAuth extends Attemptable implements Mortal
 {
 
 	@ManyToOne(optional = false)
@@ -25,13 +25,13 @@ class Method extends Attemptable implements Mortal
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, columnDefinition = "VARCHAR(15)", length = 15)
-	public MethodVariety variety;
+	public AuthMethod authMethod;
 
 	public String secret;
 	public String comment;
 
 	/**
-	 * A place to stash SQRL's id-lock challange.
+	 * A place to stash SQRL's id-lock challenge.
 	 */
 	public String idRecoveryLock;
 

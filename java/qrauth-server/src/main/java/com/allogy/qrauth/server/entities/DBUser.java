@@ -34,8 +34,8 @@ class DBUser extends Attemptable implements Mortal
 	public TenantIP lastLoginIP;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-	@MapKey(name = "variety")
-	public Map<MethodVariety, Method> methods;
+	@MapKey(name = "authMethod")
+	public Map<AuthMethod, DBUserAuth> authStipulations;
 
 	@OneToMany(mappedBy = "user")
 	public List<Username> usernames;

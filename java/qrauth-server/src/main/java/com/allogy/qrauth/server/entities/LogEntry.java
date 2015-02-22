@@ -31,7 +31,7 @@ class LogEntry
 	public DBUser user;
 
 	@ManyToOne
-	public Method method;
+	public DBUserAuth userAuth;
 
 	@ManyToOne
 	public Tenant tenant;

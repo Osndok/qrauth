@@ -28,27 +28,14 @@
         primary key (id)
     );
 
-    create table LogEntry (
-        id  bigserial not null,
-        actionKey varchar(25) not null,
-        important BOOLEAN DEFAULT 'f' not null,
-        message varchar(255) not null,
-        tenantSeen BOOLEAN DEFAULT 'f' not null,
-        time TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
-        userSeen BOOLEAN DEFAULT 'f' not null,
-        method_id int8,
-        tenant_id int8,
-        user_id int8,
-        primary key (id)
-    );
-
-    create table Method (
+    create table DBUserAuth (
         id  bigserial not null,
         attempts INTEGER DEFAULT 0 not null,
         created TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
         lastAttempt TIMESTAMP WITHOUT TIME ZONE,
         lastSuccess TIMESTAMP WITHOUT TIME ZONE,
         successes INTEGER DEFAULT 0 not null,
+        authMethod VARCHAR(15) not null,
         comment varchar(255),
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
@@ -57,8 +44,21 @@
         pubKey varchar(2048) unique,
         secret varchar(255),
         silentAlarm BOOLEAN DEFAULT 'f' not null,
-        variety VARCHAR(15) not null,
         user_id int8 not null,
+        primary key (id)
+    );
+
+    create table LogEntry (
+        id  bigserial not null,
+        actionKey varchar(25) not null,
+        important BOOLEAN DEFAULT 'f' not null,
+        message varchar(255) not null,
+        tenantSeen BOOLEAN DEFAULT 'f' not null,
+        time TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
+        userSeen BOOLEAN DEFAULT 'f' not null,
+        tenant_id int8,
+        user_id int8,
+        userAuth_id int8,
         primary key (id)
     );
 
@@ -211,25 +211,25 @@
         foreign key (lastLoginIP_id) 
         references TenantIP;
 
+    alter table DBUserAuth 
+        add constraint FK11166EB1E4D1151E 
+        foreign key (user_id) 
+        references DBUser;
+
+    alter table LogEntry 
+        add constraint FK7A7043AEBD5D763E 
+        foreign key (userAuth_id) 
+        references DBUserAuth;
+
     alter table LogEntry 
         add constraint FK7A7043AEE4D1151E 
         foreign key (user_id) 
         references DBUser;
 
     alter table LogEntry 
-        add constraint FK7A7043AECBFCD3E0 
-        foreign key (method_id) 
-        references Method;
-
-    alter table LogEntry 
         add constraint FK7A7043AE9C6CD340 
         foreign key (tenant_id) 
         references Tenant;
-
-    alter table Method 
-        add constraint FK892ABD01E4D1151E 
-        foreign key (user_id) 
-        references DBUser;
 
     alter table Nut 
         add constraint FK1336DE4D1151E 
