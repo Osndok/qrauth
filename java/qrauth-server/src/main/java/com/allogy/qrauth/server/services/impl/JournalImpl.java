@@ -5,7 +5,9 @@ import com.allogy.qrauth.server.services.Journal;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.hibernate.Session;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -43,6 +45,57 @@ class JournalImpl implements Journal
 		a.lastAttempt=a.lastSuccess=new Date();
 
 		hibernateSessionManager.getSession().save(a);
+		hibernateSessionManager.commit();
+	}
+
+	@Override
+	public
+	void incrementSuccess(Attemptable attemptable)
+	{
+		attemptable.successes++;
+		attemptable.lastSuccess=new Date();
+
+		hibernateSessionManager.getSession().save(attemptable);
+		hibernateSessionManager.commit();
+	}
+
+	@Override
+	public
+	void noticeAttempt(Collection<? extends Attemptable> attemptables)
+	{
+		final
+		Date date=new Date();
+
+		final
+		Session session=hibernateSessionManager.getSession();
+
+		for (Attemptable a : attemptables)
+		{
+			a.attempts++;
+			a.lastAttempt=new Date();
+			session.save(a);
+		}
+
+		hibernateSessionManager.commit();
+	}
+
+	@Override
+	public
+	void incrementSuccess(Collection<? extends Attemptable> attemptables)
+	{
+		final
+		Date date=new Date();
+
+		final
+		Session session=hibernateSessionManager.getSession();
+
+		for (Attemptable a : attemptables)
+		{
+			a.successes++;
+			a.lastAttempt=a.lastSuccess=new Date();
+			session.save(a);
+		}
+
 		hibernateSessionManager.commit();
 	}
 

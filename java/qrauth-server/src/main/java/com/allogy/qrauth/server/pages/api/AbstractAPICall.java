@@ -3,12 +3,16 @@ package com.allogy.qrauth.server.pages.api;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.services.DBTiming;
 import com.allogy.qrauth.server.services.Network;
+import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.Response;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by robert on 2/18/15.
@@ -43,6 +47,42 @@ class AbstractAPICall
 	{
 		response.setHeader("Allow", "POST");
 		return new ErrorResponse(405, "This API call requires a POST request method.\n");
+	}
+
+	protected
+	Object mustBePostOrPreflightCheck()
+	{
+		if (request.getMethod().equals("OPTIONS"))
+		{
+			return new StreamResponse()
+			{
+				@Override
+				public
+				String getContentType()
+				{
+					return "none";
+				}
+
+				@Override
+				public
+				InputStream getStream() throws IOException
+				{
+					return null;
+				}
+
+				@Override
+				public
+				void prepareResponse(Response response)
+				{
+					response.addHeader("Access-Control-Allow-Origin", "*");
+					response.addHeader("Access-Control-Allow-Methods", "POST");
+				}
+			};
+		}
+		else
+		{
+			return mustBePostRequest();
+		}
 	}
 
 	protected

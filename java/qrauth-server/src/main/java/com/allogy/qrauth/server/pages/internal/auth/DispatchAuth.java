@@ -5,6 +5,7 @@ import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.helpers.RSAHelper;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
+import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
@@ -12,6 +13,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.hibernate.criterion.Restrictions;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -23,11 +25,18 @@ class DispatchAuth extends AbstractAPICall
 	private
 	TenantSession tenantSession;
 
+	@Inject
+	private
+	Journal journal;
+
+	private
+	Collection<TenantIP> allMatchingTenantIPs;
+
 	Object onActivate() throws IOException
 	{
 		if (!isPostRequest())
 		{
-			return mustBePostRequest();
+			return mustBePostOrPreflightCheck();
 		}
 
 		if (log.isDebugEnabled())
@@ -40,20 +49,24 @@ class DispatchAuth extends AbstractAPICall
 		}
 
 		final
-		String tenantSessionId=request.getParameter("tenantSession");
+		Tenant tenant;
+
+		final
+		String tenantSessionId = request.getParameter("tenantSession");
 		{
-			if (tenantSessionId==null)
+			if (tenantSessionId == null)
 			{
 				log.debug("no tenant session id");
 				tenantSession = null;
+				tenant = null;
 			}
 			else
 			{
 				tenantSession = (TenantSession)
-					session.createCriteria(TenantSession.class)
-						.add(Restrictions.eq("session_id", tenantSessionId))
-						.uniqueResult()
-					;
+									session.createCriteria(TenantSession.class)
+										.add(Restrictions.eq("session_id", tenantSessionId))
+										.uniqueResult()
+				;
 
 				/**
 				 * !!!: What to do on a failure... if we terminate here, then someone might be able to brute
@@ -67,15 +80,25 @@ class DispatchAuth extends AbstractAPICall
 				if (tenantSession==null)
 				{
 					log.warn("attempting to login with invalid (previously-unseen) tenant session_id");
+					tenant=null;
 				}
 				else
 				if (Death.hathVisited(tenantSession))
 				{
 					log.warn("attempting to login with invalid (previously-killed) tenant session_id");
 					tenantSession=null;
+					tenant=null;
+				}
+				else
+				{
+					tenant=tenantSession.tenant;
 				}
 			}
 		}
+
+		allMatchingTenantIPs = network.getExistingTenantIPsForThisOriginator(tenant);
+
+		journal.noticeAttempt(allMatchingTenantIPs);
 
 		if (request.getParameter("do_sqrl") != null)
 		{
@@ -259,6 +282,8 @@ class DispatchAuth extends AbstractAPICall
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
 																"that authentication method is no longer allowed"));
 		}
+
+		journal.incrementSuccess(allMatchingTenantIPs);
 
 		final
 		DBUser user = userAuth.user;

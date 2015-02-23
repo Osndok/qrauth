@@ -14,6 +14,8 @@ interface Network
 {
 	public static final String IP_IS_BANNED="not allowed from your computer";
 
+	String getIpAddress();
+
 	/**
 	 * Returns the most relevant TenantIP, even if it has to create it.
 	 *
@@ -32,8 +34,10 @@ interface Network
 	/**
 	 * Returns all matching records for the given ip address, across all tenants.
 	 * @return
+	 * @param andTenant
 	 */
-	Collection<TenantIP> getExistingTenantIPsForThisOriginator();
+	Collection<TenantIP> getExistingTenantIPsForThisOriginator(Tenant andTenant);
+	Collection<TenantIP> getExistingTenantIPsForThisOriginatorAllTenants();
 
 	/**
 	 * If this function returns true, then the authentication provider has decided to blacklist the ip address

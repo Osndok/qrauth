@@ -187,7 +187,7 @@ class NetworkImpl implements Network, Runnable
 	private
 	RequestGlobals requestGlobals;
 
-	private
+	public
 	String getIpAddress()
 	{
 		final
@@ -234,45 +234,69 @@ class NetworkImpl implements Network, Runnable
 
 	@Override
 	public
-	Collection<TenantIP> getExistingTenantIPsForThisOriginator()
+	Collection<TenantIP> getExistingTenantIPsForThisOriginator(Tenant tenant)
 	{
-		final
-		long startTime=System.currentTimeMillis();
-
-		final
-		String ipAddress = getIpAddress();
-		{
-			if (ipAddress == null)
-			{
-				//dbTiming.concerning("ip-fetch").shorterPath(startTime);
-				return null;
-			}
-		}
-
-		final
-		Object[] addressStringsToMatch;
-		{
-			final
-			String subnetWildcard = getSubnetWildcard(ipAddress);
-
-			log.debug("list({}, {}, {})", ipAddress, subnetWildcard);
-
-			if (subnetWildcard==null)
-			{
-				addressStringsToMatch=new Object[]{ipAddress};
-			}
-			else
-			{
-				addressStringsToMatch=new Object[]{ipAddress, subnetWildcard};
-			}
-		}
-
 		final
 		Session session=hibernateSessionManager.getSession();
 
 		final
 		Criteria criteria=session.createCriteria(TenantIP.class)
-							  .add(Restrictions.in("ipAddress", addressStringsToMatch))
+							  .add(Restrictions.in("ipAddress", ipOrSubnet()))
+			;
+
+		if (tenant==null)
+		{
+			criteria.add(Restrictions.isNull("tenant"));
+		}
+		else
+		{
+			criteria.add(Restrictions.or(
+											Restrictions.isNull("tenant"),
+											Restrictions.eq("tenant", tenant)
+			));
+		}
+
+		return criteria.list();
+	}
+
+	private
+	Object[] ipOrSubnet()
+	{
+		final
+		String ipAddress = getIpAddress();
+		{
+			if (ipAddress == null)
+			{
+				log.error("unable to get ip address");
+				return new Object[]{"0.0.0.0"};
+			}
+		}
+
+		final
+		String subnetWildcard = getSubnetWildcard(ipAddress);
+
+		log.debug("list({}, {}, {})", ipAddress, subnetWildcard);
+
+		if (subnetWildcard==null)
+		{
+			return new Object[]{ipAddress};
+		}
+		else
+		{
+			return new Object[]{ipAddress, subnetWildcard};
+		}
+	}
+
+	@Override
+	public
+	Collection<TenantIP> getExistingTenantIPsForThisOriginatorAllTenants()
+	{
+		final
+		Session session=hibernateSessionManager.getSession();
+
+		final
+		Criteria criteria=session.createCriteria(TenantIP.class)
+							  .add(Restrictions.in("ipAddress", ipOrSubnet()))
 			;
 
 		return criteria.list();
