@@ -169,8 +169,9 @@
 	<textarea name="rsa_pubkey"></textarea>
 	<br/>
 	Challenge:<br/>
+	<!-- NB: pkeyutl is not available on even very new OSX versions, so we use rsautl -->
 	<pre>
-echo -n ${nut.stringValue} | openssl pkeyutl -sign -inkey ~/.ssh/id_rsa | base64
+echo -n ${nut.stringValue} | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64
 	</pre>
 	<label for="response">Response:</label>
 	<br/>
