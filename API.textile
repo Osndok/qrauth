@@ -209,20 +209,37 @@ API 5 - Standard Login & account maintenance
 ** API_KEY (unhashed)
 ** SESSION_ID (hashed)
 ** USER_IP
+** CSS (url [can be relative, or even blank] that *REPLACES* default css file)
 ** {uid:12345, username:bob, alarm:false, security_rank:4, groups:{...}, permissions:[...]}
 ** returns either (1) the json login info, (2) the html that would allow this connection, or (3) if the session should be destroyed
+** may be called often (e.g. every 2 minutes), but not at every request, to ensure the user is *still* logged in (for global logout feature)
 
-* POST /api/tenant/logout
-** API_KEY (unhashed)
-** SESSION_ID (hashed)
-** marks the session as obsolete (and depending on the user preferences, might logout all his/her sessions)
-** not to be called automatically, or on idle timeout... only on user-request
+
+(!!!) NB: there is no logout equivalent: "POST /api/tenant/logout"
+
+
+* GET /api/tenant/delegate/logout?session_id=XXXXXXX
+** As the result of any user-requested logout (as opposed to timeout), and yet
+** *WITHOUT* invalidating the user's existing tenant-side session,
+** the tenant may blindly *REDIRECT* the user here to "do the right thing" regarding the
+** user's session preferences (local/global/maybe-global/confirm/auto/abort-and-return/timeout)
+** NB: session_id (from the login command) must be provided and correct, but the user may not be presented with a warning or error if it is wrong or missing, or already invalidated
+** A complete implementation must set a flag in the session to indicate that the session must be revalidated using /login
+** This is important because the user might expect one logout command to effect all the websites, and 
+** Unfortunately, the side effect of this is that the 'final-goodbye' screen cannot currently be tenant-branded
+
+
 
 * GET /user/account
-* GET /api/tenant/user/account
 ** Not really an API call (no auth needed?)
-** The first can be provided as a link (e.g. in a new window) to provide account maintenance
-** The second will return an html blob which can be added to your page for account maintenance (an iframe)
+** This url can be provided as a link (e.g. to open in a new window) to provide easy account maintenance
+
+
+* POST /api/tenant/user/account
+** API_KEY (unhashed)
+** CSS (url [must be absolute] that *REPLACES* default css file)
+** This url will return an html blob which can be added to your page for account maintenance (an iframe)
+** ...in much the same way that /api/tenant/login works
 
 ---------------------
 
