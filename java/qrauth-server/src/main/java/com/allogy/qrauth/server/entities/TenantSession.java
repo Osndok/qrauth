@@ -70,6 +70,12 @@ class TenantSession implements Mortal
 	@Column(nullable = true, columnDefinition = Usual.TIMESTAMP)
 	public Date connected;
 
+	/**
+	 * This is a place to stash the return url (which can be specified by the tenant or implied via the referrer header).
+	 * This might be important if the authentication requires several steps (like the noscript workflows).
+	 */
+	public String return_url;
+
 	/* -------------------- Mortal Implementation ------------------ */
 
 	@NonVisual

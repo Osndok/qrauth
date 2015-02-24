@@ -18,7 +18,8 @@ class Usual
 	static final String FALSE_BOOLEAN = "BOOLEAN DEFAULT 'f'";
 	static final String TRUE_BOOLEAN  = "BOOLEAN DEFAULT 't'";
 
-	static final String CSV_2k   = "VARCHAR(2000) DEFAULT ''";
+	static final String CSV_30   = "VARCHAR(30)";
+	static final String CSV_2k   = "VARCHAR(2000)";
 
 	/**
 	 * Enough room to store IPv4, IPv6, or *both* (tunneling).

@@ -50,6 +50,18 @@ class DBUserAuth extends Attemptable implements Mortal
 	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
 	public boolean silentAlarm;
 
+	/**
+	 * If not null, this is a comma-separated list of tenant::id that is allowed access
+	 * to the *SECRET* components of this authentication method. Only relevant for
+	 * auth methods that are not marked as leak-safe, and only relevant for tenants
+	 * which have granted this user shell-access.
+	 *
+	 * This should surly be a *small* list, as sharing a bunch of secrets with a large
+	 * number of 3rd parties would be a bad thing.
+	 */
+	@Column(columnDefinition = Usual.CSV_30, length = 30)
+	public String disclose_csv;
+
 	/* -------------------- Mortal Implementation ------------------ */
 
 	@NonVisual

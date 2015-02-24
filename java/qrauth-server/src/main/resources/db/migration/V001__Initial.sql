@@ -39,6 +39,7 @@
         comment varchar(255),
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
+        disclose_csv VARCHAR(30),
         idRecoveryLock varchar(255),
         millisGranted int4,
         pubKey varchar(2048) unique,
@@ -104,7 +105,7 @@
         id  serial not null,
         created TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
         customName varchar(255),
-        permissionsCsv VARCHAR(2000) DEFAULT '' not null,
+        permissionsCsv VARCHAR(2000) not null,
         DBGroup_id int4 not null,
         tenant_id int8 not null,
         primary key (id)
@@ -138,6 +139,7 @@
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
         noticed TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
+        return_url varchar(255),
         session_id varchar(255) not null,
         tenant_id int8 not null,
         tenantIP_id int8 not null,
@@ -182,7 +184,7 @@
         max int8 not null,
         min int8 not null,
         name varchar(255) not null unique,
-        recent_csv VARCHAR(2000) DEFAULT '' not null,
+        recent_csv VARCHAR(2000) not null,
         sum int8 not null,
         primary key (id)
     );
@@ -196,6 +198,7 @@
         successes INTEGER DEFAULT 0 not null,
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
+        silentAlarm BOOLEAN DEFAULT 'f' not null,
         stringValue varchar(255) unique,
         user_id int8,
         primary key (id)
