@@ -9,4 +9,6 @@ interface Policy
 	boolean allowsAnonymousCreationOfNewTenants();
 
 	long getGlobalLogoutPeriod();
+
+	long getShortestUsableSessionLength();
 }

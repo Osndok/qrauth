@@ -40,6 +40,15 @@ class DBUser extends Attemptable implements Mortal
 	@OneToMany(mappedBy = "user")
 	public List<Username> usernames;
 
+	/**
+	 * One day, we might decide to finish building this out by checking the user-provided
+	 * epoch against the database version, thus truly supporting universal logout (as that
+	 * would increment the epoch). But this might add an additional db round trip for
+	 * every request! ...and have only a marginal security effect.
+	 */
+	@Column(nullable = false, columnDefinition = Usual.ZERO_INTEGER)
+	public int epoch;
+
 	/* -------------------- Mortal Implementation ------------------ */
 
 	@NonVisual

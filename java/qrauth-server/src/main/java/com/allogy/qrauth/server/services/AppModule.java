@@ -33,6 +33,7 @@ class AppModule
     public static
 	void bind(ServiceBinder binder)
     {
+		binder.bind(AuthSession     .class, AuthSessionImpl     .class);
         binder.bind(DatabaseMigrator.class, DatabaseMigratorImpl.class);
 		binder.bind(DBTiming        .class, DBTimingImpl        .class);
 		binder.bind(Journal         .class, JournalImpl         .class);

@@ -21,6 +21,7 @@
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
         displayName varchar(255),
+        epoch INTEGER DEFAULT 0 not null,
         globalLogout TIMESTAMP WITHOUT TIME ZONE not null,
         preferencesJson VARCHAR(2000) DEFAULT '{}' not null,
         verifiedEmail varchar(255) unique,
@@ -52,14 +53,18 @@
     create table LogEntry (
         id  bigserial not null,
         actionKey varchar(25) not null,
+        deadline TIMESTAMP WITHOUT TIME ZONE,
         important BOOLEAN DEFAULT 'f' not null,
         message varchar(255) not null,
         tenantSeen BOOLEAN DEFAULT 'f' not null,
         time TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
         userSeen BOOLEAN DEFAULT 'f' not null,
         tenant_id int8,
+        tenantIP_id int8,
+        tenantSession_id int8,
         user_id int8,
         userAuth_id int8,
+        username_id int8,
         primary key (id)
     );
 
@@ -230,9 +235,24 @@
         references DBUser;
 
     alter table LogEntry 
+        add constraint FK7A7043AEF35D7A40 
+        foreign key (username_id) 
+        references Username;
+
+    alter table LogEntry 
+        add constraint FK7A7043AE93A9F594 
+        foreign key (tenantSession_id) 
+        references TenantSession;
+
+    alter table LogEntry 
         add constraint FK7A7043AE9C6CD340 
         foreign key (tenant_id) 
         references Tenant;
+
+    alter table LogEntry 
+        add constraint FK7A7043AE35152060 
+        foreign key (tenantIP_id) 
+        references TenantIP;
 
     alter table Nut 
         add constraint FK1336DE4D1151E 

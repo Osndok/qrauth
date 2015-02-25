@@ -98,8 +98,14 @@ class Config
 	}
 
 	public
-	String getCookieHmac()
+	String getCookieDomain()
 	{
-		return properties.getProperty("cookie.hmac", "");
+		return properties.getProperty("cookie.domain", null);
+	}
+
+	public
+	String getCookiePath()
+	{
+		return properties.getProperty("cookie.path", "/");
 	}
 }
