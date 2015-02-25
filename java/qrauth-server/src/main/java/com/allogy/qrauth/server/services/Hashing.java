@@ -15,7 +15,7 @@ interface Hashing
 	 * is unlikely to be particularly useful to a 3rd party or as a database key/index.
 	 *
 	 * @param userInput - the unhashed, user-provided input string which we may need to verify later, but never need to straightly recall
-	 * @return a string that is very unlikely to collide with any other given input, and yet will surly trigger a positive 'match' in the counterposing match() function.
+	 * @return a string that is very unlikely to collide with any other given input, and yet will surly trigger a positive 'digestMatch' in the counterposing digestMatch() function.
 	 */
 	String digest(String userInput);
 
@@ -25,7 +25,7 @@ interface Hashing
 	 * @return true if (and only if) the given input/hashedValue combination is overwhelmingly likely a result of this same service
 	 * @throws UnimplementedHashFunctionException if the given hashedValue
 	 */
-	boolean match(String userInput, String hashedValue) throws UnimplementedHashFunctionException;
+	boolean digestMatch(String userInput, String hashedValue) throws UnimplementedHashFunctionException;
 
 	/**
 	 * @param hashedValue - the previously-hashed value (e.g. from the database)
@@ -46,4 +46,24 @@ interface Hashing
 	 * @return a very-stable string that
 	 */
 	String forDatabaseLookupKey(String userInput);
+
+	/**
+	 * Given 'x' returns 'y:x' such that 'y' verifies that 'x' comes from this deployment installation.
+	 *
+	 * NB: this is *NOT* encryption, and therefore does not pretend to be... if provided to the user
+	 * (as is the expected use case) everything in the 'base' string is still plainly visible!
+	 *
+	 * @param base the string that should be returned by fromHmacPrefixed() upon success
+	 * @return the given string, prefixed with a salt/pepper hash that can be used to verify the original message.
+	 */
+	String withHmacPrefix(String base);
+
+	/**
+	 * Given a user-input-safe value 'y:x' that is potentially the output of withHmacPrefix(), return the original 'base'
+	 * string if (and only if) the hmac check indicates that the value is from this deployment installation.
+	 *
+	 * @param withPrefix
+	 * @return
+	 */
+	String fromHmacPrefixed(String withPrefix) throws UnimplementedHashFunctionException;
 }

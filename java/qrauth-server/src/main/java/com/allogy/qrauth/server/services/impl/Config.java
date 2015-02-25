@@ -90,4 +90,16 @@ class Config
 			return Long.parseLong(supremeTenant);
 		}
 	}
+
+	public
+	String getCookieName()
+	{
+		return properties.getProperty("cookie.name", "qrauth");
+	}
+
+	public
+	String getCookieHmac()
+	{
+		return properties.getProperty("cookie.hmac", "");
+	}
 }

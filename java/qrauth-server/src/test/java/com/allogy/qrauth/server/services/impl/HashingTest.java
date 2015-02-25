@@ -35,7 +35,7 @@ class HashingTest extends TestCase
 	public
 	void testRejection() throws UnimplementedHashFunctionException
 	{
-		//Make sure that the match() function will reject *something*...
+		//Make sure that the digestMatch() function will reject *something*...
 		assertFalse(HashingImpl.match(pepper, "alpha", "1:"));
 		assertFalse(HashingImpl.match(pepper, "alpha", "1:bbbe0042a7fba35c"));
 		assertFalse(HashingImpl.match(pepper, "alpha", "1:bbbe0042a7fba35c:"));
@@ -103,7 +103,7 @@ class HashingTest extends TestCase
 	void hint(String userInput, String hashedValue)
 	{
 		String helpfulHint=
-			String.format("assertTrue(HashingImpl.match(pepper, \"%s\", \"%s\"));",
+			String.format("assertTrue(HashingImpl.digestMatch(pepper, \"%s\", \"%s\"));",
 							 userInput,
 							 hashedValue
 			);
@@ -130,5 +130,31 @@ class HashingTest extends TestCase
 		assertEquals("a0d7b5489aeee8eb4d3ee98a58fa2d669794ec36", HashingImpl.forDatabaseLookupKey(pepper, "beta"));
 		assertEquals("e22931bf0cd6b2a22d1d587c8d93c50ec27a894f", HashingImpl.forDatabaseLookupKey(pepper, "gamma"));
 		assertEquals("1a645e88eaf2f45de0d8b8bc542eec8af514df28", HashingImpl.forDatabaseLookupKey(pepper, "delta"));
+	}
+
+	@Test
+	public
+	void testHmac() throws UnimplementedHashFunctionException
+	{
+		final
+		Hashing hashing=One.registry.getService(Hashing.class);
+
+		subTestHmac(hashing, "alpha");
+		subTestHmac(hashing, "beta");
+		subTestHmac(hashing, "gamma");
+		subTestHmac(hashing, "alpha:beta:gamma");
+		subTestHmac(hashing, "");
+	}
+
+	private
+	void subTestHmac(Hashing hashing, String input) throws UnimplementedHashFunctionException
+	{
+		final
+		String prefixed=hashing.withHmacPrefix(input);
+
+		final
+		String output=hashing.fromHmacPrefixed(prefixed);
+
+		assertEquals(input, output);
 	}
 }

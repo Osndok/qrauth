@@ -53,12 +53,11 @@ class HashingImpl implements Hashing
 	public static
 	String digest(final String pepper, final String userInput)
 	{
-
 		final
 		String salt = generateArbitrarySaltValue();
 
 		final
-		String retval = ALGO_SEASONED_SHA1 + salt + ":" + seasonedSHA1(salt, pepper, userInput);
+		String retval = ALGO_SEASONED_SHA1 + salt + ':' + seasonedSHA1(salt, pepper, userInput);
 
 		log.debug("digest() -> {}", retval);
 
@@ -90,7 +89,7 @@ class HashingImpl implements Hashing
 
 	@Override
 	public
-	boolean match(final String userInput, final String hashedValue) throws UnimplementedHashFunctionException
+	boolean digestMatch(final String userInput, final String hashedValue) throws UnimplementedHashFunctionException
 	{
 		return match(PEPPER, userInput, hashedValue);
 	}
@@ -147,6 +146,73 @@ class HashingImpl implements Hashing
 	String forDatabaseLookupKey(String userInput)
 	{
 		return forDatabaseLookupKey(PEPPER, userInput);
+	}
+
+	@Override
+	public
+	String withHmacPrefix(String base)
+	{
+		return digest(base) + ':' + base;
+	}
+
+	@Override
+	public
+	String fromHmacPrefixed(final String withPrefix) throws UnimplementedHashFunctionException
+	{
+		/*
+		We expect at least three colons:
+		"algo:salt:hash:base" -> "base"
+		"algo:salt:hash:base:with:possible:colons" -> "base:with:possible:colons"
+		*/
+
+		if (withPrefix==null)
+		{
+			return null;
+		}
+
+		final
+		int colon1=withPrefix.indexOf(':');
+		{
+			if (colon1<=0)
+			{
+				return null;
+			}
+		}
+
+		final
+		int colon2=withPrefix.indexOf(':', colon1+1);
+		{
+			if (colon2<=colon1)
+			{
+				return null;
+			}
+		}
+
+		final
+		int colon3=withPrefix.indexOf(':', colon2+1);
+		{
+			if (colon3<=colon2)
+			{
+				return null;
+			}
+		}
+
+		final
+		String prefix=withPrefix.substring(0, colon3);
+
+		final
+		String base=withPrefix.substring(colon3+1);
+
+		//TODO: is it possible that the simple (but large-ish) overhead of exceptions could be used against us as a DoS?
+		if (digestMatch(base, prefix))
+		{
+			return base;
+		}
+		else
+		{
+			log.debug("bad hmac: {} / {}", prefix, base);
+			return null;
+		}
 	}
 
 	/**

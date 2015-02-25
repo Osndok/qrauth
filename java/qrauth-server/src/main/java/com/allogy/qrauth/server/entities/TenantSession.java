@@ -64,7 +64,7 @@ class TenantSession implements Mortal
 	public DBUser user;
 
 	/**
-	 * The time that we noticed who is associated with this session. The null-ness of this field should always match
+	 * The time that we noticed who is associated with this session. The null-ness of this field should always digestMatch
 	 * the null-ness of the person (person_id) field.
 	 */
 	@Column(nullable = true, columnDefinition = Usual.TIMESTAMP)

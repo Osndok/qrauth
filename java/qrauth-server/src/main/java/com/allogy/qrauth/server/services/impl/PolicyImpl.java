@@ -2,7 +2,10 @@ package com.allogy.qrauth.server.services.impl;
 
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.services.Policy;
+import org.apache.tapestry5.SymbolConstants;
+import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.annotations.PostInjection;
+import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.apache.tapestry5.ioc.services.cron.IntervalSchedule;
 import org.apache.tapestry5.ioc.services.cron.PeriodicExecutor;
 import org.apache.tapestry5.json.JSONObject;
@@ -21,9 +24,15 @@ class PolicyImpl implements Policy, Runnable
 	private static final long   UPDATE_PERIOD_MILLIS = TimeUnit.MINUTES.toMillis(5);
 	private static final Logger log                  = LoggerFactory.getLogger(Policy.class);
 	private static final long   GLOBAL_LOGOUT_PERIOD = TimeUnit.DAYS.toMillis(7);
+	private static final long   DEVEL_LOGOUT_PERIOD  = TimeUnit.HOURS.toMillis(1);
 
 	private
 	JSONObject supremeTenantConfig = new JSONObject();
+
+	@Inject
+	@Symbol(SymbolConstants.PRODUCTION_MODE)
+	private
+	boolean productionMode;
 
 	@PostInjection
 	public
@@ -52,7 +61,14 @@ class PolicyImpl implements Policy, Runnable
 	public
 	long getGlobalLogoutPeriod()
 	{
-		return GLOBAL_LOGOUT_PERIOD;
+		if (productionMode)
+		{
+			return GLOBAL_LOGOUT_PERIOD;
+		}
+		else
+		{
+			return DEVEL_LOGOUT_PERIOD;
+		}
 	}
 
 	private
