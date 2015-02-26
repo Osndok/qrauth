@@ -146,6 +146,50 @@ class JournalImpl implements Journal
 		hibernateSessionManager.getSession().save(logEntry);
 	}
 
+	@Override
+	public
+	void updatedUserAuth(DBUserAuth userAuth)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "userauth-update";
+		logEntry.message = "Updated "+humanReadable(userAuth.authMethod);
+		logEntry.user=userAuth.user;
+		logEntry.username=null;
+		logEntry.userAuth=userAuth;
+		logEntry.tenant=null;
+		logEntry.tenantIP=network.needIPForThisRequest(null);
+		logEntry.tenantSession=null;
+		logEntry.deadline=null;
+
+		hibernateSessionManager.getSession().save(logEntry);
+		hibernateSessionManager.commit();
+	}
+
+	@Override
+	public
+	void revokedUserAuth(DBUserAuth userAuth)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "userauth-revoked";
+		logEntry.message = "Revoked "+humanReadable(userAuth.authMethod);
+		logEntry.user=userAuth.user;
+		logEntry.username=null;
+		logEntry.userAuth=userAuth;
+		logEntry.tenant=null;
+		logEntry.tenantIP=network.needIPForThisRequest(null);
+		logEntry.tenantSession=null;
+		logEntry.deadline=null;
+
+		hibernateSessionManager.getSession().save(logEntry);
+		hibernateSessionManager.commit();
+	}
+
 	private
 	TenantIP getTenantIP(Tenant tenant)
 	{

@@ -14,3 +14,15 @@ code.blue
 	color: blue;
 	background-color: light-blue;
 }
+
+table.singleRecord th
+{
+	text-align: right;
+}
+
+table.singleRecord th,
+table.singleRecord td
+{
+	padding: 4px;
+}
+

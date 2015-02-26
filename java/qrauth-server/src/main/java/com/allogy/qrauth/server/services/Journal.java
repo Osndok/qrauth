@@ -21,4 +21,6 @@ interface Journal
 	void createdUserAccount(DBUserAuth userAuth, Username username, TenantSession tenantSession);
 	void authenticatedUser(DBUserAuth userAuth, Username username, TenantSession tenantSession, Date deadline);
 
+	void updatedUserAuth(DBUserAuth userAuth);
+	void revokedUserAuth(DBUserAuth userAuth);
 }

@@ -1,6 +1,7 @@
 package com.allogy.qrauth.server.pages.user;
 
 import com.allogy.qrauth.server.entities.DBUser;
+import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.LogEntry;
 import com.allogy.qrauth.server.entities.TenantIP;
 import com.allogy.qrauth.server.services.AuthSession;
@@ -19,10 +20,6 @@ import org.hibernate.criterion.Restrictions;
 public
 class ActivityUser extends AbstractUserPage
 {
-	@Inject
-	private
-	Session session;
-
 	public
 	GridDataSource getDataSource()
 	{
@@ -56,6 +53,16 @@ class ActivityUser extends AbstractUserPage
 			//TODO: do we need to consider subnet records here?!?!
 			return myIpAddress.equals(tenantIP.ipAddress);
 		}
+	}
+
+	public
+	String getUserAuthSummary()
+	{
+		final
+		DBUserAuth userAuth=logEntry.userAuth;
+
+		//TODO: use a user-specific (and type-specific?) counters, rather than the sequence number.
+		return userAuth.authMethod+"-"+userAuth.id;
 	}
 
 }

@@ -18,7 +18,9 @@
 			${logEntry.username?.stringValue}
 		</p:usernameCell>
 		<p:authMethodCell>
-			AuthMethod
+			<t:if test="logEntry.userAuth">
+				<t:pagelink page="user/credentials/edit" context="logEntry.userAuth">${userAuthSummary}</t:pagelink>
+			</t:if>
 		</p:authMethodCell>
 	</t:grid>
 

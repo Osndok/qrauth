@@ -27,12 +27,15 @@ class DBUserAuth extends Attemptable implements Mortal
 	@Column(nullable = false, columnDefinition = "VARCHAR(15)", length = 15)
 	public AuthMethod authMethod;
 
+	@NonVisual
 	public String secret;
+
 	public String comment;
 
 	/**
 	 * A place to stash SQRL's id-lock challenge.
 	 */
+	@NonVisual
 	public String idRecoveryLock;
 
 	@Column(unique = true, length = 2048)
@@ -59,6 +62,7 @@ class DBUserAuth extends Attemptable implements Mortal
 	 * This should surly be a *small* list, as sharing a bunch of secrets with a large
 	 * number of 3rd parties would be a bad thing.
 	 */
+	@NonVisual
 	@Column(columnDefinition = Usual.CSV_30, length = 30)
 	public String disclose_csv;
 
@@ -67,7 +71,6 @@ class DBUserAuth extends Attemptable implements Mortal
 	@NonVisual
 	public String deathMessage;
 
-	@NonVisual
 	@Column(columnDefinition = Usual.TIMESTAMP)
 	public Date deadline;
 
