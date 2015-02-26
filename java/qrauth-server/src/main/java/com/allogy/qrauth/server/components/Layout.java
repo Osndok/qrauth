@@ -1,5 +1,6 @@
 package com.allogy.qrauth.server.components;
 
+import com.allogy.qrauth.server.services.AuthSession;
 import org.apache.tapestry5.*;
 import org.apache.tapestry5.alerts.AlertManager;
 import org.apache.tapestry5.annotations.*;
@@ -35,18 +36,35 @@ public class Layout
 	@Symbol(SymbolConstants.APPLICATION_VERSION)
 	private String appVersion;
 
-
-
-	public String getClassForPageName()
+	public
+	String getClassForPageName()
 	{
 		return resources.getPageName().equalsIgnoreCase(pageName)
 				? "active"
 				: null;
 	}
 
-	public String[] getPageNames()
+	public
+	boolean isLoggedIn()
 	{
-		return new String[]{"Index", "About", "Contact"};
+		return authSession.isLoggedIn();
+	}
+
+	@Inject
+	private
+	AuthSession authSession;
+
+	public
+	String[] getPageNames()
+	{
+		if (authSession.isLoggedIn())
+		{
+			return new String[]{"user/Login", "About", "Contact"};
+		}
+		else
+		{
+			return new String[]{"About", "Contact"};
+		}
 	}
 
 }

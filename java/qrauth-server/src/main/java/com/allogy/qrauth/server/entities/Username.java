@@ -19,7 +19,7 @@ class Username extends Attemptable implements Mortal
 	@ManyToOne
 	public DBUser user;
 
-	@Column(nullable = true, unique = true)
+	@Column(nullable = false, unique = true)
 	public String stringValue;
 
 	/**

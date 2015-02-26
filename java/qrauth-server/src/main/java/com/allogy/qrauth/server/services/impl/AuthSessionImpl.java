@@ -377,7 +377,11 @@ class AuthSessionImpl implements AuthSession
 		final
 		String withoutHmacPrefix = hashing.fromHmacPrefixed(withHmacPrefix);
 
-		if (withoutHmacPrefix != null)
+		if (withoutHmacPrefix == null)
+		{
+			log.debug("failed hmac test: {}", withHmacPrefix);
+		}
+		else
 		{
 			final
 			AuthSessionMemo authSessionMemo = new AuthSessionMemo(withoutHmacPrefix);

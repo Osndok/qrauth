@@ -275,7 +275,7 @@ class NetworkImpl implements Network, Runnable
 		final
 		String subnetWildcard = getSubnetWildcard(ipAddress);
 
-		log.debug("list({}, {}, {})", ipAddress, subnetWildcard);
+		log.debug("list({}, {})", ipAddress, subnetWildcard);
 
 		if (subnetWildcard==null)
 		{

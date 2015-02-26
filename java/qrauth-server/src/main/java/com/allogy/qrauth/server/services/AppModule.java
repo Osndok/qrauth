@@ -110,9 +110,10 @@ class AppModule
 
 	public static
 	void contributeMasterDispatcher(OrderedConfiguration<Dispatcher> configuration,
-									Network network)
+									Network network, AuthSession authSession)
 	{
 		configuration.add("high-level-ban", new HighLevelBanFilter(network), "before:RootPath");
+		configuration.add("auth-session", authSession, "before:PageRender");
 	}
 
 	/**

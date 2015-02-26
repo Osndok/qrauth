@@ -4,7 +4,9 @@ import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.helpers.RSAHelper;
+import com.allogy.qrauth.server.pages.Index;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
+import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
 import org.apache.commons.codec.binary.Base64;
@@ -15,6 +17,7 @@ import org.hibernate.criterion.Restrictions;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by robert on 2/20/15.
@@ -180,9 +183,42 @@ class DispatchAuth extends AbstractAPICall
 		if (pubKeyOrUsername.indexOf(' ')<0)
 		{
 			final
-			String username=pubKeyOrUsername;
+			Username username=getUsername(pubKeyOrUsername);
 
-			//Lookup (and test against) all the user's *active* rsa keys
+			if (username==null)
+			{
+				//TODO: !!!: disguise (in both response and timing) revealation of valid/invalid username (in production mode?)
+				return new ErrorResponse(400, "invalid username");
+			}
+
+			final
+			byte[] binaryResponse=Base64.decodeBase64(base64Response);
+
+			final
+			List<DBUserAuth> pubkeys=session.createCriteria(DBUserAuth.class)
+				.add(Restrictions.eq("user", username.user))
+				.add(Restrictions.eq("authMethod", AuthMethod.RSA))
+				.list()
+				;
+
+			for (DBUserAuth rsaUserAuth : pubkeys)
+			{
+				final
+				RSAHelper rsaHelper=new RSAHelper(rsaUserAuth);
+
+				try
+				{
+					if (rsaHelper.signatureIsValid(nut.stringValue, binaryResponse))
+					{
+						log.debug("rsa login with a username: '{}'", username.stringValue);
+						return maybeAuthenticateUser(rsaUserAuth, username);
+					}
+				}
+				finally
+				{
+					rsaHelper.close();
+				}
+			}
 
 			//return do_rsa_any_pubkey(user, pubkeys);
 			return new ErrorResponse(500, "unimplemented; rsa to existing username");
@@ -203,13 +239,13 @@ class DispatchAuth extends AbstractAPICall
 						log.debug("creating account in reaction to valid (yet unknown) rsa login");
 						userAuth=rsaHelper.toDBUserAuth();
 						createUserWithNewStipulation(userAuth);
-						return maybeAuthenticateUser(userAuth);
+						return maybeAuthenticateUser(userAuth, null);
 					}
 					else
 					{
 						//TODO: MULTI-FACTOR: give the user the option of *requiring* a username, in this path they only used a keypair here.
 						log.debug("rsa login without a username");
-						return maybeAuthenticateUser(userAuth);
+						return maybeAuthenticateUser(userAuth, null);
 					}
 				}
 				else
@@ -222,6 +258,15 @@ class DispatchAuth extends AbstractAPICall
 				rsaHelper.close();
 			}
 		}
+	}
+
+	private
+	Username getUsername(String username)
+	{
+		return (Username) session.createCriteria(Username.class)
+			.add(Restrictions.eq("stringValue", username))
+			.uniqueResult()
+			;
 	}
 
 	private
@@ -275,15 +320,13 @@ class DispatchAuth extends AbstractAPICall
 	}
 
 	private
-	Object maybeAuthenticateUser(DBUserAuth userAuth)
+	Object maybeAuthenticateUser(DBUserAuth userAuth, Username username)
 	{
 		if (Death.hathVisited(userAuth))
 		{
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
 																"that authentication method is no longer allowed"));
 		}
-
-		journal.incrementSuccess(allMatchingTenantIPs);
 
 		final
 		DBUser user = userAuth.user;
@@ -293,13 +336,25 @@ class DispatchAuth extends AbstractAPICall
 			return new ErrorResponse(403, Death.noteMightSay(userAuth, "your user account has been suspended"));
 		}
 
-		//TODO: !!!: consume the nut (maybe combine with creation transaction, above? or update below?)
-		//TODO: !!!: set cookie
-		//TODO: !!!: where do we send them?!?!
-		//TODO: if globalLogout deadline is passed, set it to now plus the policy duration
+		final
+		Nut nut=getNut();
+		{
+			nut.deadline = new Date();
+			nut.deathMessage = "accepted as nonce for " + userAuth;
+			session.save(nut);
 
-		return new ErrorResponse(500, "trying; authenticate as an existing user");
+			//NB: nut consumption commit() will be wrapped up in the authSession transaction.
+		}
+
+		authSession.authenticateRemoteBrowser(userAuth, username, tenantSession);
+
+		//TODO: !!!: where do we send them?!?! (a) if tenantSession == null, (b) if tenant session is not null, (c) user selected 'configure' option...
+		return Index.class;
 	}
+
+	@Inject
+	private
+	AuthSession authSession;
 
 	private
 	Nut getNut()

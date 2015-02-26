@@ -275,4 +275,13 @@ class RSAHelper implements Closeable
 
 		return a;
 	}
+
+	public
+	RSAHelper(DBUserAuth a)
+	{
+		sshKeyBlob=a.pubKey;
+		sshComment=a.comment;
+		sshFormat="ssh-rsa "+sshKeyBlob+" "+sshComment;
+	}
+
 }

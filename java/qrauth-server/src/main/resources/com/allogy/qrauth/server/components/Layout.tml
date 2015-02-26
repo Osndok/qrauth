@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
-        >
+      xmlns:p="tapestry:parameter"
+      >
 <head>
     <meta charset="utf-8" />
     <title>${title}</title>
@@ -37,7 +38,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <t:pagelink page="index" class="navbar-brand">app</t:pagelink>
+            <t:pagelink page="index" class="navbar-brand">qrauth</t:pagelink>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -49,7 +50,12 @@
             </ul>
             <span class="navbar-right">
                 <li>
-                    <t:pagelink page="login" class="btn btn-default navbar-btn">Sign in</t:pagelink>
+                	<t:if test="loggedIn">
+                		<t:pagelink page="user/logout" class="btn btn-default navbar-btn">Log out</t:pagelink>
+                	<p:else>
+	                    <t:pagelink page="user/login" class="btn btn-default navbar-btn">Sign in</t:pagelink>
+                    </p:else>
+                    </t:if>
                	</li>
             </span>
 
