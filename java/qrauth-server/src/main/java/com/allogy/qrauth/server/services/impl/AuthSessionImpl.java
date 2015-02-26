@@ -2,10 +2,7 @@ package com.allogy.qrauth.server.services.impl;
 
 import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.helpers.Death;
-import com.allogy.qrauth.server.services.AuthSession;
-import com.allogy.qrauth.server.services.Hashing;
-import com.allogy.qrauth.server.services.Network;
-import com.allogy.qrauth.server.services.Policy;
+import com.allogy.qrauth.server.services.*;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -106,6 +103,13 @@ class AuthSessionImpl implements AuthSession
 		final
 		AuthSessionMemo authSessionMemo=environment.peek(AuthSessionMemo.class);
 
+		if (authSessionMemo==null)
+		{
+			//Well... we don't know who is even requesting the logout.
+			cookies.removeCookieValue(QRAUTH_COOKIE_NAME);
+			return;
+		}
+
 		final
 		Session session = hibernateSessionManager.getSession();
 
@@ -140,7 +144,7 @@ class AuthSessionImpl implements AuthSession
 
 		logEntry.time = new Date();
 		logEntry.actionKey = "logout";
-		logEntry.message = "User-requested logout";
+		logEntry.message = "Logout requested";
 		logEntry.username=getUsername(session, authSessionMemo);
 		logEntry.userAuth=getDBUserAuth();
 		logEntry.user=logEntry.userAuth.user;
@@ -151,6 +155,8 @@ class AuthSessionImpl implements AuthSession
 		session.save(logEntry);
 
 		hibernateSessionManager.commit();
+
+		cookies.removeCookieValue(QRAUTH_COOKIE_NAME);
 	}
 
 	private
@@ -184,6 +190,7 @@ class AuthSessionImpl implements AuthSession
 		final
 		Session session = hibernateSessionManager.getSession();
 
+		/*
 		final
 		Tenant tenant;
 		{
@@ -199,6 +206,7 @@ class AuthSessionImpl implements AuthSession
 
 		final
 		TenantIP tenantIP=network.needIPForThisRequest(tenant);
+		*/
 
 		final
 		DBUser user = userAuth.user;
@@ -241,22 +249,17 @@ class AuthSessionImpl implements AuthSession
 			session.save(username);
 		}
 
-		final
-		LogEntry logEntry = new LogEntry();
+		if (tenantSession!=null)
+		{
+			tenantSession.deadline = sessionDeadline;
+			session.save(tenantSession);
+		}
 
-		logEntry.time = nowDate;
-		logEntry.actionKey = "login";
-		logEntry.message = "Authenticated using "+userAuth.authMethod+" "+userAuth;
-		logEntry.user=user;
-		logEntry.username=username;
-		logEntry.userAuth=userAuth;
-		logEntry.tenant=tenant;
-		logEntry.tenantIP=tenantIP;
-		logEntry.tenantSession=tenantSession;
-		logEntry.deadline=sessionDeadline;
-		session.save(logEntry);
+		journal.authenticatedUser(userAuth, username, tenantSession, sessionDeadline);
 
 		hibernateSessionManager.commit();
+
+		//---------------------------------
 
 		final
 		AuthSessionMemo authSessionMemo=new AuthSessionMemo(userAuth, username, tenantSession, sessionDeadline);
@@ -291,13 +294,17 @@ class AuthSessionImpl implements AuthSession
 			.write();
 	}
 
+	@Inject
+	private
+	Journal journal;
+
 	private
 	int secondsUntil(long now, long then)
 	{
 		final
-		long delta=then-now;
+		long delta = then - now;
 
-		return (int)(delta/1000);
+		return (int) (delta / 1000);
 	}
 
 	@Inject

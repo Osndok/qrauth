@@ -2,6 +2,10 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
-	TODO: user logout page (possibly skip it, if they have it so configured)
+	TODO: user logout page should be skippable (if the user has it so configured)
+
+	<t:form>
+		<t:submit t:id="confirmLogout" value="Confirm Logout"/>
+	</t:form>
 
 </html>

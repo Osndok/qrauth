@@ -1,7 +1,8 @@
 package com.allogy.qrauth.server.services.impl;
 
-import com.allogy.qrauth.server.entities.Attemptable;
+import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.services.Journal;
+import com.allogy.qrauth.server.services.Network;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -97,6 +98,108 @@ class JournalImpl implements Journal
 		}
 
 		hibernateSessionManager.commit();
+	}
+
+	@Override
+	public
+	void createdUserAccount(
+							   DBUserAuth userAuth, Username username, TenantSession tenantSession
+	)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "user-create";
+		logEntry.message = "Created account using "+humanReadable(userAuth.authMethod);
+		logEntry.user=userAuth.user;
+		logEntry.username=username;
+		logEntry.userAuth=userAuth;
+		logEntry.tenant=getTenant(tenantSession);
+		logEntry.tenantIP=getTenantIP(logEntry.tenant);
+		logEntry.tenantSession=tenantSession;
+		logEntry.deadline=null;
+
+		hibernateSessionManager.getSession().save(logEntry);
+	}
+
+	@Override
+	public
+	void authenticatedUser(
+							  DBUserAuth userAuth, Username username, TenantSession tenantSession, Date deadline
+	)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "user-login";
+		logEntry.message = "Authenticated using "+humanReadable(userAuth.authMethod);
+		logEntry.user=userAuth.user;
+		logEntry.username=username;
+		logEntry.userAuth=userAuth;
+		logEntry.tenant=getTenant(tenantSession);
+		logEntry.tenantIP=getTenantIP(logEntry.tenant);
+		logEntry.tenantSession=tenantSession;
+		logEntry.deadline=deadline;
+
+		hibernateSessionManager.getSession().save(logEntry);
+	}
+
+	private
+	TenantIP getTenantIP(Tenant tenant)
+	{
+		return network.needIPForThisRequest(tenant);
+	}
+
+	@Inject
+	private
+	Network network;
+
+	private
+	String humanReadable(AuthMethod authMethod)
+	{
+		switch (authMethod)
+		{
+			case SQRL:
+				return "SQRL public key";
+			case RSA:
+				return "RSA public key";
+			case YUBIKEY_CUSTOM:
+				return "custom Yubikey factors";
+			case HMAC_OTP:
+				return "H-OTP proof";
+			case TIME_OTP:
+				return "T-OTP proof";
+			case PAPER_PASSWORDS:
+				return "PPP password";
+			case YUBIKEY_PUBLIC:
+				return "public Yubikey verification";
+			case OPEN_ID:
+				return "3rd party OpenID server";
+			case STATIC_OTP:
+				return "provisioned one-time-password";
+			case EMAILED_SECRET:
+				return "email reception proof";
+			case SALTED_PASSWORD:
+				return "static password";
+
+			default:
+				return "unknown method";
+		}
+	}
+
+	private
+	Tenant getTenant(TenantSession tenantSession)
+	{
+		if (tenantSession == null)
+		{
+			return null;
+		}
+		else
+		{
+			return tenantSession.tenant;
+		}
 	}
 
 	@Inject
