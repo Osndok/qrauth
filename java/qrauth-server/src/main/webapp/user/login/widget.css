@@ -162,6 +162,11 @@
 	margin-bottom: 10px;
 }
 
+#qrauth_rsa pre
+{
+	text-align: center;
+}
+
 #qrauth_sqrl left
 {
 	text-align: center;
@@ -253,3 +258,10 @@
 	font-weight: bold;
 }
 
+#qrauth_clipboard1
+{
+	float: right;
+	color: darkgray;
+	text-decoration: underline;
+	cursor: copy;
+}

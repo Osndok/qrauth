@@ -31,3 +31,4 @@ function qrauth_sqrlClick()
 
 tabby.init();
 
+new ZeroClipboard(document.getElementById('qrauth_clipboard1'));

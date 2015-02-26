@@ -168,11 +168,26 @@
 	<br/>
 	<textarea name="rsa_pubkey"></textarea>
 	<br/>
+	<!--
+	TODO: is the convenience of a copy-to-clipboard widget worth the security risk presented by training users to directly
+	execute commands they only *think* that they have seen (as the webpage could copy anything), thus potentially giving a
+	malacious website full control of their user account and exposure of secrets such as the matching private key.
+
+	It is unclear where the true responsibility lays, should terminal emulators confirm pasted content? Browsers only
+	copy visible text? or sites not provide commands via copy/paste utilities?
+
+	Since it is not a clear threat unto itself (a MITM can get wreck havoc with your session anyway), we will let it
+	be the user's choice, and our responsibility will be to do whatever we can to make sure it is an informed choice,
+	rather than authoritatively prescribing that no-one have this option.
+
+	Perhaps we can (at a very small random chance) instead copy a benign warning message, to keep them on their
+	toes?
+	-->
+	<div data-clipboard-target="qrauth_rsa_command" id="qrauth_clipboard1" title="BEWARE!">Copy to Clipboard</div>
 	Challenge:<br/>
 	<!-- NB: pkeyutl is not available on even very new OSX versions, so we use rsautl -->
-	<pre>
-echo -n ${nut.stringValue} | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64
-	</pre>
+	<!-- NB: it is important that there be no 'newline' characters between the pre tags, or ZeroClipboard will pick them up and the command may execute once pasted -->
+	<pre id="qrauth_rsa_command">echo -n ${nut.stringValue} | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64</pre>
 	<label for="response">Response:</label>
 	<br/>
 	<textarea name="rsa_response"></textarea>
@@ -198,6 +213,7 @@ echo -n ${nut.stringValue} | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64
 
 <script src="${base}${context:lib/tabby/classList.js}"></script>
 <script src="${base}${context:lib/tabby/tabby.js}"></script>
+<script src="${base}${context:lib/zeroclipboard-2.2.0/ZeroClipboard.min.js}"></script>
 <script src="${base}${context:user/login/widget.js}"></script>
 
 </div>
