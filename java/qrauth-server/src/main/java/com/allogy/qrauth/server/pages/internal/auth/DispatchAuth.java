@@ -191,6 +191,9 @@ class DispatchAuth extends AbstractAPICall
 				return new ErrorResponse(400, "invalid username");
 			}
 
+			journal.noticeAttempt(username);
+			journal.noticeAttempt(username.user);
+
 			final
 			byte[] binaryResponse=Base64.decodeBase64(base64Response);
 
@@ -203,6 +206,8 @@ class DispatchAuth extends AbstractAPICall
 
 			for (DBUserAuth rsaUserAuth : pubkeys)
 			{
+				journal.noticeAttempt(rsaUserAuth);
+
 				final
 				RSAHelper rsaHelper=new RSAHelper(rsaUserAuth);
 
@@ -244,6 +249,8 @@ class DispatchAuth extends AbstractAPICall
 					{
 						//TODO: MULTI-FACTOR: give the user the option of *requiring* a username, in this path they only used a keypair here.
 						log.debug("rsa login without a username");
+						journal.noticeAttempt(userAuth);
+						journal.noticeAttempt(userAuth.user);
 						return maybeAuthenticateUser(userAuth, null);
 					}
 				}
