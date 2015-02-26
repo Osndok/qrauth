@@ -1,0 +1,7 @@
+<html t:type="layout" title="Logout"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter">
+
+	TODO: user logout page (possibly skip it, if they have it so configured)
+
+</html>

@@ -1,0 +1,8 @@
+<html t:type="layout" title="Account Activity"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter">
+
+	<t:grid t:source="dataSource" row="tenantUser">
+	</t:grid>
+
+</html>

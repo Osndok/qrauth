@@ -1,0 +1,25 @@
+<html t:type="layout" title="Account Activity"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter">
+
+	<t:grid t:source="dataSource" row="logEntry" add="site,ipAddress,username,authMethod" reorder="time,ipAddress,message,site,username,authMethod">
+		<p:ipAddressCell>
+			<t:if test="fromMyIp">
+				<code class="blue" title="${message:from-my-ip}">${logEntry.tenantIp?.ipAddress}</code>
+			<p:else>
+				<code class="red" title="${message:not-from-my-ip}">${logEntry.tenantIp?.ipAddress}</code>
+			</p:else>
+			</t:if>
+		</p:ipAddressCell>
+		<p:siteCell>
+			${logEntry.tenant}
+		</p:siteCell>
+		<p:usernameCell>
+			${logEntry.username?.stringValue}
+		</p:usernameCell>
+		<p:authMethodCell>
+			AuthMethod
+		</p:authMethodCell>
+	</t:grid>
+
+</html>

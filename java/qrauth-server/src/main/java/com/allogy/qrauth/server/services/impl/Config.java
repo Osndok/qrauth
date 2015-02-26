@@ -108,4 +108,16 @@ class Config
 	{
 		return properties.getProperty("cookie.path", "/");
 	}
+
+	public
+	String getBrandName()
+	{
+		return properties.getProperty("brand.name", "qrauth");
+	}
+
+	public
+	String getBrandLink()
+	{
+		return properties.getProperty("brand.link", "https://github.com/Osndok/qrauth");
+	}
 }

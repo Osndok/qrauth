@@ -7,42 +7,113 @@
 
     <!-- Main hero unit for a primary marketing message or call to action -->
     <div class="hero-unit">
+        <img style="float:left" src="${asset:context:images/qrauth-logo.png}"
+        alt="temporary qrauth logo" title="temporary qrauth logo" />
+
+        <h1>qrauth ${applicationVersion}</h1>
         <p>
-            <img src="${asset:context:images/tapestry.png}"
-                 alt="${message:greeting}" title="${message:greeting}" />
+        	Welcome! qrauth is a new project intended to bring unified multi-tenant and rock-solid authentication
+        	to the masses. In the interest of public security, we think that account registration (often with
+        	email address verification) has outlived its usefulness, that should usernames should be optional,
+        	and that it's high time that those ever-so-insecure static passwords go extinct!
         </p>
-        <h3>${message:greeting}</h3>
-        <p>The current time is: <strong>${currentTime}</strong></p>
-        <p>
-            This is a template for a simple marketing or informational website. It includes a large callout called
-            the hero unit and three supporting pieces of content. Use it as a starting point to create something
-            more unique.
-        </p>
-        <p><t:actionlink t:id="learnmore" class="btn btn-primary btn-large">Learn more &raquo;</t:actionlink></p>
     </div>
 
     <!-- Example row of columns -->
     <div class="row">
         <div class="span4">
-            <h2>Normal link</h2>
-            <p>Clink the bottom link and the page refresh with event <code>complete</code></p>
-            <p><t:eventlink event="complete" class="btn" >Complete&raquo;</t:eventlink></p>
+            <h2>The quest...</h2>
+            <p>
+            	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin in tempor nisl. Phasellus dapibus, quam
+            	ut fringilla mollis, lacus urna vehicula metus, sit amet ultricies dolor dui ac massa. Fusce blandit
+            	finibus enim varius auctor. Nullam diam arcu, iaculis et dui eget, lacinia sagittis lorem. Ut id viverra
+            	ipsum, vel consequat leo. Maecenas lectus turpis, fringilla eget augue vitae, iaculis sagittis tortor.
+            	Quisque rutrum sapien eros, quis sodales turpis cursus ac. Nulla gravida eu eros ut pharetra. Nulla ut
+            	convallis velit, a consectetur tellus. Etiam metus tellus, blandit quis dignissim sit amet, imperdiet
+            	nec ligula.
+            </p>
         </div>
-        <t:zone t:id="middlezone" class="span4">
 
-        </t:zone>
         <div class="span4">
-            <h2>Ajax link</h2>
-            <p>Click the bottom link to update just the middle column with Ajax call with event <code>ajax</code></p>
-            <p><t:eventlink event="ajax" zone="middlezone" class="btn" >Ajax&raquo;</t:eventlink></p>
+            <h2>...for real...</h2>
+            <p>
+            	Ut in velit nec neque aliquet tempus id eget lectus. Morbi eu mollis odio. Nam nulla mi, semper eget
+            	nisl at, gravida aliquet lorem. Donec id pretium urna. Interdum et malesuada fames ac ante ipsum primis
+            	in faucibus. Morbi vitae leo in est tincidunt ultricies lacinia id nunc. In consequat metus porttitor
+            	orci venenatis fringilla. Nullam suscipit nulla enim. Donec non cursus leo, eget volutpat augue.
+            	Suspendisse condimentum, odio at pellentesque tincidunt, augue urna tincidunt nisi, id dapibus libero
+            	sem in ipsum. Nam eget quam at ante dictum tempus. In hac habitasse platea dictumst. Praesent maximus
+            	ullamcorper nunc. Proin ornare lobortis sodales.
+            </p>
         </div>
-    </div>
 
-    <t:block t:id="block">
-        <h2>Ajax updated</h2>
-        <p>I'v been updated through AJAX call</p>
-        <p>The current time is: <strong>${currentTime}</strong></p>
-        <t:alerts />
-    </t:block>
+        <div class="span4">
+            <h2>... authentication</h2>
+            <p>
+            	Proin lacinia, nunc at fermentum gravida, libero diam laoreet metus, malesuada consequat ligula orci non
+            	quam. Aenean vestibulum ullamcorper gravida. Nulla eget ex tincidunt, finibus lacus at, posuere felis.
+            	Quisque dictum vestibulum massa sed sagittis. Morbi accumsan velit non felis facilisis, quis commodo
+            	odio consectetur. Nulla facilisi. Quisque ac orci odio.
+            </p>
+        </div>
+        <div class="span4">
+            <h2>It's easy!</h2>
+            <p>
+            	Fusce tristique tristique orci, sed scelerisque tortor. Pellentesque facilisis dolor turpis, non
+            	porttitor nisl faucibus et. Vivamus placerat, augue a tincidunt facilisis, est lacus vulputate nibh,
+            	pharetra maximus augue lorem vestibulum purus. Aenean sit amet sapien a turpis molestie viverra ut sit
+            	amet enim. Curabitur eu tellus sit amet orci tempus efficitur ut vel sem. Class aptent taciti sociosqu
+            	ad litora torquent per conubia nostra, per inceptos himenaeos. Sed ac tempor quam. In bibendum, ligula
+            	quis mattis elementum, odio nisi iaculis purus, a sollicitudin turpis urna id nibh. Cras porttitor
+            	tincidunt risus, ac sagittis elit hendrerit a. Sed sodales sapien cursus, ornare est sed, aliquam ex.
+            </p>
+        </div>
+        <div class="span4">
+            <h2>It's thorough!</h2>
+            <p>
+            	Suspendisse potenti. Quisque magna mi, cursus ac est ac, sollicitudin fringilla ante. Nulla quis augue
+            	eleifend, hendrerit augue ut, suscipit massa. Vivamus in sodales mi. Ut iaculis vel lorem sed vulputate.
+            	Donec ac enim id nisi varius lacinia nec pulvinar odio. Ut sed sem ultrices, porttitor risus sed,
+            	egestas nisl. Cras mattis est non massa consequat, eu mollis purus tempus. Nunc mollis tellus id erat
+            	fermentum, ac venenatis turpis lacinia.
+            </p>
+        </div>
+        <div class="span4">
+            <h2>It's authentication your way!</h2>
+            <p>
+				Sed facilisis ipsum at dolor hendrerit facilisis. Aenean ut cursus dui. Aliquam diam lacus, pulvinar at
+				malesuada ut, porttitor vel diam. Integer at ornare turpis, ut scelerisque turpis. Fusce ex arcu,
+				convallis eget enim vitae, mollis maximus mi. Mauris luctus egestas erat sit amet congue. Donec eu
+				hendrerit massa. Praesent pulvinar, sapien quis euismod varius, turpis ex aliquam mi, nec porta neque
+				turpis laoreet nisl.
+            </p>
+        </div>
+        <div class="span4">
+            <h2>It's usable by anyone!</h2>
+            <p>
+				Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Vivamus rhoncus
+				eleifend lacus ac venenatis. Fusce viverra, ipsum quis blandit gravida, eros nisl commodo dolor, mattis
+				efficitur enim ante et purus. Quisque varius interdum lectus, non laoreet mi vehicula at. Vestibulum
+				quis massa tellus. Proin in turpis diam. Aliquam dignissim tristique libero vel fermentum. Cum sociis
+				natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras ullamcorper eleifend
+				lorem, sed suscipit erat rutrum ut.
+            </p>
+        </div>
+        <div class="span4">
+            <h2>It can even authenticate you to your workstation or server!</h2>
+        	<img style="float:right" src="${asset:context:images/sqrl-shell-login.png}" width="345" height="228"/>
+            <p>
+				Nunc dictum varius erat et sollicitudin. In ultrices molestie libero, quis luctus ipsum. Aenean tellus
+				ipsum, egestas vel ante non, pellentesque consequat libero. Morbi fringilla risus magna, eget feugiat
+				neque dapibus sed. Nunc turpis nunc, suscipit quis massa in, auctor accumsan lectus. Cras ac tempor
+				ante. Nunc venenatis massa facilisis sapien tincidunt, in tincidunt est iaculis. Duis vehicula euismod
+				quam, quis ultricies libero cursus vel. Pellentesque tincidunt volutpat turpis ac accumsan. Fusce non
+				vulputate ex, ut faucibus arcu. Suspendisse id facilisis leo. Vestibulum hendrerit pellentesque
+				pulvinar. In viverra pellentesque tempus. Nullam gravida euismod turpis. Duis condimentum nisl arcu,
+				volutpat faucibus lorem rutrum et.
+            </p>
+        </div>
+
+    </div>
 
 </html>

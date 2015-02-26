@@ -52,12 +52,15 @@ class LogEntry
 	@Column(nullable = false)
 	public String message;
 
+	@NonVisual
 	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
 	public boolean userSeen;
 
+	@NonVisual
 	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
 	public boolean tenantSeen;
 
+	@NonVisual
 	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
 	public boolean important;
 
@@ -66,6 +69,7 @@ class LogEntry
 	 * (or limited to) a particular session, the deadline might be that session's deadline... that we might
 	 * (by default) show the user a list of could-be-active sessions.
 	 */
+	@NonVisual
 	@Column(columnDefinition = Usual.TIMESTAMP)
 	public Date deadline;
 

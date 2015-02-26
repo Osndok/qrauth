@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.services;
 
 import java.io.IOException;
 
+import com.allogy.qrauth.common.Version;
 import org.apache.tapestry5.*;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.OrderedConfiguration;
@@ -31,6 +32,6 @@ public class DevelopmentModule
         // assets. Web browsers will cache assets because of the far future expires
         // header. If existing assets are changed, the version number should also
         // change, to force the browser to download new versions.
-        configuration.add(SymbolConstants.APPLICATION_VERSION, "0.0-SNAPSHOT-DEV");
+        configuration.add(SymbolConstants.APPLICATION_VERSION, Version.FULL+"-development");
     }
 }

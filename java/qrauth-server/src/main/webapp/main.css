@@ -1,0 +1,16 @@
+
+table.table
+{
+	margin-top: 15px;
+}
+
+table.table thead a
+{
+	color: #444;
+}
+
+code.blue
+{
+	color: blue;
+	background-color: light-blue;
+}

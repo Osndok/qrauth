@@ -20,23 +20,15 @@ import java.util.Date;
  */
 public class Index
 {
-	@Inject
-	private Logger logger;
-
-	@Inject
-	private AjaxResponseRenderer ajaxResponseRenderer;
-
 	@Property
 	@Inject
 	@Symbol(SymbolConstants.TAPESTRY_VERSION)
 	private String tapestryVersion;
 
-	@InjectPage
-	private About about;
-
+	@Property
 	@Inject
-	private Block block;
-
+	@Symbol(SymbolConstants.APPLICATION_VERSION)
+	private String applicationVersion;
 
 	// Handle call with an unwanted context
 	Object onActivate(EventContext eventContext)
@@ -47,30 +39,4 @@ public class Index
 	}
 
 
-	Object onActionFromLearnMore()
-	{
-		about.setLearn("LearnMore");
-
-		return  about;
-	}
-
-	@Log
-	void onComplete()
-	{
-		logger.info("Complete call on Index page");
-	}
-
-	@Log
-	void onAjax()
-	{
-		logger.info("Ajax call on Index page");
-
-		ajaxResponseRenderer.addRender("middlezone", block);
-	}
-
-
-	public Date getCurrentTime()
-	{
-		return new Date();
-	}
 }
