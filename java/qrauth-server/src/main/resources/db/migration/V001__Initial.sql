@@ -204,7 +204,7 @@
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
         silentAlarm BOOLEAN DEFAULT 'f' not null,
-        stringValue varchar(255) unique,
+        stringValue varchar(255) not null unique,
         user_id int8,
         primary key (id)
     );
