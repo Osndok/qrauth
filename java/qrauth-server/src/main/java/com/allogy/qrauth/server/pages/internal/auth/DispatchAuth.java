@@ -220,8 +220,7 @@ class DispatchAuth extends AbstractAPICall
 				}
 			}
 
-			//return do_rsa_any_pubkey(user, pubkeys);
-			return new ErrorResponse(500, "unimplemented; rsa to existing username");
+			return new ErrorResponse(400, "that username has no public keys on file that match your provided signature");
 		}
 		else
 		{
@@ -298,6 +297,8 @@ class DispatchAuth extends AbstractAPICall
 
 		session.save(user);
 		session.save(userAuth);
+
+		journal.createdUserAccount(userAuth, null, tenantSession);
 	}
 
 	private

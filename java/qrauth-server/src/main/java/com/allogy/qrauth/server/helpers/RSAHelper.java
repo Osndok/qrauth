@@ -2,6 +2,8 @@ package com.allogy.qrauth.server.helpers;
 
 import com.allogy.qrauth.server.entities.AuthMethod;
 import com.allogy.qrauth.server.entities.DBUserAuth;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
@@ -176,17 +178,25 @@ class RSAHelper implements Closeable
 				return true;
 			}
 		}
+		catch (IOException e)
+		{
+			//This usually means authentication failed, but can also mean the binaries aren't available, etc.
+			log.warn("rsa authentication failed", e);
+			return false;
+		}
 		finally
 		{
 			signatureFile.delete();
 		}
 	}
 
+	private static final Logger log = LoggerFactory.getLogger(RSAHelper.class);
+
 	private
 	void writeBytesToFile(byte[] bytes, File file) throws IOException
 	{
 		final
-		OutputStream out=new FileOutputStream(file);
+		OutputStream out = new FileOutputStream(file);
 
 		try
 		{
@@ -202,16 +212,16 @@ class RSAHelper implements Closeable
 	public
 	void close() throws IOException
 	{
-		if (pemFile!=null)
+		if (pemFile != null)
 		{
 			pemFile.delete();
-			pemFile=null;
+			pemFile = null;
 		}
 
-		if (sshFile!=null)
+		if (sshFile != null)
 		{
 			sshFile.delete();
-			sshFile=null;
+			sshFile = null;
 		}
 	}
 
@@ -224,7 +234,7 @@ class RSAHelper implements Closeable
 	public
 	String getSshKeyBlob() throws IOException
 	{
-		if (sshKeyBlob==null)
+		if (sshKeyBlob == null)
 		{
 			splitSshFormat();
 		}
@@ -249,9 +259,9 @@ class RSAHelper implements Closeable
 
 		if (bits.length != 3)
 		{
-			for (int i=0; i<bits.length; i++)
+			for (int i = 0; i < bits.length; i++)
 			{
-				System.err.println("bit["+i+"] = '"+bits[i]+"'");
+				System.err.println("bit[" + i + "] = '" + bits[i] + "'");
 			}
 
 			throw new IllegalArgumentException("expecting only three key segments (type,key,comment), maybe remove spaces from comment?");
@@ -279,9 +289,9 @@ class RSAHelper implements Closeable
 	public
 	RSAHelper(DBUserAuth a)
 	{
-		sshKeyBlob=a.pubKey;
-		sshComment=a.comment;
-		sshFormat="ssh-rsa "+sshKeyBlob+" "+sshComment;
+		sshKeyBlob = a.pubKey;
+		sshComment = a.comment;
+		sshFormat = "ssh-rsa " + sshKeyBlob + " " + sshComment;
 	}
 
 }
