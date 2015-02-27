@@ -23,4 +23,8 @@ interface Journal
 
 	void updatedUserAuth(DBUserAuth userAuth);
 	void revokedUserAuth(DBUserAuth userAuth);
+
+	void transferredUserAuth(DBUserAuth userAuth, DBUser user);
+
+	void addedUserAuthCredential(DBUserAuth userAuth);
 }

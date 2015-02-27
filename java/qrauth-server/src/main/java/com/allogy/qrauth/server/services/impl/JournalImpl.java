@@ -190,6 +190,50 @@ class JournalImpl implements Journal
 		hibernateSessionManager.commit();
 	}
 
+	@Override
+	public
+	void transferredUserAuth(DBUserAuth userAuth, DBUser toWhom)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "userauth-transferred";
+		logEntry.message = "Transferred "+humanReadable(userAuth.authMethod)+" to "+toWhom;
+		logEntry.user=userAuth.user;
+		logEntry.username=null;
+		logEntry.userAuth=userAuth;
+		logEntry.tenant=null;
+		logEntry.tenantIP=network.needIPForThisRequest(null);
+		logEntry.tenantSession=null;
+		logEntry.deadline=null;
+
+		hibernateSessionManager.getSession().save(logEntry);
+		hibernateSessionManager.commit();
+	}
+
+	@Override
+	public
+	void addedUserAuthCredential(DBUserAuth userAuth)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "userauth-added";
+		logEntry.message = "Added "+humanReadable(userAuth.authMethod)+" authentication method";
+		logEntry.user=userAuth.user;
+		logEntry.username=null;
+		logEntry.userAuth=userAuth;
+		logEntry.tenant=null;
+		logEntry.tenantIP=network.needIPForThisRequest(null);
+		logEntry.tenantSession=null;
+		logEntry.deadline=null;
+
+		hibernateSessionManager.getSession().save(logEntry);
+		hibernateSessionManager.commit();
+	}
+
 	private
 	TenantIP getTenantIP(Tenant tenant)
 	{
@@ -210,7 +254,7 @@ class JournalImpl implements Journal
 			case RSA:
 				return "RSA public key";
 			case YUBIKEY_CUSTOM:
-				return "custom Yubikey factors";
+				return "custom Yubikey token";
 			case HMAC_OTP:
 				return "H-OTP proof";
 			case TIME_OTP:
@@ -218,7 +262,7 @@ class JournalImpl implements Journal
 			case PAPER_PASSWORDS:
 				return "PPP password";
 			case YUBIKEY_PUBLIC:
-				return "public Yubikey verification";
+				return "public Yubikey token";
 			case OPEN_ID:
 				return "3rd party OpenID server";
 			case STATIC_OTP:

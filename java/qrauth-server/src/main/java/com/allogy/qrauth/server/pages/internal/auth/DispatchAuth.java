@@ -6,6 +6,7 @@ import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.helpers.RSAHelper;
 import com.allogy.qrauth.server.pages.Index;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
+import com.allogy.qrauth.server.pages.user.ActivityUser;
 import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
@@ -357,7 +358,7 @@ class DispatchAuth extends AbstractAPICall
 		authSession.authenticateRemoteBrowser(userAuth, username, tenantSession);
 
 		//TODO: !!!: where do we send them?!?! (a) if tenantSession == null, (b) if tenant session is not null, (c) user selected 'configure' option...
-		return Index.class;
+		return ActivityUser.class;
 	}
 
 	@Inject

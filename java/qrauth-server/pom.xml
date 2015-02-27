@@ -70,6 +70,11 @@
             <version>${slf4j-release-version}</version>
         </dependency>
 
+		<dependency>
+			<groupId>com.yubico</groupId>
+			<artifactId>yubico-validation-client2</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 
         <!-- Uncomment this to add support resource minification and runtime compilation -->
         <!--

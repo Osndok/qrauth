@@ -15,6 +15,11 @@ code.blue
 	background-color: light-blue;
 }
 
+table.singleRecord
+{
+	max-width: 100%;
+}
+
 table.singleRecord th
 {
 	text-align: right;
@@ -26,3 +31,9 @@ table.singleRecord td
 	padding: 4px;
 }
 
+td.pubKey
+{
+	word-wrap:break-word;
+	overflow: hidden;
+	max-width: 800px;
+}

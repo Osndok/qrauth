@@ -5,12 +5,12 @@
 	<table>
 		<tr>
 			<th>Method:</th>
-			<th><a href="http://en.wikipedia.org/wiki/SQRL">SQRL</a></th>
-			<th><a href="http://en.wikipedia.org/wiki/RSA_(cryptosystem)">RSA</a></th>
-			<th><a href="http://en.wikipedia.org/wiki/HMAC-based_One-time_Password_Algorithm">H-OTP</a></th>
-			<th><a href="http://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm">T-OTP</a></th>
-			<th><a href="https://www.grc.com/ppp.htm">PPP</a></th>
-			<th><a href="http://en.wikipedia.org/wiki/OpenID">OpenID</a></th>
+			<th><a target="_blank" href="http://en.wikipedia.org/wiki/SQRL">SQRL</a></th>
+			<th><a target="_blank" href="http://en.wikipedia.org/wiki/RSA_(cryptosystem)">RSA</a></th>
+			<th><a target="_blank" href="http://en.wikipedia.org/wiki/HMAC-based_One-time_Password_Algorithm">H-OTP</a></th>
+			<th><a target="_blank" href="http://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm">T-OTP</a></th>
+			<th><a target="_blank" href="https://www.grc.com/ppp.htm">PPP</a></th>
+			<th><a target="_blank" href="http://en.wikipedia.org/wiki/OpenID">OpenID</a></th>
 			<th>Email</th>
 			<th class="password">Password</th>
 		</tr>

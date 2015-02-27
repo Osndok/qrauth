@@ -1,5 +1,7 @@
 package com.allogy.qrauth.server.services.impl;
 
+import com.yubico.client.v2.YubicoClient;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +52,31 @@ class Config
 		finally
 		{
 			in.close();
+		}
+
+		{
+			final
+			String yubiSecret=_getYubicoApiSecret();
+
+			final
+			Integer yubiId=_getYubicoApiId();
+
+			if (yubiSecret==null || yubiId==null)
+			{
+				yubicoClientCachingFactory = null;
+			}
+			else
+			{
+				yubicoClientCachingFactory = new ThreadLocal<YubicoClient>()
+				{
+					@Override
+					protected
+					YubicoClient initialValue()
+					{
+						return YubicoClient.getClient(yubiId, yubiSecret);
+					}
+				};
+			}
 		}
 	}
 
@@ -119,5 +146,52 @@ class Config
 	String getBrandLink()
 	{
 		return properties.getProperty("brand.link", "https://github.com/Osndok/qrauth");
+	}
+
+	private
+	Integer _getYubicoApiId()
+	{
+		return _integer("yubico.api.id", null);
+	}
+
+	private
+	String _getYubicoApiSecret()
+	{
+		return properties.getProperty("yubico.api.secret", null);
+	}
+
+	private
+	Integer _integer(String key, Integer _default)
+	{
+		final
+		String stringValue=properties.getProperty(key);
+
+		if (stringValue==null)
+		{
+			return _default;
+		}
+		else
+		{
+			return Integer.parseInt(stringValue);
+		}
+	}
+
+	private final
+	ThreadLocal<YubicoClient> yubicoClientCachingFactory;
+
+	/**
+	 * @return a YubicoClient that will validate against the public yubi-cloud, or null if there is no api key
+	 */
+	public
+	YubicoClient getYubicoClient()
+	{
+		if (yubicoClientCachingFactory == null)
+		{
+			return null;
+		}
+		else
+		{
+			return yubicoClientCachingFactory.get();
+		}
 	}
 }

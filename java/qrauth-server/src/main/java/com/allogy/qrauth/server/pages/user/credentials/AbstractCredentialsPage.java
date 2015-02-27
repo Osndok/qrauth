@@ -77,4 +77,11 @@ class AbstractCredentialsPage
 	{
 		return userAuth.id;
 	}
+
+	public
+	AbstractCredentialsPage with(DBUserAuth userAuth)
+	{
+		this.userAuth=userAuth;
+		return this;
+	}
 }

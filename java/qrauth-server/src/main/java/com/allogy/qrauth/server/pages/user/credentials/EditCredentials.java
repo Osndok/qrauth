@@ -1,5 +1,6 @@
 package com.allogy.qrauth.server.pages.user.credentials;
 
+import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.pages.user.Credentials;
 import com.allogy.qrauth.server.services.Journal;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -24,4 +25,5 @@ class EditCredentials extends AbstractCredentialsPage
 		journal.updatedUserAuth(userAuth);
 		return Credentials.class;
 	}
+
 }
