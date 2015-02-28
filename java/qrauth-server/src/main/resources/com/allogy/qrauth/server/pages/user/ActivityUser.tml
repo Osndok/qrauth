@@ -15,7 +15,7 @@
 			${logEntry.tenant}
 		</p:siteCell>
 		<p:usernameCell>
-			${logEntry.username?.stringValue}
+			${logEntry.username?.displayValue}
 		</p:usernameCell>
 		<p:authMethodCell>
 			<t:if test="logEntry.userAuth">

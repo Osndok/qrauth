@@ -20,7 +20,10 @@ class Username extends Attemptable implements Mortal
 	public DBUser user;
 
 	@Column(nullable = false, unique = true)
-	public String stringValue;
+	public String displayValue;
+
+	@Column(nullable = false, unique = true)
+	public String matchValue;
 
 	/**
 	 * Counterpart to the DBUserAuth silent alarm, perhaps someone would want a special

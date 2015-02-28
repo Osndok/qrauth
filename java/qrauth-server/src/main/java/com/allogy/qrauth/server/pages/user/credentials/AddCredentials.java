@@ -61,13 +61,14 @@ class AddCredentials extends AbstractUserPage
 		switch (authMethod)
 		{
 			case RSA:
-				return "create/login";
+				return "create-and-login/not add";
 
 			case SQRL:
+			case SALTED_PASSWORD:
 				return "almost";
 
 			case YUBIKEY_PUBLIC:
-				return "soon";
+				return "Yes";
 
 			case YUBIKEY_CUSTOM:
 			case HMAC_OTP:
@@ -76,7 +77,6 @@ class AddCredentials extends AbstractUserPage
 			case OPEN_ID:
 			case STATIC_OTP:
 			case EMAILED_SECRET:
-			case SALTED_PASSWORD:
 			default:
 				return "";
 		}

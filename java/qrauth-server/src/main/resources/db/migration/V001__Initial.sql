@@ -203,8 +203,9 @@
         successes INTEGER DEFAULT 0 not null,
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
+        displayValue varchar(255) not null unique,
+        matchValue varchar(255) not null unique,
         silentAlarm BOOLEAN DEFAULT 'f' not null,
-        stringValue varchar(255) not null unique,
         user_id int8,
         primary key (id)
     );

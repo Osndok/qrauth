@@ -10,20 +10,20 @@ import static com.allogy.qrauth.server.entities.AuthMethodGroup.*;
 public
 enum AuthMethod
 {
-	/**15-chars-max| RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | GROUP         */
-	SQRL           (   1  , false    , true     , false     , true    , false , true     , QR_ONLY       ),
-	RSA            (   2  , false    , false    , false     , false   , false , true     , RSA_CRAM      ),
-	YUBIKEY_CUSTOM (   3  , false    , true     , false     , false   , false , false    , USER_AND_PASS ),
-	HMAC_OTP       (   4  , false    , true     , false     , false   , false , false    , USER_AND_PASS ),
-	TIME_OTP       (   5  , false    , false    , false     , false   , true  , false    , USER_AND_PASS ),
-	PAPER_PASSWORDS(   7  , false    , true     , false     , false   , false , false    , PPP_CRAM      ),
-	YUBIKEY_PUBLIC (   8  , false    , false    , true      , true    , false , true     , PASS_ONLY     ),
-	OPEN_ID        (   9  , false    , false    , true      , true    , false , true     , THIRD_PARTY   ),
-	/* --- line of mandatory deadlines ----------------------------------------------------------------- */
-	STATIC_OTP     (  10  , true     , true     , false     , false   , false , false    , USER_AND_PASS ),
-	/* --- line of questionable security --------------------------------------------------------------- */
-	EMAILED_SECRET (  11  , true     , false    , true      , true    , false , false    , THIRD_PARTY   ),
-	SALTED_PASSWORD(  12  , true     , false    , false     , false   , false , false    , USER_AND_PASS ),
+	/**15-chars-max| RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | P/W ENTRY | GROUP         */
+	SQRL           (   1  , false    , true     , false     , true    , false , true     , false     , QR_ONLY       ),
+	RSA            (   2  , false    , false    , false     , false   , false , true     , false     , RSA_CRAM      ),
+	YUBIKEY_CUSTOM (   3  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
+	HMAC_OTP       (   4  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
+	TIME_OTP       (   5  , false    , false    , false     , false   , true  , false    , true      , USER_AND_PASS ),
+	PAPER_PASSWORDS(   7  , false    , true     , false     , false   , false , false    , true      , PPP_CRAM      ),
+	YUBIKEY_PUBLIC (   8  , false    , false    , true      , true    , false , true     , true      , PASS_ONLY     ),
+	OPEN_ID        (   9  , false    , false    , true      , true    , false , true     , false     , THIRD_PARTY   ),
+	/* --- line of mandatory deadlines ----------------------------------------------------------------------------- */
+	STATIC_OTP     (  10  , true     , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
+	/* --- line of questionable security --------------------------------------------------------------------------- */
+	EMAILED_SECRET (  11  , true     , false    , true      , true    , false , false    , false     , THIRD_PARTY   ),
+	SALTED_PASSWORD(  12  , true     , false    , false     , false   , false , false    , true      , USER_AND_PASS ),
 	;
 
 	private static final int FIRST_QUESTIONABLE_RANK = 11;
@@ -52,6 +52,9 @@ enum AuthMethod
 	boolean leakSafe;
 
 	private final
+	boolean passwordEntry;
+
+	private final
 	AuthMethodGroup authMethodGroup;
 
 	private
@@ -63,6 +66,7 @@ enum AuthMethod
 				  boolean network,
 				  boolean clock,
 				  boolean leakSafe,
+				  boolean passwordEntry,
 				  AuthMethodGroup authMethodGroup
 	)
 	{
@@ -73,6 +77,7 @@ enum AuthMethod
 		this.network = network;
 		this.clock = clock;
 		this.leakSafe = leakSafe;
+		this.passwordEntry = passwordEntry;
 		this.authMethodGroup = authMethodGroup;
 	}
 
@@ -165,5 +170,14 @@ enum AuthMethod
 	long getDefaultLoginLength()
 	{
 		return FIRST_RANK_MILLIS/rank;
+	}
+
+	/**
+	 * @return true if (and only if) this auth method might involve receiving text in a password field
+	 */
+	public
+	boolean usesPasswordEntry()
+	{
+		return passwordEntry;
 	}
 }

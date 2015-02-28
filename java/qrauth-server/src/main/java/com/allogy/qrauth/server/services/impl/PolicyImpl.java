@@ -1,6 +1,9 @@
 package com.allogy.qrauth.server.services.impl;
 
+import com.allogy.qrauth.server.entities.DBUser;
 import com.allogy.qrauth.server.entities.Tenant;
+import com.allogy.qrauth.server.entities.Username;
+import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.services.Policy;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -77,6 +80,83 @@ class PolicyImpl implements Policy, Runnable
 	long getShortestUsableSessionLength()
 	{
 		return SHORTEST_USABLE_SESSION;
+	}
+
+	@Override
+	public
+	boolean wouldAllowUsernameToBeRegistered(String username)
+	{
+		//TODO: !!!: prevent common unix-system usernames and group names from being registered as usernames
+		//TODO: prevent common names (e.g. "john") from being registered as usernames
+		//TODO: prevent dictionary words from being registered as usernames
+		//TODO: prevent usernames that contain dirty words from being registered
+		//TODO: maybe restrict to usernames to unix-style names
+		//TODO: for whole-string username restrictions, use a bloom filter that is created at compile time
+		return username.length() > 4;
+	}
+
+	@Override
+	public
+	String usernameMatchFilter(String userInput)
+	{
+		return userInput.trim().toLowerCase();
+	}
+
+	/**
+	 * In testing, this is the amount of time it took for a user to read the 'not now' text and refresh the page.
+	 */
+	private static final long ADDITIONAL_USERNAME_COOLDOWN = TimeUnit.SECONDS.toMillis(6);
+
+	@Override
+	public
+	boolean wouldAllowAdditionalUsernames(DBUser user, boolean extraEffort)
+	{
+		if (user.usernames == null)
+		{
+			//a primitive hibernate object (new user).
+			return true;
+		}
+
+		int numAlive = 0;
+		int numDead = 0;
+		Username mostRecent = null;
+
+		for (Username username : user.usernames)
+		{
+			if (Death.hathVisited(username))
+			{
+				numDead++;
+			}
+			else
+			{
+				numAlive++;
+			}
+
+			if (mostRecent == null || username.created.before(mostRecent.created))
+			{
+				mostRecent = username;
+			}
+		}
+
+		if (mostRecent != null && System.currentTimeMillis() < mostRecent.created.getTime() + ADDITIONAL_USERNAME_COOLDOWN)
+		{
+			log.debug("in username-creation cooldown period: {} alive, {} dead, recent={}", numAlive, numDead, mostRecent);
+			return false;
+		}
+
+		final
+		int total=numAlive+numDead;
+
+		//TODO: count usernames based on ip match too?
+
+		if (extraEffort)
+		{
+			return numAlive < 15;
+		}
+		else
+		{
+			return total < 15;
+		}
 	}
 
 	private

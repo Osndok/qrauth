@@ -40,6 +40,24 @@ class Death
 	}
 
 	public static
+	boolean hathVisited(Mortal mortal, long now) throws NullPointerException
+	{
+		final
+		Date deadline=mortal.getDeadline();
+
+		return deadline!=null && deadline.getTime() <= now;
+	}
+
+	public static
+	boolean hathVisited(Mortal mortal, Date now) throws NullPointerException
+	{
+		final
+		Date deadline=mortal.getDeadline();
+
+		return deadline!=null && deadline.before(now);
+	}
+
+	public static
 	String noteMightSay(Mortal mortal, String _default)
 	{
 		if (mortal==null)
