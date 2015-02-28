@@ -94,14 +94,36 @@ class PolicyImpl implements Policy, Runnable
 		//TODO: prevent usernames that contain dirty words from being registered
 		//TODO: maybe restrict to usernames to unix-style names
 		//TODO: for whole-string username restrictions, use a bloom filter that is created at compile time
-		return username.length() > 4;
+		return usernameMatchFilter(username).length() > 4;
 	}
 
 	@Override
 	public
 	String usernameMatchFilter(String userInput)
 	{
-		return userInput.trim().toLowerCase();
+		final
+		int l=userInput.length();
+
+		final
+		StringBuilder sb=new StringBuilder();
+
+		for (int i=0; i<l; i++)
+		{
+			final
+			char c=userInput.charAt(i);
+
+			if ((c>='a' && c<='z') || (c>='0' && c<='9'))
+			{
+				sb.append(c);
+			}
+			else
+			if (c>='A' && c<='Z')
+			{
+				sb.append(Character.toLowerCase(c));
+			}
+		}
+
+		return sb.toString();
 	}
 
 	/**
