@@ -79,10 +79,13 @@ class AppModule
         // FactoryDefaults (with the same key). Here we're restricting the supported
         // locales to just "en" (English). As you add localised message catalogs and other assets,
         // you can extend this list of locales (it's a comma separated series of locale names;
-        // the first locale name is the default when there's no reasonable digestMatch).
+        // the first locale name is the default when there's no reasonable match).
         configuration.add(SymbolConstants.SUPPORTED_LOCALES, "en");
 
-		configuration.add(SymbolConstants.SECURE_ENABLED, "false"); //only secure, disable tapestry roaming (see below).
+		//only secure, disable tapestry's to-and-fro roaming (see below).
+		configuration.add(SymbolConstants.SECURE_ENABLED, "false");
+
+		//For an instant, a dark overlay and a busy-spinner is shown until the page becomes idle (by default).
 		configuration.add(SymbolConstants.ENABLE_PAGELOADING_MASK, "false");
 
 		configuration.add(HibernateSymbols.EARLY_START_UP, "true");

@@ -126,7 +126,7 @@ class DoSqrl extends AbstractAPICall
 		 * The SQRL client synthesizes the site-specific private key, uses that to sign the concatenated
 		 * values of the previously mentioned client and server parameters, sends the resulting signature to
 		 * the web server as the value of this ids parameter. The web server verifies the signature using the
-		 * accompanying idk, which must also digestMatch the value stored in the user's SQRL account association.
+		 * accompanying idk, which must also match the value stored in the user's SQRL account association.
 		 */
 		final
 		String identitySignature = request.getParameter(PARAMETER_IDS);

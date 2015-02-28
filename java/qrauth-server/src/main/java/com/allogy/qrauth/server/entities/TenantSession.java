@@ -58,13 +58,28 @@ class TenantSession implements Mortal
 	 * Returns the Person that is connected with this Tenant's session, or null if we do not yet know
 	 * who (if anyone) it should be linked with.
 	 *
-	 * WARNING: The fact of this field being non-null is sufficient to (at least temporarily) authenticate a Person!
+	 * WARNING: The fact of this field being non-null may be sufficient (at least temporarily) to authenticate a Person!
 	 */
 	@ManyToOne(optional = true)
 	public DBUser user;
 
 	/**
-	 * The time that we noticed who is associated with this session. The null-ness of this field should always digestMatch
+	 * ATM, this is needed simply to convey the 'alarm' value, if/when a tenant becomes multi-username-aware, this
+	 * might have more meaning.
+	 */
+	@ManyToOne(optional = true)
+	public Username username;
+
+	/**
+	 * This indicates which set of credentials was used to authenticate to this session. Note that this may be
+	 * implicit if the user was already logged in before requesting auth to this tenant. We must track this so
+	 * that we can report the 'rank' and 'alarm' values of the security method.
+	 */
+	@ManyToOne(optional = true)
+	public DBUserAuth userAuth;
+
+	/**
+	 * The time that we noticed who is associated with this session. The null-ness of this field should always match
 	 * the null-ness of the person (person_id) field.
 	 */
 	@Column(nullable = true, columnDefinition = Usual.TIMESTAMP)

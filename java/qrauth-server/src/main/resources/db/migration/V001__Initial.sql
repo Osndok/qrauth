@@ -149,6 +149,8 @@
         tenant_id int8 not null,
         tenantIP_id int8 not null,
         user_id int8,
+        userAuth_id int8,
+        username_id int8,
         primary key (id)
     );
 
@@ -310,9 +312,19 @@
     create index idx_tenantsession_id on TenantSession (session_id);
 
     alter table TenantSession 
+        add constraint FK77262E6CBD5D763E 
+        foreign key (userAuth_id) 
+        references DBUserAuth;
+
+    alter table TenantSession 
         add constraint FK77262E6CE4D1151E 
         foreign key (user_id) 
         references DBUser;
+
+    alter table TenantSession 
+        add constraint FK77262E6CF35D7A40 
+        foreign key (username_id) 
+        references Username;
 
     alter table TenantSession 
         add constraint FK77262E6C9C6CD340 
