@@ -2,6 +2,13 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
-	TODO: usernames page (list current, and claim untaken usernames)
+	<t:grid t:source="dataSource" row="username" add="commands">
+   		<p:commandsCell>
+   			<t:pagelink page="user/names/edit" context="username">Edit</t:pagelink>,
+   			<t:pagelink page="user/names/revoke" context="username">Revoke</t:pagelink>
+   		</p:commandsCell>
+   	</t:grid>
+
+   	<t:pagelink page="user/names/add" class="btn btn-primary">Add</t:pagelink>
 
 </html>
