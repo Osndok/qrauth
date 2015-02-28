@@ -25,6 +25,16 @@ class AuthSessionMemo implements Mortal
 	public final
 	long deadline;
 
+	public final
+	long userId;
+
+	/**
+	 * NB: this value is not endemic to our cause, but is primarily to just get an idea of which tenants bring the most traffic.
+	 * This value sticks until the user re-authenticates...
+	 */
+	public final
+	Long tenantId;
+
 	public
 	AuthSessionMemo(String bundle)
 	{
@@ -35,9 +45,31 @@ class AuthSessionMemo implements Mortal
 		userEpoch = Integer.parseInt(bits[1]);
 		userNameId = optionalLong(bits, 2);
 		tenantSessionId = optionalLong(bits, 3);
-		deadline=Long.parseLong(bits[4]);
+		deadline = Long.parseLong(bits[4]);
+		userId = Long.parseLong(bits[5]);
+		tenantId = optionalLong(bits, 3);
 
-		toStringCache=bundle;
+		toStringCache = bundle;
+	}
+
+	@Override
+	public
+	String toString()
+	{
+		if (toStringCache==null)
+		{
+			//WARNING: this must be parsable by the one-string constructor above.
+			toStringCache=
+				userAuthId + ":" +
+					userEpoch + ":" +
+					orEmpty(userNameId) + ":" +
+					orEmpty(tenantSessionId) + ":" +
+					deadline + ":" +
+					userId + ":" +
+					orEmpty(tenantId)
+			;
+		}
+		return toStringCache;
 	}
 
 	private static
@@ -62,23 +94,26 @@ class AuthSessionMemo implements Mortal
 		final
 		DBUser user=userAuth.user;
 
+		this.userId = user.id;
 		this.userAuthId=userAuth.id;
 		this.userEpoch = user.epoch;
 		this.userNameId=(username==null?null:username.id);
 		this.tenantSessionId=(tenantSession==null?null:tenantSession.id);
+		this.tenantId=(tenantSession==null?null:tenantSession.tenant.id);
 		this.deadline=sessionDeadline.getTime();
 	}
 
-	@Override
-	public
-	String toString()
+	private
+	String orEmpty(Long value)
 	{
-		if (toStringCache==null)
+		if (value==null)
 		{
-			//WARNING: this must be parsable by the one-string constructor above.
-			toStringCache=userAuthId+":"+ userEpoch +":"+(userNameId==null?"":userNameId)+":"+(tenantSessionId==null?"":tenantSessionId)+":"+deadline;
+			return "";
 		}
-		return toStringCache;
+		else
+		{
+			return Long.toString(value);
+		}
 	}
 
 	@Override

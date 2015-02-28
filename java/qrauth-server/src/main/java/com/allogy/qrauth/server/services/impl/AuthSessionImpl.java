@@ -190,24 +190,6 @@ class AuthSessionImpl implements AuthSession
 		final
 		Session session = hibernateSessionManager.getSession();
 
-		/*
-		final
-		Tenant tenant;
-		{
-			if (tenantSession == null)
-			{
-				tenant = null;
-			}
-			else
-			{
-				tenant = tenantSession.tenant;
-			}
-		}
-
-		final
-		TenantIP tenantIP=network.needIPForThisRequest(tenant);
-		*/
-
 		final
 		DBUser user = userAuth.user;
 
@@ -401,6 +383,17 @@ class AuthSessionImpl implements AuthSession
 			{
 				log.debug("valid session cookie-token: {}", authSessionMemo);
 				environment.push(AuthSessionMemo.class, authSessionMemo);
+
+				final
+				Response response=requestGlobals.getResponse();
+
+				//TODO: while meant for logging, this might expose the user::id to tenants, is that okay?
+				response.setHeader("AI-User-ID", "u"+authSessionMemo.userId);
+
+				if (authSessionMemo.tenantId!=null)
+				{
+					response.setHeader("AI-Tenant-ID", "t"+authSessionMemo.tenantId);
+				}
 			}
 		}
 	}
