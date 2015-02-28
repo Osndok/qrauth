@@ -83,7 +83,7 @@
 		<br/><br/>
 	</right>
 	<lower>
-		It is not neccesary to create a new identity per-website, as the SQRL protocol
+		It is not necessary to create a new identity per-website, as the SQRL protocol
 		automatically isolates your online identities per-domain.
 		See <a href="https://www.grc.com/sqrl/sqrl.htm">the main sqrl page at grc.com</a>
 		for more information.
@@ -108,7 +108,16 @@
 		</tr>
 		<tr>
 			<td>Password:</td>
-			<td><input name="otp_password"/></td>
+			<!--
+			NOTICE: The password field is not marked as a password, and therefore will be exposed when typing.
+			 OTPs *should* be one-time, so it's okay to expose them.
+			 IN FACT, it is partly better so that the browser will not try/offer to remember the password.
+			 HOWEVER... this field *is* used for (the discouraged) static passwords,
+			 BUT... maybe that will make the decerning user uncomfortable enough to to use a better auth method,
+			 OR.... it might aid in a lock-out situation (where the OTPs is provided over the phone, etc)
+			 ANYWAY... there should be no security theatre concerning the fact that the password is not really 'hidden'.
+			-->
+			<td><input name="otp_password" autocomplete="off"/></td>
 			<td><input type="submit" name="do_otp" value="Submit"/></td>
 		</tr>
 	</table>

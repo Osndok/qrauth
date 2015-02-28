@@ -344,20 +344,22 @@ class DispatchAuth extends AbstractAPICall
 			//The username matches a real user record, run through all the user's possible otp methods, maybe find one that works.
 			for (DBUserAuth userAuth : user.authMethods)
 			{
-				if (!Death.hathVisited(userAuth, now))
+				/*
+				NOTICE: we do not check for 'dead' auth methods, so that:
+				(1) the actual death message will surface, and
+				(2) the user cannot reuse old passwords.
+				 */
+				final
+				AuthMethod authMethod = userAuth.authMethod;
+
+				if (authMethod.usesPasswordEntry())
 				{
-					final
-					AuthMethod authMethod = userAuth.authMethod;
+					attemptables.add(userAuth);
 
-					if (authMethod.usesPasswordEntry())
+					if (passwordSatisfiesAuthMethod(authMethod, userAuth, password))
 					{
-						attemptables.add(userAuth);
-
-						if (passwordSatisfiesAuthMethod(authMethod, userAuth, password))
-						{
-							log.debug("provided password satisfies {} {}", authMethod, userAuth);
-							return maybeAuthenticateUser(userAuth, username);
-						}
+						log.debug("provided password satisfies {} {}", authMethod, userAuth);
+						return maybeAuthenticateUser(userAuth, username);
 					}
 				}
 			}
@@ -375,6 +377,12 @@ class DispatchAuth extends AbstractAPICall
 	private
 	Hashing hashing;
 
+	/**
+	 * @param authMethod
+	 * @param userAuth
+	 * @param password
+	 * @return
+	 */
 	private
 	boolean passwordSatisfiesAuthMethod(AuthMethod authMethod, DBUserAuth userAuth, String password)
 	{

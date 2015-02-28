@@ -4,6 +4,7 @@ import com.allogy.qrauth.server.entities.DBUser;
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.Username;
 import com.allogy.qrauth.server.helpers.Death;
+import com.allogy.qrauth.server.helpers.PasswordHelper;
 import com.allogy.qrauth.server.services.Policy;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -15,6 +16,7 @@ import org.apache.tapestry5.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -156,6 +158,32 @@ class PolicyImpl implements Policy, Runnable
 		else
 		{
 			return total < 15;
+		}
+	}
+
+	private static final long MS_PER_DAY=TimeUnit.DAYS.toMillis(1);
+
+	/**
+	 * @param strength - a double to prevent integer division and make the function more readable.
+	 * @return
+	 */
+	public
+	Date passwordDeadlineGivenComplexity(double strength)
+	{
+		double days = strength / PasswordHelper.DICTIONARY_WORD_STRENGTH;
+
+		if (days<1)
+		{
+			return new Date(System.currentTimeMillis()+MS_PER_DAY);
+		}
+		else
+		if (days>30)
+		{
+			return new Date(System.currentTimeMillis()+30*MS_PER_DAY);
+		}
+		else
+		{
+			return new Date(System.currentTimeMillis()+(long)(days*MS_PER_DAY));
 		}
 	}
 

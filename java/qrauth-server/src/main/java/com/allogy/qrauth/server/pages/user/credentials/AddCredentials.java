@@ -2,11 +2,15 @@ package com.allogy.qrauth.server.pages.user.credentials;
 
 import com.allogy.qrauth.server.entities.AuthMethod;
 import com.allogy.qrauth.server.entities.DBUserAuth;
+import com.allogy.qrauth.server.entities.UnimplementedHashFunctionException;
 import com.allogy.qrauth.server.helpers.DateHelper;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
+import com.allogy.qrauth.server.helpers.PasswordHelper;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
+import com.allogy.qrauth.server.services.Hashing;
 import com.allogy.qrauth.server.services.Journal;
+import com.allogy.qrauth.server.services.Policy;
 import com.allogy.qrauth.server.services.impl.Config;
 import com.yubico.client.v2.VerificationResponse;
 import com.yubico.client.v2.YubicoClient;
@@ -64,10 +68,10 @@ class AddCredentials extends AbstractUserPage
 				return "create-and-login/not add";
 
 			case SQRL:
-			case SALTED_PASSWORD:
 				return "almost";
 
 			case YUBIKEY_PUBLIC:
+			case SALTED_PASSWORD:
 				return "Yes";
 
 			case YUBIKEY_CUSTOM:
@@ -107,7 +111,8 @@ class AddCredentials extends AbstractUserPage
 
 		switch (authMethod)
 		{
-			case YUBIKEY_PUBLIC: return yubiPublic;
+			case YUBIKEY_PUBLIC  : return yubiPublic;
+			case SALTED_PASSWORD : return saltedPassword;
 
 			case SQRL:
 			case RSA:
@@ -118,7 +123,6 @@ class AddCredentials extends AbstractUserPage
 			case OPEN_ID:
 			case STATIC_OTP:
 			case EMAILED_SECRET:
-			case SALTED_PASSWORD:
 			default:
 				return unimplemented;
 		}
@@ -267,5 +271,71 @@ class AddCredentials extends AbstractUserPage
 			.uniqueResult();
 	}
 
+	/*
+	--------------------------- SALTED_PASSWORD --------------------------------
+	 */
 
+	@Inject
+	private
+	Block saltedPassword;
+
+	@Property
+	private
+	String password;
+
+	@Inject
+	private
+	Hashing hashing;
+
+	@Inject
+	private
+	Policy policy;
+
+	Object onSelectedFromDoSaltedPassword() throws UnimplementedHashFunctionException
+	{
+		if (alreadyHavePasswordOnFile())
+		{
+			return new ErrorResponse(400, "that password has already been used, and cannot therefore be reused");
+		}
+
+		//NB: password is escaping!
+		final
+		int strength = PasswordHelper.gaugeStrength(password);
+
+		final
+		DBUserAuth userAuth = new DBUserAuth();
+
+		userAuth.user = user;
+		userAuth.authMethod = AuthMethod.SALTED_PASSWORD;
+		userAuth.millisGranted = (int) userAuth.authMethod.getDefaultLoginLength();
+		userAuth.comment = "Strength="+strength;
+		userAuth.secret = hashing.digest(password);
+		userAuth.deadline=policy.passwordDeadlineGivenComplexity(strength);
+		userAuth.deathMessage="That password has expired";
+		session.save(userAuth);
+
+		journal.addedUserAuthCredential(userAuth);
+
+		return editCredentials.with(userAuth);
+	}
+
+	private
+	boolean alreadyHavePasswordOnFile() throws UnimplementedHashFunctionException
+	{
+		final
+		String password=this.password;
+
+		for (DBUserAuth userAuth : user.authMethods)
+		{
+			if (userAuth.authMethod == AuthMethod.SALTED_PASSWORD)
+			{
+				if (hashing.digestMatch(password, userAuth.secret))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 }
