@@ -1,0 +1,56 @@
+<html t:type="layout" title="Edit Username"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter"
+      >
+
+	<table class="singleRecord">
+		<tr>
+			<th>ID:</th>
+			<td>${username.id}</td>
+		</tr>
+		<tr>
+			<th>Created:</th>
+			<td>${username.created}</td>
+		</tr>
+		<tr>
+			<th>Last Attempt:</th>
+			<td>${username.lastAttempt}</td>
+		</tr>
+		<tr>
+			<th>Last Success:</th>
+			<td>${username.lastSuccess}</td>
+		</tr>
+		<tr>
+			<th>Attempts:</th>
+			<td>${username.attempts}</td>
+		</tr>
+		<tr>
+			<th>Successes:</th>
+			<td>${username.successes}</td>
+		</tr>
+		<tr>
+			<th>Expiry:</th>
+			<td>
+				<t:if test="username.deadline">
+					${username.deadline}
+					<!-- TODO: provide a widget here to bring the deadline closer (if not already at hand) -->
+				<p:else>
+					<i>None</i>&nbsp;&nbsp;&nbsp;&nbsp;
+					<t:pagelink page="user/names/revoke" context="username">Revoke</t:pagelink>
+					<!-- TODO: provide a widget here to set the deadline -->
+				</p:else>
+				</t:if>
+			</td>
+		</tr>
+	</table>
+
+	<h3>NOTE: You can only change capitalization, spaces, and punctuation.</h3>
+	<h4>(e.g. "johnSmith" -> "John (Smith)")</h4>
+
+	<t:form>
+		<t:label for="displayName"/>
+		<t:textfield value="displayValue" t:id="displayName" autocomplete="off"/>
+		<t:submit/>
+	</t:form>
+
+</html>

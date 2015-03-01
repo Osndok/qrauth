@@ -3,6 +3,7 @@ package com.allogy.qrauth.server.pages.user.names;
 import com.allogy.qrauth.server.entities.Username;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
+import com.allogy.qrauth.server.pages.user.NamesUser;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
 import org.apache.tapestry5.annotations.InjectPage;
@@ -48,7 +49,7 @@ class AddNames extends AbstractUserPage
 	{
 		log.debug("onSuccess()");
 
-		if (policy.wouldAllowAdditionalUsernames(user, false))
+		if (policy.wouldAllowAdditionalUsernames(user, false) && policy.wouldAllowUsernameToBeRegistered(displayName))
 		{
 			final
 			String matchValue = policy.usernameMatchFilter(displayName);
@@ -59,13 +60,14 @@ class AddNames extends AbstractUserPage
 			{
 				username = new Username();
 				username.user = user;
-				username.displayValue = displayName;
+				username.displayValue = displayName.trim();
 				username.matchValue = matchValue;
 				session.save(username);
 
 				journal.allocatedUsername(username);
 
-				return editNamesPage.with(username);
+				//return editNamesPage.with(username);
+				return NamesUser.class;
 			}
 
 			return this;
@@ -88,4 +90,17 @@ class AddNames extends AbstractUserPage
 	@Inject
 	private
 	Policy policy;
+
+	@Property
+	private
+	String hint;
+
+	public
+	String[] getSuggestions()
+	{
+		return new String[]{
+			"TODO: list some actual, untaken, usernames based on dictionary word pairs and bits of supplied name",
+			"TODO: clicking on a suggestion should immediately allocate it, they can revoke it later, if they don't want it."
+		};
+	}
 }

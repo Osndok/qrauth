@@ -1,5 +1,6 @@
 package com.allogy.qrauth.server.pages.user.names;
 
+import com.allogy.qrauth.server.entities.DBUser;
 import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.Username;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
@@ -22,6 +23,10 @@ class AbstractNamesPage
 	@Property
 	protected
 	DBUserAuth myAuth;
+
+	@Property
+	protected
+	DBUser user;
 
 	Object onActivate()
 	{
@@ -49,6 +54,8 @@ class AbstractNamesPage
 		this.myAuth = authSession.getDBUserAuth();
 
 		if (myAuth == null) return Index.class;
+
+		this.user = myAuth.user;
 
 		if (!theSameUser(username, myAuth))
 		{

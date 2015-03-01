@@ -3,12 +3,23 @@
       xmlns:p="tapestry:parameter"
       >
 
-	<h3>Please provide a username in the format you would like it to be displayed</h3>
-	<h4>(e.g. "John Smith", "Cuddly Kittens", etc.)</h4>
+	<t:if test="displayName">
+		<h3>Sorry... "${displayName}" is already taken, or not allowed.</h3>
+		<h4>Please try again, or select from some of these suggestions:</h4>
+		<ul>
+<t:loop source="suggestions" value="hint">
+			<li>${hint}</li>
+</t:loop>
+		</ul>
+	<p:else>
+		<h3>Please provide a username in the format you would like it to be displayed</h3>
+    	<h4>(e.g. "John Smith", "Cuddly Kittens", etc.)</h4>
+	</p:else>
+	</t:if>
 
 	<t:form>
-		<t:label for="displayName"/>
-		<t:textfield value="displayName" t:id="displayName"/>
+		<t:label for="username"/>
+		<t:textfield value="displayName" t:id="username"/>
 		<t:submit/>
 	</t:form>
 
