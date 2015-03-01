@@ -268,6 +268,7 @@ class AuthSessionImpl implements AuthSession
 			}
 		}
 
+		//TODO: can we set http-only (no javascript access) by this method?
 		cookies.getBuilder(QRAUTH_COOKIE_NAME, hashing.withHmacPrefix(authSessionMemo.toString()))
 			.setDomain(COOKIE_DOMAIN)
 			.setMaxAge(secondsUntil(now, cookieDeadline))

@@ -14,6 +14,12 @@
         <param-value>com.allogy.qrauth.server</param-value>
     </context-param>
 
+	<!--dnw
+	<session-config>
+		<tracking-mode>COOKIE</tracking-mode>
+	</session-config>
+	-->
+
     <!--
     Specify some additional Modules for two different execution
     modes: development and qa.
