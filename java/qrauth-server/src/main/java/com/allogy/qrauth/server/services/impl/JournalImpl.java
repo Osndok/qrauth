@@ -1,6 +1,7 @@
 package com.allogy.qrauth.server.services.impl;
 
 import com.allogy.qrauth.server.entities.*;
+import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Network;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
@@ -225,6 +226,32 @@ class JournalImpl implements Journal
 		logEntry.user=userAuth.user;
 		logEntry.username=null;
 		logEntry.userAuth=userAuth;
+		logEntry.tenant=null;
+		logEntry.tenantIP=network.needIPForThisRequest(null);
+		logEntry.tenantSession=null;
+		logEntry.deadline=null;
+
+		hibernateSessionManager.getSession().save(logEntry);
+		hibernateSessionManager.commit();
+	}
+
+	@Inject
+	private
+	AuthSession authSession;
+
+	@Override
+	public
+	void allocatedUsername(Username username)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "username-allocated";
+		logEntry.message = "Allocated Username";
+		logEntry.user=username.user;
+		logEntry.username=username;
+		logEntry.userAuth=authSession.getDBUserAuth();
 		logEntry.tenant=null;
 		logEntry.tenantIP=network.needIPForThisRequest(null);
 		logEntry.tenantSession=null;

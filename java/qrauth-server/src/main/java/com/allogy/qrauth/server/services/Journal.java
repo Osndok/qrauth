@@ -27,4 +27,6 @@ interface Journal
 	void transferredUserAuth(DBUserAuth userAuth, DBUser user);
 
 	void addedUserAuthCredential(DBUserAuth userAuth);
+
+	void allocatedUsername(Username username);
 }

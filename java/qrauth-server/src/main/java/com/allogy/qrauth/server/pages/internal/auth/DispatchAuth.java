@@ -303,7 +303,7 @@ class DispatchAuth extends AbstractAPICall
 					if (authSession.isLoggedIn())
 					{
 						log.info("login using username & yubikey almost allocated username, ignoring '{}' in favor of allocating a username", standardEgress);
-						return addNamesPage.withHint(usernameString);
+						return addNamesPage.withDisplayName(usernameString);
 						//TODO: we need to be sure that (if there is a tenantSession) that they eventually make it back to the tenant's page.
 					}
 					else

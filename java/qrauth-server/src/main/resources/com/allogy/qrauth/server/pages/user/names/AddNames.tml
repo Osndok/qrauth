@@ -1,0 +1,15 @@
+<html t:type="layout" title="Add Username"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter"
+      >
+
+	<h3>Please provide a username in the format you would like it to be displayed</h3>
+	<h4>(e.g. "John Smith", "Cuddly Kittens", etc.)</h4>
+
+	<t:form>
+		<t:label for="displayName"/>
+		<t:textfield value="displayName" t:id="displayName"/>
+		<t:submit/>
+	</t:form>
+
+</html>
