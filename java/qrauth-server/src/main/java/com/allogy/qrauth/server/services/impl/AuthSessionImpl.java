@@ -187,6 +187,8 @@ class AuthSessionImpl implements AuthSession
 	public
 	void authenticateRemoteBrowser(DBUserAuth userAuth, Username username, TenantSession tenantSession)
 	{
+		log.debug("authenticateRemoteBrowser({}, {}, {})", userAuth, username, tenantSession);
+
 		final
 		Session session = hibernateSessionManager.getSession();
 

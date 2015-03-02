@@ -257,7 +257,7 @@ class RSAHelper implements Closeable
 		final
 		String[] bits = raw.split(" ");
 
-		if (bits.length != 3)
+		if (bits.length < 3)
 		{
 			for (int i = 0; i < bits.length; i++)
 			{
@@ -280,8 +280,8 @@ class RSAHelper implements Closeable
 		DBUserAuth a = new DBUserAuth();
 
 		a.authMethod = AuthMethod.RSA;
-		a.pubKey = getSshKeyBlob();
-		a.comment = sshComment;
+		a.pubKey = getSshKeyBlob().trim();
+		a.comment = sshComment.trim();
 
 		return a;
 	}

@@ -728,6 +728,8 @@ class DispatchAuth extends AbstractAPICall
 	private
 	Object maybeAuthenticateUser(DBUserAuth userAuth, Username username)
 	{
+		log.debug("maybeAuthenticateUser({}, {})", userAuth, username);
+
 		//TODO: this check should be made as soon as we know the user (which is in the userAuth), but then there would be a bunch of little checks to remember scattered around this class... :(
 		if (Death.hathVisited(userAuth))
 		{
@@ -769,7 +771,8 @@ class DispatchAuth extends AbstractAPICall
 		Nut nut = getNut();
 		{
 			nut.deadline = new Date();
-			nut.deathMessage = "accepted as nonce for " + userAuth;
+			//???: this would just serve to fill the database with data that would never be seen...
+			//nut.deathMessage = "accepted as nonce for " + userAuth;
 			session.save(nut);
 
 			//NB: nut consumption commit() will be wrapped up in the authSession transaction.

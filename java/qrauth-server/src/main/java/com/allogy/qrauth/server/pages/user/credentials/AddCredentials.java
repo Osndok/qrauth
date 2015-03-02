@@ -3,11 +3,9 @@ package com.allogy.qrauth.server.pages.user.credentials;
 import com.allogy.qrauth.server.entities.AuthMethod;
 import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.UnimplementedHashFunctionException;
-import com.allogy.qrauth.server.helpers.DateHelper;
-import com.allogy.qrauth.server.helpers.Death;
-import com.allogy.qrauth.server.helpers.ErrorResponse;
-import com.allogy.qrauth.server.helpers.PasswordHelper;
+import com.allogy.qrauth.server.helpers.*;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
+import com.allogy.qrauth.server.pages.user.credentials.rsa.ReclaimRSA;
 import com.allogy.qrauth.server.services.Hashing;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
@@ -25,6 +23,7 @@ import org.apache.tapestry5.ioc.internal.util.InternalUtils;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -64,12 +63,10 @@ class AddCredentials extends AbstractUserPage
 	{
 		switch (authMethod)
 		{
-			case RSA:
-				return "create-and-login/not add";
-
 			case SQRL:
 				return "almost";
 
+			case RSA:
 			case YUBIKEY_PUBLIC:
 			case STATIC_OTP:
 			case STATIC_PASSWORD:
@@ -112,9 +109,9 @@ class AddCredentials extends AbstractUserPage
 			case STATIC_PASSWORD : return staticPassword;
 			case ROLLING_PASSWORD: return rollingPassword;
 			case STATIC_OTP      : return staticOtp;
+			case RSA             : return rsaBlock;
 
 			case SQRL:
-			case RSA:
 			case YUBIKEY_CUSTOM:
 			case HMAC_OTP:
 			case TIME_OTP:
@@ -456,6 +453,65 @@ class AddCredentials extends AbstractUserPage
 		journal.addedUserAuthCredential(userAuth);
 
 		return editCredentials.with(userAuth);
+	}
+
+	/*
+	--------------------------- RSA --------------------------------
+	 */
+
+	@Inject
+	private
+	Block rsaBlock;
+
+	@Property
+	private
+	String pubKey;
+
+	@InjectPage
+	private
+	ReclaimRSA reclaimRSA;
+
+	@CommitAfter
+	Object onSelectedFromDoRSA() throws IOException
+	{
+		if (pubKey==null || pubKey.isEmpty())
+		{
+			return new ErrorResponse(400, "public key field cannot be empty");
+		}
+
+		final
+		RSAHelper rsaHelper=new RSAHelper(pubKey);
+
+		try
+		{
+			DBUserAuth userAuth=byPubKey(rsaHelper.getSshKeyBlob());
+
+			if (userAuth==null)
+			{
+				userAuth=rsaHelper.toDBUserAuth();
+				userAuth.user=user;
+				session.save(userAuth);
+
+				journal.addedUserAuthCredential(userAuth);
+				return editCredentials.with(userAuth);
+			}
+			else
+			if (userAuth.user.id.equals(user.id))
+			{
+				//TODO: could they be trying to re-activate this keypair? should we check to see if it is dead?
+				//We already have this public key on file... for this same account.
+				return editCredentials.with(userAuth);
+			}
+			else
+			{
+				//They entered a key that we already have on file, go to the reclaim-key procedure...
+				return reclaimRSA.with(userAuth);
+			}
+		}
+		finally
+		{
+			rsaHelper.close();
+		}
 	}
 
 }
