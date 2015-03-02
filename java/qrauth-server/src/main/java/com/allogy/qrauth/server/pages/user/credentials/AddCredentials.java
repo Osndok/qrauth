@@ -71,6 +71,7 @@ class AddCredentials extends AbstractUserPage
 				return "almost";
 
 			case YUBIKEY_PUBLIC:
+			case STATIC_OTP:
 			case SALTED_PASSWORD:
 				return "Yes";
 
@@ -79,7 +80,6 @@ class AddCredentials extends AbstractUserPage
 			case TIME_OTP:
 			case PAPER_PASSWORDS:
 			case OPEN_ID:
-			case STATIC_OTP:
 			case EMAILED_SECRET:
 			default:
 				return "";
@@ -97,10 +97,6 @@ class AddCredentials extends AbstractUserPage
 	private
 	Block unimplemented;
 
-	@Inject
-	private
-	Block yubiPublic;
-
 	public
 	Block getAuthMethodBlock()
 	{
@@ -113,6 +109,7 @@ class AddCredentials extends AbstractUserPage
 		{
 			case YUBIKEY_PUBLIC  : return yubiPublic;
 			case SALTED_PASSWORD : return saltedPassword;
+			case STATIC_OTP      : return staticOtp;
 
 			case SQRL:
 			case RSA:
@@ -121,7 +118,6 @@ class AddCredentials extends AbstractUserPage
 			case TIME_OTP:
 			case PAPER_PASSWORDS:
 			case OPEN_ID:
-			case STATIC_OTP:
 			case EMAILED_SECRET:
 			default:
 				return unimplemented;
@@ -143,6 +139,10 @@ class AddCredentials extends AbstractUserPage
 	/*
 	----------- YUBI_PUBLIC -------------
 	 */
+
+	@Inject
+	private
+	Block yubiPublic;
 
 	@Property
 	private
@@ -327,7 +327,7 @@ class AddCredentials extends AbstractUserPage
 
 		for (DBUserAuth userAuth : user.authMethods)
 		{
-			if (userAuth.authMethod == AuthMethod.SALTED_PASSWORD)
+			if (isBasicPasswordMechanism(userAuth.authMethod))
 			{
 				if (hashing.digestMatch(password, userAuth.secret))
 				{
@@ -338,4 +338,57 @@ class AddCredentials extends AbstractUserPage
 
 		return false;
 	}
+
+	private
+	boolean isBasicPasswordMechanism(AuthMethod authMethod)
+	{
+		return (authMethod==AuthMethod.STATIC_OTP || authMethod==AuthMethod.SALTED_PASSWORD);
+	}
+
+	/*
+	------------------------------ STATIC_OTP -------------------------------
+	staticOtp
+	 */
+
+	@Inject
+	private
+	Block staticOtp;
+
+	@Property
+	private
+	String comment;
+
+	Object onSelectedFromDoStaticOtp() throws UnimplementedHashFunctionException
+	{
+		if (alreadyHavePasswordOnFile())
+		{
+			return new ErrorResponse(400, "that password has already been used, and cannot therefore be reused");
+		}
+
+		if (comment==null || comment.isEmpty())
+		{
+			//NB: password is escaping!
+			final
+			int strength = PasswordHelper.gaugeStrength(password);
+
+			comment="Strength="+strength+", and is only valid once";
+		}
+
+		final
+		DBUserAuth userAuth = new DBUserAuth();
+
+		userAuth.user = user;
+		userAuth.authMethod = AuthMethod.STATIC_OTP;
+		userAuth.millisGranted = (int) userAuth.authMethod.getDefaultLoginLength();
+		userAuth.comment = comment;
+		userAuth.secret = hashing.digest(password);
+		userAuth.deadline = null;
+		userAuth.deathMessage = null;
+		session.save(userAuth);
+
+		journal.addedUserAuthCredential(userAuth);
+
+		return editCredentials.with(userAuth);
+	}
+
 }

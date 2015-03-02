@@ -394,6 +394,7 @@ class DispatchAuth extends AbstractAPICall
 		 */
 		switch (authMethod)
 		{
+			case STATIC_OTP:
 			case SALTED_PASSWORD:
 			{
 				try
@@ -425,7 +426,6 @@ class DispatchAuth extends AbstractAPICall
 			case HMAC_OTP:
 			case TIME_OTP:
 			case PAPER_PASSWORDS:
-			case STATIC_OTP:
 			case EMAILED_SECRET:
 				log.error("unimplemented password-based auth method: {}", authMethod);
 				return false;
@@ -730,8 +730,19 @@ class DispatchAuth extends AbstractAPICall
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
 																"that authentication method is no longer acceptable"));
 		}
+		else
+		if (userAuth.authMethod==AuthMethod.STATIC_OTP)
+		{
+			userAuth.deadline=new Date();
+			if (userAuth.deathMessage==null)
+			{
+				userAuth.deathMessage="One-time-password has already been used for authentication.";
+			}
+			session.save(userAuth);
+			journal.revokedUserAuth(userAuth);
+		}
 
-		if (Death.hathVisited(username))
+		if (username!=null && Death.hathVisited(username))
 		{
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
 																"that username is no longer acceptable"));

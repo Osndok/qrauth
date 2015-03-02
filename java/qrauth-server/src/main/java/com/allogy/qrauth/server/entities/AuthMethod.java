@@ -17,10 +17,10 @@ enum AuthMethod
 	HMAC_OTP       (   4  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
 	TIME_OTP       (   5  , false    , false    , false     , false   , true  , false    , true      , USER_AND_PASS ),
 	PAPER_PASSWORDS(   7  , false    , true     , false     , false   , false , false    , true      , PPP_CRAM      ),
-	YUBIKEY_PUBLIC (   8  , false    , false    , true      , true    , false , true     , true      , PASS_ONLY     ),
-	OPEN_ID        (   9  , false    , false    , true      , true    , false , true     , false     , THIRD_PARTY   ),
+	STATIC_OTP     (   8  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
+	YUBIKEY_PUBLIC (   9  , false    , false    , true      , true    , false , true     , true      , PASS_ONLY     ),
+	OPEN_ID        (  10  , false    , false    , true      , true    , false , true     , false     , THIRD_PARTY   ),
 	/* --- line of mandatory deadlines ----------------------------------------------------------------------------- */
-	STATIC_OTP     (  10  , true     , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
 	/* --- line of questionable security --------------------------------------------------------------------------- */
 	EMAILED_SECRET (  11  , true     , false    , true      , true    , false , false    , false     , THIRD_PARTY   ),
 	SALTED_PASSWORD(  12  , true     , false    , false     , false   , false , false    , true      , USER_AND_PASS ),
