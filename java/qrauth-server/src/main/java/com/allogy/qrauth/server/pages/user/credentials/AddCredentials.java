@@ -72,6 +72,7 @@ class AddCredentials extends AbstractUserPage
 
 			case YUBIKEY_PUBLIC:
 			case STATIC_OTP:
+			case STATIC_PASSWORD:
 			case ROLLING_PASSWORD:
 				return "Yes";
 
@@ -108,7 +109,8 @@ class AddCredentials extends AbstractUserPage
 		switch (authMethod)
 		{
 			case YUBIKEY_PUBLIC  : return yubiPublic;
-			case ROLLING_PASSWORD: return saltedPassword;
+			case STATIC_PASSWORD : return staticPassword;
+			case ROLLING_PASSWORD: return rollingPassword;
 			case STATIC_OTP      : return staticOtp;
 
 			case SQRL:
@@ -277,7 +279,7 @@ class AddCredentials extends AbstractUserPage
 
 	@Inject
 	private
-	Block saltedPassword;
+	Block rollingPassword;
 
 	@Property
 	private
@@ -291,11 +293,16 @@ class AddCredentials extends AbstractUserPage
 	private
 	Policy policy;
 
-	Object onSelectedFromDoSaltedPassword() throws UnimplementedHashFunctionException
+	Object onSelectedFromDoRollingPassword() throws UnimplementedHashFunctionException
 	{
 		if (alreadyHavePasswordOnFile())
 		{
 			return new ErrorResponse(400, "that password has already been used, and cannot therefore be reused");
+		}
+
+		if (password == null || password.isEmpty())
+		{
+			return new ErrorResponse(400, "the password cannot be empty");
 		}
 
 		//NB: password is escaping!
@@ -308,10 +315,10 @@ class AddCredentials extends AbstractUserPage
 		userAuth.user = user;
 		userAuth.authMethod = AuthMethod.ROLLING_PASSWORD;
 		userAuth.millisGranted = (int) userAuth.authMethod.getDefaultLoginLength();
-		userAuth.comment = "Strength="+strength;
+		userAuth.comment = "Strength=" + strength;
 		userAuth.secret = hashing.digest(password);
-		userAuth.deadline=policy.passwordDeadlineGivenComplexity(strength);
-		userAuth.deathMessage="That password has expired";
+		userAuth.deadline = policy.passwordDeadlineGivenComplexity(strength);
+		userAuth.deathMessage = "That password has expired";
 		session.save(userAuth);
 
 		journal.addedUserAuthCredential(userAuth);
@@ -323,7 +330,7 @@ class AddCredentials extends AbstractUserPage
 	boolean alreadyHavePasswordOnFile() throws UnimplementedHashFunctionException
 	{
 		final
-		String password=this.password;
+		String password = this.password;
 
 		for (DBUserAuth userAuth : user.authMethods)
 		{
@@ -342,7 +349,7 @@ class AddCredentials extends AbstractUserPage
 	private
 	boolean isBasicPasswordMechanism(AuthMethod authMethod)
 	{
-		return (authMethod==AuthMethod.STATIC_OTP || authMethod==AuthMethod.ROLLING_PASSWORD);
+		return (authMethod == AuthMethod.STATIC_OTP || authMethod == AuthMethod.ROLLING_PASSWORD);
 	}
 
 	/*
@@ -365,13 +372,18 @@ class AddCredentials extends AbstractUserPage
 			return new ErrorResponse(400, "that password has already been used, and cannot therefore be reused");
 		}
 
-		if (comment==null || comment.isEmpty())
+		if (password == null || password.isEmpty())
+		{
+			return new ErrorResponse(400, "the password cannot be empty");
+		}
+
+		if (comment == null || comment.isEmpty())
 		{
 			//NB: password is escaping!
 			final
 			int strength = PasswordHelper.gaugeStrength(password);
 
-			comment="Strength="+strength+", and is only valid once";
+			comment = "Strength=" + strength + ", and is only valid once";
 		}
 
 		final
@@ -384,6 +396,61 @@ class AddCredentials extends AbstractUserPage
 		userAuth.secret = hashing.digest(password);
 		userAuth.deadline = null;
 		userAuth.deathMessage = null;
+		session.save(userAuth);
+
+		journal.addedUserAuthCredential(userAuth);
+
+		return editCredentials.with(userAuth);
+	}
+
+	/*
+	--------------------------- STATIC_PASSWORD --------------------------------
+	 */
+
+	@Inject
+	private
+	Block staticPassword;
+
+	@Property
+	private
+	Date deadline;
+
+	Object onSelectedFromDoStaticPassword() throws UnimplementedHashFunctionException
+	{
+		if (alreadyHavePasswordOnFile())
+		{
+			return new ErrorResponse(400, "that password has already been used, and cannot therefore be reused");
+		}
+
+		if (deadline==null)
+		{
+			return new ErrorResponse(400, "you must select a deadline for this password");
+		}
+
+		if (password == null || password.isEmpty())
+		{
+			return new ErrorResponse(400, "the password cannot be empty");
+		}
+
+		if (comment == null || comment.isEmpty())
+		{
+			//NB: password is escaping!
+			final
+			int strength = PasswordHelper.gaugeStrength(password);
+
+			comment = "Strength=" + strength;
+		}
+
+		final
+		DBUserAuth userAuth = new DBUserAuth();
+
+		userAuth.user = user;
+		userAuth.authMethod = AuthMethod.STATIC_PASSWORD;
+		userAuth.millisGranted = (int) userAuth.authMethod.getDefaultLoginLength();
+		userAuth.comment = comment;
+		userAuth.secret = hashing.digest(password);
+		userAuth.deadline = deadline;
+		userAuth.deathMessage = "That password has reached it's end-of-life.";
 		session.save(userAuth);
 
 		journal.addedUserAuthCredential(userAuth);

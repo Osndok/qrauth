@@ -229,6 +229,7 @@ class JournalImpl implements Journal
 		logEntry.tenantIP=network.needIPForThisRequest(null);
 		logEntry.tenantSession=null;
 		logEntry.deadline=null;
+		logEntry.important=true; //Adding an auth method is *always* important.
 
 		hibernateSessionManager.getSession().save(logEntry);
 		hibernateSessionManager.commit();
@@ -322,10 +323,12 @@ class JournalImpl implements Journal
 			case EMAILED_SECRET:
 				return "email reception proof";
 			case ROLLING_PASSWORD:
+				return "rolling password";
+			case STATIC_PASSWORD:
 				return "static password";
 
 			default:
-				return "unknown method";
+				return "unknown";
 		}
 	}
 

@@ -288,6 +288,8 @@ class DispatchAuth extends AbstractAPICall
 						username.displayValue=usernameString.trim();
 						username.matchValue=policy.usernameMatchFilter(usernameString);
 						session.save(username);
+
+						journal.allocatedUsername(username);
 					}
 					else
 					{
