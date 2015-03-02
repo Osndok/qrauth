@@ -72,7 +72,7 @@ class AddCredentials extends AbstractUserPage
 
 			case YUBIKEY_PUBLIC:
 			case STATIC_OTP:
-			case SALTED_PASSWORD:
+			case ROLLING_PASSWORD:
 				return "Yes";
 
 			case YUBIKEY_CUSTOM:
@@ -108,7 +108,7 @@ class AddCredentials extends AbstractUserPage
 		switch (authMethod)
 		{
 			case YUBIKEY_PUBLIC  : return yubiPublic;
-			case SALTED_PASSWORD : return saltedPassword;
+			case ROLLING_PASSWORD: return saltedPassword;
 			case STATIC_OTP      : return staticOtp;
 
 			case SQRL:
@@ -272,7 +272,7 @@ class AddCredentials extends AbstractUserPage
 	}
 
 	/*
-	--------------------------- SALTED_PASSWORD --------------------------------
+	--------------------------- ROLLING_PASSWORD --------------------------------
 	 */
 
 	@Inject
@@ -306,7 +306,7 @@ class AddCredentials extends AbstractUserPage
 		DBUserAuth userAuth = new DBUserAuth();
 
 		userAuth.user = user;
-		userAuth.authMethod = AuthMethod.SALTED_PASSWORD;
+		userAuth.authMethod = AuthMethod.ROLLING_PASSWORD;
 		userAuth.millisGranted = (int) userAuth.authMethod.getDefaultLoginLength();
 		userAuth.comment = "Strength="+strength;
 		userAuth.secret = hashing.digest(password);
@@ -342,7 +342,7 @@ class AddCredentials extends AbstractUserPage
 	private
 	boolean isBasicPasswordMechanism(AuthMethod authMethod)
 	{
-		return (authMethod==AuthMethod.STATIC_OTP || authMethod==AuthMethod.SALTED_PASSWORD);
+		return (authMethod==AuthMethod.STATIC_OTP || authMethod==AuthMethod.ROLLING_PASSWORD);
 	}
 
 	/*

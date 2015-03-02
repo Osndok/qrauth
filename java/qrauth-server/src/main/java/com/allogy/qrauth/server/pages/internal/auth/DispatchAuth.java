@@ -395,7 +395,8 @@ class DispatchAuth extends AbstractAPICall
 		switch (authMethod)
 		{
 			case STATIC_OTP:
-			case SALTED_PASSWORD:
+			case STATIC_PASSWORD:
+			case ROLLING_PASSWORD:
 			{
 				try
 				{

@@ -10,23 +10,28 @@ import static com.allogy.qrauth.server.entities.AuthMethodGroup.*;
 public
 enum AuthMethod
 {
-	/**15-chars-max| RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | P/W ENTRY | GROUP         */
-	SQRL           (   1  , false    , true     , false     , true    , false , true     , false     , QR_ONLY       ),
-	RSA            (   2  , false    , false    , false     , false   , false , true     , false     , RSA_CRAM      ),
-	YUBIKEY_CUSTOM (   3  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
-	HMAC_OTP       (   4  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
-	TIME_OTP       (   5  , false    , false    , false     , false   , true  , false    , true      , USER_AND_PASS ),
-	PAPER_PASSWORDS(   7  , false    , true     , false     , false   , false , false    , true      , PPP_CRAM      ),
-	STATIC_OTP     (   8  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
-	YUBIKEY_PUBLIC (   9  , false    , false    , true      , true    , false , true     , true      , PASS_ONLY     ),
-	OPEN_ID        (  10  , false    , false    , true      , true    , false , true     , false     , THIRD_PARTY   ),
-	/* --- line of mandatory deadlines ----------------------------------------------------------------------------- */
-	/* --- line of questionable security --------------------------------------------------------------------------- */
-	EMAILED_SECRET (  11  , true     , false    , true      , true    , false , false    , false     , THIRD_PARTY   ),
-	SALTED_PASSWORD(  12  , true     , false    , false     , false   , false , false    , true      , USER_AND_PASS ),
+	/*
+	NB: You cannot simply change the name of these enums or delete a row, as theese names are stored in the database.
+	To do either safely, one must perform a multi-step database migration (coordinated with the production manager).
+	 */
+	/**20-chars-max | RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | P/W ENTRY | GROUP         */
+	SQRL            (   1  , false    , true     , false     , true    , false , true     , false     , QR_ONLY       ),
+	RSA             (   2  , false    , false    , false     , false   , false , true     , false     , RSA_CRAM      ),
+	YUBIKEY_CUSTOM  (   3  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
+	HMAC_OTP        (   4  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
+	TIME_OTP        (   5  , false    , false    , false     , false   , true  , false    , true      , USER_AND_PASS ),
+	PAPER_PASSWORDS (   7  , false    , true     , false     , false   , false , false    , true      , PPP_CRAM      ),
+	STATIC_OTP      (   8  , false    , true     , false     , false   , false , false    , true      , USER_AND_PASS ),
+	YUBIKEY_PUBLIC  (   9  , false    , false    , true      , true    , false , true     , true      , PASS_ONLY     ),
+	OPEN_ID         (  10  , false    , false    , true      , true    , false , true     , false     , THIRD_PARTY   ),
+	/* --- line of mandatory deadlines ------------------------------------------------------------------------------ */
+	ROLLING_PASSWORD(  11  , true     , false    , false     , false   , false , false    , true      , USER_AND_PASS ),
+	/* --- line of questionable security ---------------------------------------------------------------------------- */
+	EMAILED_SECRET  (  12  , true     , false    , true      , true    , false , false    , false     , THIRD_PARTY   ),
+	STATIC_PASSWORD (  13  , true     , false    , false     , false   , false , false    , true      , USER_AND_PASS ),
 	;
 
-	private static final int FIRST_QUESTIONABLE_RANK = 11;
+	private static final int FIRST_QUESTIONABLE_RANK = 12;
 
 	private static final long FIRST_RANK_MILLIS = TimeUnit.DAYS.toMillis(7);
 

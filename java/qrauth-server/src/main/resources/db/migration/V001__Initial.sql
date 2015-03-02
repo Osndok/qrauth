@@ -36,7 +36,7 @@
         lastAttempt TIMESTAMP WITHOUT TIME ZONE,
         lastSuccess TIMESTAMP WITHOUT TIME ZONE,
         successes INTEGER DEFAULT 0 not null,
-        authMethod VARCHAR(15) not null,
+        authMethod VARCHAR(20) not null,
         comment varchar(255),
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),

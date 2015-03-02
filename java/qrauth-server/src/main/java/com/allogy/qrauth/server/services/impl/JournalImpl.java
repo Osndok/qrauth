@@ -5,7 +5,6 @@ import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Network;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
-import org.apache.tapestry5.hibernate.annotations.CommitAfter;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.hibernate.Session;
 
@@ -322,7 +321,7 @@ class JournalImpl implements Journal
 				return "provisioned one-time-password";
 			case EMAILED_SECRET:
 				return "email reception proof";
-			case SALTED_PASSWORD:
+			case ROLLING_PASSWORD:
 				return "static password";
 
 			default:

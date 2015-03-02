@@ -24,7 +24,7 @@ class DBUserAuth extends Attemptable implements Mortal
 	public Integer millisGranted;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, columnDefinition = "VARCHAR(15)", length = 15)
+	@Column(nullable = false, columnDefinition = "VARCHAR(20)", length = 20)
 	public AuthMethod authMethod;
 
 	@NonVisual
