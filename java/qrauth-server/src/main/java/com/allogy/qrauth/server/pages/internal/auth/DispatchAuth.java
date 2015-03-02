@@ -289,6 +289,7 @@ class DispatchAuth extends AbstractAPICall
 						username.matchValue=policy.usernameMatchFilter(usernameString);
 						session.save(username);
 
+						//TODO: BUG: authentication method is not noted, because authSession[Memo] has not been set
 						journal.allocatedUsername(username);
 					}
 					else

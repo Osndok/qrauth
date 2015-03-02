@@ -27,7 +27,7 @@ class RevokeNames extends AbstractNamesPage
 		if (!Death.hathVisited(username))
 		{
 			username.deadline=new Date();
-			username.deathMessage=(memo.isEmpty()?null:memo);
+			username.deathMessage=memo;
 			session.save(username);
 
 			journal.revokedUsername(username);

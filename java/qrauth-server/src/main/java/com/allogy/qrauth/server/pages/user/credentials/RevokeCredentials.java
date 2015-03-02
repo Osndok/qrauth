@@ -32,7 +32,7 @@ class RevokeCredentials extends AbstractCredentialsPage
 		if (!Death.hathVisited(userAuth))
 		{
 			userAuth.deadline = new Date();
-			userAuth.deathMessage = (memo.isEmpty()?null:memo);
+			userAuth.deathMessage = memo;
 			session.save(userAuth);
 
 			journal.revokedUserAuth(userAuth);
