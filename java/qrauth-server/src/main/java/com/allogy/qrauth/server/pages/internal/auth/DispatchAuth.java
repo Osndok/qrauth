@@ -131,6 +131,8 @@ class DispatchAuth extends AbstractAPICall
 
 		allMatchingTenantIPs = network.getExistingTenantIPsForThisOriginator(tenant);
 
+		//TODO: !!!: we need to check per-tenant ip bans here
+
 		journal.noticeAttempt(allMatchingTenantIPs);
 
 		if (request.getParameter("do_sqrl") != null)
@@ -726,7 +728,13 @@ class DispatchAuth extends AbstractAPICall
 		if (Death.hathVisited(userAuth))
 		{
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
-																"that authentication method is no longer allowed"));
+																"that authentication method is no longer acceptable"));
+		}
+
+		if (Death.hathVisited(username))
+		{
+			return new ErrorResponse(403, Death.noteMightSay(userAuth,
+																"that username is no longer acceptable"));
 		}
 
 		final

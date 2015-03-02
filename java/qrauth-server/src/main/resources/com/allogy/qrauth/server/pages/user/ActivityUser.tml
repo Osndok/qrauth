@@ -15,7 +15,9 @@
 			${logEntry.tenant}
 		</p:siteCell>
 		<p:usernameCell>
-			${logEntry.username?.displayValue}
+			<t:if test="logEntry.username">
+				<t:pagelink page="user/names/edit" context="logEntry.username">${logEntry.username.displayValue}</t:pagelink>
+			</t:if>
 		</p:usernameCell>
 		<p:authMethodCell>
 			<t:if test="logEntry.userAuth">

@@ -1,5 +1,6 @@
 package com.allogy.qrauth.server.pages.user.credentials;
 
+import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.pages.user.Credentials;
 import com.allogy.qrauth.server.services.Journal;
 import org.apache.tapestry5.annotations.Property;
@@ -28,11 +29,14 @@ class RevokeCredentials extends AbstractCredentialsPage
 
 	Object onSuccess()
 	{
-		userAuth.deadline=new Date();
-		userAuth.deathMessage=memo;
-		session.save(userAuth);
+		if (!Death.hathVisited(userAuth))
+		{
+			userAuth.deadline = new Date();
+			userAuth.deathMessage = (memo.isEmpty()?null:memo);
+			session.save(userAuth);
 
-		journal.revokedUserAuth(userAuth);
+			journal.revokedUserAuth(userAuth);
+		}
 
 		return Credentials.class;
 	}

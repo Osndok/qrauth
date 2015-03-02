@@ -4,7 +4,10 @@
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
 	<Get name="sessionHandler">
 		<Get name="sessionManager">
+			<!--
+			This just transfers it into the url...
 			<Set name="usingCookies" type="boolean">false</Set>
+			-->
 			<!--dnw: <Set name="usingURLs" type="boolean">false</Set> -->
 		</Get>
 	</Get>

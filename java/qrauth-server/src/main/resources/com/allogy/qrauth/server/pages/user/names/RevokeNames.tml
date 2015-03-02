@@ -1,7 +1,9 @@
-<html t:type="layout" title="Edit Username"
+<html t:type="layout" title="Revoke Username"
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter"
       >
+
+	<h3>Revoking this username...</h3>
 
 	<table class="singleRecord">
 		<tr>
@@ -44,21 +46,25 @@
 					<!-- TODO: provide a widget here to bring the deadline closer (if not already at hand) -->
 				<p:else>
 					<i>None</i>&nbsp;&nbsp;&nbsp;&nbsp;
-					<t:pagelink page="user/names/revoke" context="username">Revoke</t:pagelink>
-					<!-- TODO: provide a widget here to set the deadline -->
 				</p:else>
 				</t:if>
 			</td>
 		</tr>
 	</table>
 
-	<h3>NOTE: You can only change capitalization, spaces, and punctuation.</h3>
-	<h4>(e.g. "johnSmith" -> "John (Smith)")</h4>
+	<h3>Please provide a short note regarding this revocation...</h3>
+
+	<p>
+		<b>NOTE:</b> The primary reason for revoking a username is to prevent someone from logging in using it.
+		Once revoked, this username will not be used for any 'new' tenants, but will remain the primary username
+		for tenants you have formerly authenticated with (that do not support variable usernames) and will still
+		be protected from someone else registering (as they could then assume your former identity).
+	</p>
 
 	<t:form>
-		<t:label for="displayName"/>
-		<t:textfield value="displayValue" t:id="displayName" autocomplete="off"/>
-		<t:submit/>
+		<t:label for="memoField"/>
+		<t:textfield value="memo" t:id="memoField"/>
+		<t:submit value="Revoke"/>
 	</t:form>
 
 </html>

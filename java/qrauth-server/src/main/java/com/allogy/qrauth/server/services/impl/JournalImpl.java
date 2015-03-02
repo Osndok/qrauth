@@ -248,7 +248,7 @@ class JournalImpl implements Journal
 
 		logEntry.time = new Date();
 		logEntry.actionKey = "username-allocated";
-		logEntry.message = "Allocated Username";
+		logEntry.message = "Allocated username: '"+username.displayValue+"'";
 		logEntry.user=username.user;
 		logEntry.username=username;
 		logEntry.userAuth=authSession.getDBUserAuth();
@@ -259,6 +259,32 @@ class JournalImpl implements Journal
 
 		hibernateSessionManager.getSession().save(logEntry);
 		hibernateSessionManager.commit();
+	}
+
+	@Override
+	public
+	void revokedUsername(Username username)
+	{
+		final
+		DBUserAuth userAuth=authSession.getDBUserAuth();
+
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "username-revoked";
+		logEntry.message = "Revoked username '"+username.displayValue+"'";
+		logEntry.user=userAuth.user;
+		logEntry.username=username;
+		logEntry.userAuth=userAuth;
+		logEntry.tenant=null;
+		logEntry.tenantIP=network.needIPForThisRequest(null);
+		logEntry.tenantSession=null;
+		logEntry.deadline=null;
+
+		hibernateSessionManager.getSession().save(logEntry);
+		hibernateSessionManager.commit();
+
 	}
 
 	private

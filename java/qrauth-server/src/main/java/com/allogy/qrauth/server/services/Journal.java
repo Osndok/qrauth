@@ -29,4 +29,6 @@ interface Journal
 	void addedUserAuthCredential(DBUserAuth userAuth);
 
 	void allocatedUsername(Username username);
+
+	void revokedUsername(Username username);
 }
