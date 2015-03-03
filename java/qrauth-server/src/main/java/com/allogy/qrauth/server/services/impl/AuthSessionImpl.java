@@ -210,7 +210,17 @@ class AuthSessionImpl implements AuthSession
 		}
 
 		final
-		Date sessionDeadline=theSoonerOf(user.globalLogout, new Date(now + userAuth.millisGranted));
+		Date sessionDeadline;
+		{
+			if (userAuth.millisGranted == null)
+			{
+				sessionDeadline=user.globalLogout;
+			}
+			else
+			{
+				sessionDeadline=theSoonerOf(user.globalLogout, new Date(now + userAuth.millisGranted));
+			}
+		}
 
 		user.attempts++;
 		user.successes++;

@@ -7,6 +7,7 @@ import com.allogy.qrauth.server.helpers.DateHelper;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.helpers.RSAHelper;
+import com.allogy.qrauth.server.pages.internal.auth.DispatchAuth;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
 import com.allogy.qrauth.server.pages.user.credentials.EditCredentials;
 import com.allogy.qrauth.server.pages.user.names.AbstractNamesPage;
@@ -90,7 +91,7 @@ class ReclaimRSA extends AbstractUserPage
 	Object onSuccess() throws IOException
 	{
 		final
-		String response=request.getParameter("response");
+		String response = DispatchAuth.stripNonBase64Lines(request.getParameter("response"));
 
 		if (response==null || response.isEmpty())
 		{
@@ -169,6 +170,7 @@ class ReclaimRSA extends AbstractUserPage
 		DBUserAuth duplicate = rsaHelper.toDBUserAuth();
 
 		duplicate.user = user;
+		duplicate.millisGranted = (int)duplicate.authMethod.getDefaultLoginLength();
 		session.save(duplicate);
 
 		journal.addedUserAuthCredential(duplicate);

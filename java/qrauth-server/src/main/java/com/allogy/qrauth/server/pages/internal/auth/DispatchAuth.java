@@ -66,7 +66,7 @@ class DispatchAuth extends AbstractAPICall
 		final
 		String tenantSessionId = request.getParameter("tenantSession");
 		{
-			if (tenantSessionId == null)
+			if (tenantSessionId == null || tenantSessionId.isEmpty())
 			{
 				log.debug("no tenant session id");
 				tenantSession = null;
@@ -558,14 +558,12 @@ class DispatchAuth extends AbstractAPICall
 		}
 
 		final
-		String base64Response = request.getParameter("rsa_response");
+		String base64Response = stripNonBase64Lines(request.getParameter("rsa_response"));
 		{
 			if (base64Response == null || base64Response.isEmpty())
 			{
 				return missingParameter("rsa_response");
 			}
-
-			//TODO: detect (and strip) common command prompts (or... lines with non-base64 characters?).
 		}
 
 		final
@@ -602,24 +600,53 @@ class DispatchAuth extends AbstractAPICall
 										   .add(Restrictions.eq("authMethod", AuthMethod.RSA))
 										   .list();
 
+			//Try "alive" public keys first...
 			for (DBUserAuth rsaUserAuth : pubkeys)
 			{
-				journal.noticeAttempt(rsaUserAuth);
-
-				final
-				RSAHelper rsaHelper = new RSAHelper(rsaUserAuth);
-
-				try
+				if (!Death.hathVisited(rsaUserAuth))
 				{
-					if (rsaHelper.signatureIsValid(nut.stringValue, binaryResponse))
+					journal.noticeAttempt(rsaUserAuth);
+
+					final
+					RSAHelper rsaHelper = new RSAHelper(rsaUserAuth);
+
+					try
 					{
-						log.debug("rsa login with a username: '{}'", username.matchValue);
-						return maybeAuthenticateUser(rsaUserAuth, username);
+						if (rsaHelper.signatureIsValid(nut.stringValue, binaryResponse))
+						{
+							log.debug("rsa login with a username: '{}'", username.matchValue);
+							return maybeAuthenticateUser(rsaUserAuth, username);
+						}
+					}
+					finally
+					{
+						rsaHelper.close();
 					}
 				}
-				finally
+			}
+
+			//Only then, try dead keys; this separation is important in case two users bat a pubKey back-and-forth, as it will still match one of the dead keys.
+			for (DBUserAuth rsaUserAuth : pubkeys)
+			{
+				if (Death.hathVisited(rsaUserAuth))
 				{
-					rsaHelper.close();
+					journal.noticeAttempt(rsaUserAuth);
+
+					final
+					RSAHelper rsaHelper = new RSAHelper(rsaUserAuth);
+
+					try
+					{
+						if (rsaHelper.signatureIsValid(nut.stringValue, binaryResponse))
+						{
+							log.debug("rsa login with a username: '{}'", username.matchValue);
+							return maybeAuthenticateUser(rsaUserAuth, username);
+						}
+					}
+					finally
+					{
+						rsaHelper.close();
+					}
 				}
 			}
 
@@ -662,6 +689,42 @@ class DispatchAuth extends AbstractAPICall
 				rsaHelper.close();
 			}
 		}
+	}
+
+	public static
+	String stripNonBase64Lines(String base64)
+	{
+		if (base64==null || base64.isEmpty())
+		{
+			return null;
+		}
+
+		final
+		String[] lines=base64.split("\n");
+
+		final
+		StringBuilder sb=new StringBuilder(base64.length());
+
+		for (String line : lines)
+		{
+			if (containsOnlyBase64Characters(line))
+			{
+				sb.append(line);
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private static
+	boolean containsOnlyBase64Characters(String s)
+	{
+		//Basically anything that would indicate a command prompt.
+		return (s.indexOf('[')<0 &&
+					s.indexOf(']')<0 &&
+					s.indexOf('$')<0 &&
+					s.indexOf('>')<0
+		);
 	}
 
 	private
@@ -733,6 +796,7 @@ class DispatchAuth extends AbstractAPICall
 		//TODO: this check should be made as soon as we know the user (which is in the userAuth), but then there would be a bunch of little checks to remember scattered around this class... :(
 		if (Death.hathVisited(userAuth))
 		{
+			log.debug("dead: {}", userAuth);
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
 																"that authentication method is no longer acceptable"));
 		}
@@ -750,6 +814,7 @@ class DispatchAuth extends AbstractAPICall
 
 		if (username!=null && Death.hathVisited(username))
 		{
+			log.debug("dead: {}", username);
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
 																"that username is no longer acceptable"));
 		}
@@ -759,6 +824,7 @@ class DispatchAuth extends AbstractAPICall
 
 		if (Death.hathVisited(user))
 		{
+			log.debug("dead: {}", user);
 			return new ErrorResponse(403, Death.noteMightSay(userAuth, "your user account has been suspended"));
 		}
 

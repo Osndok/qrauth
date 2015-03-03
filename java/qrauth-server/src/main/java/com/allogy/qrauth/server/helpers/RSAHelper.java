@@ -31,7 +31,8 @@ class RSAHelper implements Closeable
 	{
 		if (pubKey.contains("ssh-rsa"))
 		{
-			sshFormat = pubKey;
+			//ssh-rsa format does not have ascii armor, and we have a lame parser, so it's a bit more sensitive
+			sshFormat = stripPromptAndCommentsFromSshRsaKey(pubKey);
 		}
 		else
 		if (pubKey.contains("BEGIN SSH2 PUBLIC KEY"))
@@ -73,6 +74,56 @@ class RSAHelper implements Closeable
 		else
 		{
 			throw new UnsupportedEncodingException("unknown public key format, or not an rsa key");
+		}
+	}
+
+	/**
+	 * Goal is to convert noisy input: "\n#comment\noption=value ssh-rsa X Y\n\n#aft noise" into a usable key
+	 * @param sshPublicKey
+	 * @return
+	 */
+	public static
+	String stripPromptAndCommentsFromSshRsaKey(String sshPublicKey)
+	{
+		if (sshPublicKey.indexOf('\n')>=0)
+		{
+			final
+			String[] bits=sshPublicKey.split("\n");
+
+			for (String bit : bits)
+			{
+				if (!bit.isEmpty() && bit.charAt(0)!='#' && bit.contains("ssh-rsa"))
+				{
+					return maybeStripPrefixOptions(bit);
+				}
+			}
+
+			throw new IllegalArgumentException("does not appear to be an ssh-rsa key");
+		}
+		else
+		if (sshPublicKey.contains("ssh-rsa"))
+		{
+			return maybeStripPrefixOptions(sshPublicKey);
+		}
+		else
+		{
+			throw new IllegalArgumentException("does not appear to be an ssh-rsa key");
+		}
+	}
+
+	private static
+	String maybeStripPrefixOptions(String key)
+	{
+		final
+		int i=key.indexOf("ssh-rsa");
+
+		if (i<=0)
+		{
+			return key;
+		}
+		else
+		{
+			return key.substring(i);
 		}
 	}
 
