@@ -91,7 +91,7 @@ class OTPHelper
 		}
 		else
 		{
-			type = Type.TOTP;
+			type = Type.HOTP;
 		}
 
 		format = Format.Eight_Digits;

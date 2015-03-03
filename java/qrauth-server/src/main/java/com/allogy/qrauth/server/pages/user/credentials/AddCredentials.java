@@ -22,10 +22,7 @@ import com.yubico.client.v2.VerificationResponse;
 import com.yubico.client.v2.YubicoClient;
 import com.yubico.client.v2.exceptions.YubicoValidationFailure;
 import com.yubico.client.v2.exceptions.YubicoVerificationException;
-import org.apache.tapestry5.Asset;
-import org.apache.tapestry5.Block;
-import org.apache.tapestry5.ComponentResources;
-import org.apache.tapestry5.StreamResponse;
+import org.apache.tapestry5.*;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Path;
 import org.apache.tapestry5.annotations.Property;
@@ -144,11 +141,11 @@ class AddCredentials extends AbstractUserPage
 			case ROLLING_PASSWORD: return rollingPassword;
 			case STATIC_OTP      : return staticOtp;
 			case RSA             : return rsaBlock;
-			case TIME_OTP        : return timeOtpBlock;
+			case TIME_OTP        : return otpBlock;
+			case HMAC_OTP        : return otpBlock;
 
 			case SQRL:
 			case YUBIKEY_CUSTOM:
-			case HMAC_OTP:
 			case PAPER_PASSWORDS:
 			case OPEN_ID:
 			case EMAILED_SECRET:
@@ -552,6 +549,7 @@ class AddCredentials extends AbstractUserPage
 	----------------------------- When SECRETS are to be EXPOSED !!! ---------------------------
 	 */
 
+	@Property
 	private
 	DBUserAuth userAuthReveal;
 
@@ -611,7 +609,7 @@ class AddCredentials extends AbstractUserPage
 
 	@Inject
 	private
-	Block timeOtpBlock;
+	Block otpBlock;
 
 	@Inject
 	@Path("context:images/qr-code-ready.png")
@@ -623,7 +621,7 @@ class AddCredentials extends AbstractUserPage
 	OTPHelper otpHelper;
 
 	public
-	String getTimeOtpQrUrl()
+	String getOtpQrUrl()
 	{
 		if (userAuthReveal == null)
 		{
@@ -706,7 +704,7 @@ class AddCredentials extends AbstractUserPage
 	}
 
 	public
-	String getTimeOtpQrUrlTitle()
+	String getOtpQrUrlTitle()
 	{
 		if (userAuthReveal == null)
 		{
@@ -719,7 +717,7 @@ class AddCredentials extends AbstractUserPage
 	}
 
 	public
-	String getTimeOtpNumericCode()
+	String getOtpSecretCode()
 	{
 		if (userAuthReveal == null)
 		{
@@ -735,7 +733,7 @@ class AddCredentials extends AbstractUserPage
 		}
 	}
 
-	Object onSelectedFromTimeOtpDone()
+	Object onSelectedFromOtpDone()
 	{
 		if (userAuthReveal==null)
 		{
@@ -748,7 +746,7 @@ class AddCredentials extends AbstractUserPage
 	}
 
 	@CommitAfter
-	Object onSelectedFromTimeOtpReveal()
+	Object onSelectedFromOtpReveal()
 	{
 		otpHelper.randomizeSecret();
 
@@ -768,10 +766,14 @@ class AddCredentials extends AbstractUserPage
 
 	@Inject
 	private
+	Block hotpBashScript;
+
+	@Inject
+	private
 	ComponentResources componentResources;
 
 	@CommitAfter
-	Object onSelectedFromTimeOtpBash()
+	Object onSelectedFromOtpBash()
 	{
 		otpHelper.randomizeSecret();
 
@@ -782,6 +784,9 @@ class AddCredentials extends AbstractUserPage
 		session.save(userAuthReveal);
 
 		journal.addedUserAuthCredential(userAuthReveal);
+
+		final
+		Block block=(userAuthReveal.authMethod==AuthMethod.TIME_OTP?totpBashScript:hotpBashScript);
 
 		return new StreamResponse()
 		{
@@ -796,7 +801,7 @@ class AddCredentials extends AbstractUserPage
 			public
 			InputStream getStream() throws IOException
 			{
-				return BlockHelper.toInputStream(componentResources, totpBashScript);
+				return BlockHelper.toInputStream(componentResources, block);
 			}
 
 			@Override
@@ -809,7 +814,7 @@ class AddCredentials extends AbstractUserPage
 	}
 
 	/*
-	Object onSelectedFromTimeOtpReconfigure()
+	Object onSelectedFromOtpReconfigure()
 	{
 		//TODO: all we have to do is flash-persist (or store in user policy) the otp helper
 		return this;
@@ -817,7 +822,7 @@ class AddCredentials extends AbstractUserPage
 	*/
 
 	@CommitAfter
-	Object onSelectedFromTimeOtpManual()
+	Object onSelectedFromOtpManual()
 	{
 		otpHelper.setBase32Secret(password);
 
@@ -830,6 +835,24 @@ class AddCredentials extends AbstractUserPage
 		journal.addedUserAuthCredential(userAuthReveal);
 
 		return editCredentials.with(userAuthReveal);
+	}
+
+	/**
+	 * That's when one knows you are stretching your template engine a bit beyond it's design goals.
+	 */
+	public
+	String getLT()
+	{
+		return "<";
+	}
+
+	/**
+	 * That's when one knows you are stretching your template engine a bit beyond it's design goals.
+	 */
+	public
+	String getGT()
+	{
+		return ">";
 	}
 
 }

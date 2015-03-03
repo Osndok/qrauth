@@ -66,20 +66,20 @@ tr.important:hover
 	color: #888;
 }
 
-#timeOtpForm pre.big
+#otpForm pre.big
 {
 	font-size: 3em;
 	text-align: center;
 	font-family: monospace;
 }
 
-#timeOtpForm .primary
+#otpForm .primary
 {
 	margin: 25px auto;
 	width: 735px;
 }
 
-#timeOtpForm .secondary
+#otpForm .secondary
 {
 	margin: 50px auto;
 	width: 735px;
@@ -87,37 +87,37 @@ tr.important:hover
 	padding: 15px;
 }
 
-#timeOtpForm .secondary td
+#otpForm .secondary td
 {
 	padding: 10px;
 }
 
-#timeOtpForm .qrCode
+#otpForm .qrCode
 {
 	float:left;
 }
 
-#timeOtpForm .numericCode
+#otpForm .numericCode
 {
 	float:left;
 	margin-top: 33px;
 	margin-left: 15px;
 }
 
-#timeOtpForm .buttons
+#otpForm .buttons
 {
 	clear: both;
 	text-align: center;
 	margin-top: 15px;
 }
 
-#timeOtpForm input,
-#timeOtpForm select
+#otpForm input,
+#otpForm select
 {
 	margin: 5px 10px;
 }
 
-#timeOtpForm .qrCode img
+#otpForm .qrCode img
 {
 	margin: 15px;
 	/* providing the size here helps a bit with the jarred-loading */
@@ -132,3 +132,7 @@ tr.important:hover
 	border: 2px solid red;
 }
 
+#otpPeriod
+{
+	width: 20px;
+}
