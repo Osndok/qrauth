@@ -6,6 +6,12 @@ import org.apache.commons.codec.binary.Base32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.allogy.qrauth.server.entities.AuthMethod.HMAC_OTP;
@@ -68,6 +74,7 @@ class OTPHelper
 	public Format  format;
 	public Algo    algo;
 	public Integer period;
+	public Integer counter;
 
 	private String base32Secret;
 
@@ -90,6 +97,7 @@ class OTPHelper
 		format = Format.Eight_Digits;
 		algo = Algo.SHA1;
 		period = 30;
+		counter = 1;
 	}
 
 	public
@@ -130,12 +138,13 @@ class OTPHelper
 		algo=Algo.valueOf(bits[2]);
 		period=Integer.parseInt(bits[3]);
 		base32Secret=bits[4];
+		counter=Integer.parseInt(bits[5]);
 	}
 
 	private
 	String dbSecretString()
 	{
-		return type.toString() + ':' + format + ':' + algo + ':' + period + ':' + base32Secret;
+		return type.toString() + ':' + format + ':' + algo + ':' + period + ':' + base32Secret+':'+counter;
 	}
 
 	@Override
@@ -198,4 +207,104 @@ class OTPHelper
 
 		return sb.toString();
 	}
+
+	public static
+	boolean matchesUserInput(DBUserAuth userAuth, long now, String response)
+	{
+		final
+		AuthMethod authMethod=userAuth.authMethod;
+
+		if (authMethod==TIME_OTP)
+		{
+			return new OTPHelper(userAuth).totpMatches(now, response);
+		}
+		else
+		if (authMethod==HMAC_OTP)
+		{
+			throw new UnsupportedOperationException();
+			//TODO: increment counter for hmac
+		}
+		else
+		{
+			throw new UnsupportedOperationException(authMethod.toString());
+		}
+	}
+
+	/**
+	 * Based largely on:
+	 * https://github.com/wstrange/GoogleAuth/blob/master/src/main/java/com/warrenstrange/googleauth/GoogleAuthenticator.java#L227
+	 *
+	 * @param now
+	 * @param response
+	 * @return
+	 */
+	private
+	boolean totpMatches(long now, String response)
+	{
+		if (response.length()!=format.intValue)
+		{
+			log.debug("incorrect response length");
+			return false;
+		}
+
+		final
+		byte[] key=new Base32().decode(base32Secret);
+
+		final
+		long window=now/(period*1000);
+
+		final
+		int responseInteger=Integer.parseInt(response);
+
+		try
+		{
+			if (responseInteger== calculateOtpHmacCode(key, window - 1)) return true;
+			if (responseInteger== calculateOtpHmacCode(key, window)) return true;
+			return (responseInteger== calculateOtpHmacCode(key, window + 1));
+		}
+		catch (Exception e)
+		{
+			log.error("unable to test TOTP match", e);
+			return false;
+		}
+	}
+
+	/**
+	 * Based heavily on:
+	 * https://github.com/pkelchner/otp/blob/master/src/main/java/net/cortexx/otp/HmacBasedOneTimePassword.java#L44
+	 *
+	 * @param key
+	 * @param counter
+	 * @return
+	 */
+	private
+	int calculateOtpHmacCode(byte[] key, long counter) throws NoSuchAlgorithmException, InvalidKeyException
+	{
+		final byte[] counterBytes = ByteBuffer.allocate(8)
+										.order(ByteOrder.BIG_ENDIAN)
+										.putLong(counter)
+										.array();
+
+		final byte[] hash;
+
+		final
+		Mac mac=Mac.getInstance("hmac"+algo);
+
+		mac.init(new SecretKeySpec(key, "raw"));
+
+		//TODO: the upstream implementation had a lock here, it might be good to be triple-sure it is not needed.
+		hash = mac.doFinal(counterBytes);
+
+		final int offset = hash[19] & 0x0F;
+		final int truncatedHash = ((ByteBuffer) ByteBuffer.wrap(hash)
+													.order(ByteOrder.BIG_ENDIAN)
+													.position(offset))
+									  .getInt() & 0x7FFFFFFF;
+
+		final
+		int truncation=(int)Math.pow(10, format.intValue);
+
+		return truncatedHash % truncation;
+	}
+
 }

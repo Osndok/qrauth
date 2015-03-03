@@ -1,10 +1,7 @@
 package com.allogy.qrauth.server.pages.internal.auth;
 
 import com.allogy.qrauth.server.entities.*;
-import com.allogy.qrauth.server.helpers.Death;
-import com.allogy.qrauth.server.helpers.ErrorResponse;
-import com.allogy.qrauth.server.helpers.RSAHelper;
-import com.allogy.qrauth.server.helpers.UserPolicy;
+import com.allogy.qrauth.server.helpers.*;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
 import com.allogy.qrauth.server.pages.user.ActivityUser;
 import com.allogy.qrauth.server.pages.user.names.AddNames;
@@ -426,9 +423,16 @@ class DispatchAuth extends AbstractAPICall
 				}
 			}
 
-			case YUBIKEY_CUSTOM:
-			case HMAC_OTP:
 			case TIME_OTP:
+			case HMAC_OTP:
+			{
+				final
+				long now=System.currentTimeMillis();
+
+				return OTPHelper.matchesUserInput(userAuth, now, password);
+			}
+
+			case YUBIKEY_CUSTOM:
 			case PAPER_PASSWORDS:
 			case EMAILED_SECRET:
 				log.error("unimplemented password-based auth method: {}", authMethod);
