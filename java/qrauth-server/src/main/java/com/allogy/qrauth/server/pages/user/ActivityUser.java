@@ -57,4 +57,17 @@ class ActivityUser extends AbstractUserPage
 			return myIpAddress.equals(tenantIP.ipAddress);
 		}
 	}
+
+	public
+	String getImportance()
+	{
+		if (logEntry.important)
+		{
+			return "important";
+		}
+		else
+		{
+			return null;
+		}
+	}
 }
