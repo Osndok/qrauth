@@ -2,29 +2,48 @@ package com.allogy.qrauth.server.pages.user.credentials;
 
 import com.allogy.qrauth.server.entities.AuthMethod;
 import com.allogy.qrauth.server.entities.DBUserAuth;
+import com.allogy.qrauth.server.entities.OutputStreamResponse;
 import com.allogy.qrauth.server.entities.UnimplementedHashFunctionException;
 import com.allogy.qrauth.server.helpers.*;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
+import com.allogy.qrauth.server.pages.user.Credentials;
 import com.allogy.qrauth.server.pages.user.credentials.rsa.ReclaimRSA;
 import com.allogy.qrauth.server.services.Hashing;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
 import com.allogy.qrauth.server.services.impl.Config;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.yubico.client.v2.VerificationResponse;
 import com.yubico.client.v2.YubicoClient;
 import com.yubico.client.v2.exceptions.YubicoValidationFailure;
 import com.yubico.client.v2.exceptions.YubicoVerificationException;
+import org.apache.tapestry5.Asset;
 import org.apache.tapestry5.Block;
+import org.apache.tapestry5.ComponentResources;
+import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.annotations.InjectPage;
+import org.apache.tapestry5.annotations.Path;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
+import org.apache.tapestry5.internal.structure.BlockImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.internal.util.InternalUtils;
+import org.apache.tapestry5.services.Response;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * Created by robert on 2/27/15.
@@ -39,11 +58,26 @@ class AddCredentials extends AbstractUserPage
 	void onActivate(AuthMethod authMethod)
 	{
 		this.authMethod=authMethod;
+
+		if (OTPHelper.fitsAuthMethod(authMethod) && otpHelper==null)
+		{
+			otpHelper=new OTPHelper(authMethod);
+		}
 	}
 
 	Object onPassivate()
 	{
-		return authMethod;
+		if (userAuthReveal==null)
+		{
+			return authMethod;
+		}
+		else
+		{
+			return new Object[]{
+				authMethod.toString(),
+				userAuthReveal.id.toString()
+			};
+		}
 	}
 
 	public
@@ -110,11 +144,11 @@ class AddCredentials extends AbstractUserPage
 			case ROLLING_PASSWORD: return rollingPassword;
 			case STATIC_OTP      : return staticOtp;
 			case RSA             : return rsaBlock;
+			case TIME_OTP        : return timeOtpBlock;
 
 			case SQRL:
 			case YUBIKEY_CUSTOM:
 			case HMAC_OTP:
-			case TIME_OTP:
 			case PAPER_PASSWORDS:
 			case OPEN_ID:
 			case EMAILED_SECRET:
@@ -512,6 +546,290 @@ class AddCredentials extends AbstractUserPage
 		{
 			rsaHelper.close();
 		}
+	}
+
+	/*
+	----------------------------- When SECRETS are to be EXPOSED !!! ---------------------------
+	 */
+
+	private
+	DBUserAuth userAuthReveal;
+
+	Object onActivate(AuthMethod authMethod, long revealId)
+	{
+		if (userAuthReveal==null)
+		{
+			return psuedoActivate(authMethod, revealId);
+		}
+
+		return null;
+	}
+
+	Object psuedoActivate(AuthMethod authMethod, long revealId)
+	{
+		final
+		DBUserAuth requested=(DBUserAuth)session.get(DBUserAuth.class, revealId);
+
+		if (requested==null)
+		{
+			return new ErrorResponse(404, "auth method not found");
+		}
+
+		//Make sure the credential is *ours* and *recent*
+		if (!requested.user.id.equals(user.id))
+		{
+			return new ErrorResponse(400, "user/credential mismatch");
+		}
+
+		if (requested.created.getTime() < oldestRevealableTime())
+		{
+			return new ErrorResponse(400, "sorry, only recently-created credentials can be revealed");
+		}
+
+		//Alright... let 'em have it!
+		this.userAuthReveal = requested;
+
+		if (OTPHelper.fitsAuthMethod(requested.authMethod))
+		{
+			otpHelper=new OTPHelper(requested);
+		}
+
+		return null;
+	}
+
+	private
+	long oldestRevealableTime()
+	{
+		return System.currentTimeMillis() - policy.longestReasonableAddCredentialTaskLength();
+	}
+
+
+
+	/*
+	-------------------------------------- TIME_OTP -----------------------------------------
+	 */
+
+	@Inject
+	private
+	Block timeOtpBlock;
+
+	@Inject
+	@Path("context:images/qr-code-ready.png")
+	private
+	Asset qrCodeReady;
+
+	@Property
+	private
+	OTPHelper otpHelper;
+
+	public
+	String getTimeOtpQrUrl()
+	{
+		if (userAuthReveal == null)
+		{
+			return qrCodeReady.toClientURL();
+		}
+		else
+		{
+			return userAuthReveal.id+"/qr.png";
+		}
+	}
+
+	Object onActivate(AuthMethod authMethod, long revealId, String qrCodeFilename) throws WriterException
+	{
+		if (!qrCodeFilename.equals("qr.png"))
+		{
+			return new ErrorResponse(404, "unknown secret attachment");
+		}
+
+		//Work around usually-works-fine tapestry activation method ordering...
+		{
+			final
+			Object retval=psuedoActivate(authMethod, revealId);
+
+			if (retval!=null)
+			{
+				return retval;
+			}
+		}
+
+		/*
+		GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator(Config.get().getTOTPConfig());
+		GoogleAuthenticatorKey credentials = googleAuthenticator.createCredentials();
+		String key = credentials.getKey();
+		log.debug("google authenticator key: {}", key);
+
+		//BUG: need to add 'digits=8' to url
+		String url = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL("Allogy", "Username", credentials);
+		log.debug("got uri: {}", url);
+		*/
+
+		final
+		String url = otpHelper.toOtpAuthURL("Allogy", userAuthReveal.toString());
+
+		final
+		String finalImageFormat = "png";
+
+		final
+		QRCodeWriter qrCodeWriter = new QRCodeWriter();
+
+		BarcodeFormat barcodeFormat = BarcodeFormat.QR_CODE;
+		int width = 177;
+		int height = 177;
+
+		Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+		hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+		hints.put(EncodeHintType.MARGIN, 0); /* default = 4, but we do padding with html (no need to include in bitmap) */
+
+		final BitMatrix bitMatrix = qrCodeWriter.encode(url, barcodeFormat, width, height, hints);
+
+		return new OutputStreamResponse()
+		{
+			public
+			String getContentType()
+			{
+				return "image/" + finalImageFormat;
+			}
+
+			public
+			void writeToStream(OutputStream outputStream) throws IOException
+			{
+				MatrixToImageWriter.writeToStream(bitMatrix, finalImageFormat, outputStream);
+			}
+
+			public
+			void prepareResponse(Response response)
+			{
+				//no-op...
+			}
+		};
+	}
+
+	public
+	String getTimeOtpQrUrlTitle()
+	{
+		if (userAuthReveal == null)
+		{
+			return "This is where the QR code will appear, if requested.";
+		}
+		else
+		{
+			return "You should scan this QR code immediately.";
+		}
+	}
+
+	public
+	String getTimeOtpNumericCode()
+	{
+		if (userAuthReveal == null)
+		{
+			//e.g. "J3HQJ4NT57KRMATN"
+			//e.g. "YGCHDZHXYLF2BGG7"
+			//turn "----------------";
+			//turn "-R-E-A-D-Y-.-.--";
+			return "----READY...----";
+		}
+		else
+		{
+			return otpHelper.getBase32Secret();
+		}
+	}
+
+	Object onSelectedFromTimeOtpDone()
+	{
+		if (userAuthReveal==null)
+		{
+			return Credentials.class;
+		}
+		else
+		{
+			return editCredentials.with(userAuthReveal);
+		}
+	}
+
+	@CommitAfter
+	Object onSelectedFromTimeOtpReveal()
+	{
+		otpHelper.randomizeSecret();
+
+		userAuthReveal=otpHelper.toDBUserAuth();
+		userAuthReveal.user=user;
+		userAuthReveal.millisGranted=(int)userAuthReveal.authMethod.getDefaultLoginLength();
+		session.save(userAuthReveal);
+
+		journal.addedUserAuthCredential(userAuthReveal);
+
+		return this;
+	}
+
+	@Inject
+	private
+	Block totpBashScript;
+
+	@Inject
+	private
+	ComponentResources componentResources;
+
+	@CommitAfter
+	Object onSelectedFromTimeOtpBash()
+	{
+		otpHelper.randomizeSecret();
+
+		userAuthReveal=otpHelper.toDBUserAuth();
+		userAuthReveal.user=user;
+		userAuthReveal.millisGranted=(int)userAuthReveal.authMethod.getDefaultLoginLength();
+		userAuthReveal.comment="BASH-Script Token: "+userAuthReveal.comment;
+		session.save(userAuthReveal);
+
+		journal.addedUserAuthCredential(userAuthReveal);
+
+		return new StreamResponse()
+		{
+			@Override
+			public
+			String getContentType()
+			{
+				return "text/plain";
+			}
+
+			@Override
+			public
+			InputStream getStream() throws IOException
+			{
+				return BlockHelper.toInputStream(componentResources, totpBashScript);
+			}
+
+			@Override
+			public
+			void prepareResponse(Response response)
+			{
+				response.setHeader("Content-Disposition", "attachment; filename=otp-token-"+userAuthReveal.id+".sh");
+			}
+		};
+	}
+
+	/*
+	Object onSelectedFromTimeOtpReconfigure()
+	{
+		//TODO: all we have to do is flash-persist (or store in user policy) the otp helper
+		return this;
+	}
+	*/
+
+	@CommitAfter
+	Object onSelectedFromTimeOtpManual()
+	{
+		otpHelper.setBase32Secret(password);
+
+		userAuthReveal=otpHelper.toDBUserAuth();
+		userAuthReveal.user=user;
+		userAuthReveal.millisGranted=(int)userAuthReveal.authMethod.getDefaultLoginLength();
+		userAuthReveal.comment="Manually-Provisioned Token: "+userAuthReveal.comment;
+		session.save(userAuthReveal);
+
+		journal.addedUserAuthCredential(userAuthReveal);
+
+		return editCredentials.with(userAuthReveal);
 	}
 
 }

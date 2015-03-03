@@ -23,4 +23,6 @@ interface Policy
 	boolean wouldAllowAdditionalUsernames(DBUser user, boolean extraEffort);
 
 	Date passwordDeadlineGivenComplexity(double strength);
+
+	long longestReasonableAddCredentialTaskLength();
 }

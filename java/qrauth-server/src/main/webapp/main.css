@@ -65,3 +65,70 @@ tr.important:hover
 {
 	color: #888;
 }
+
+#timeOtpForm pre.big
+{
+	font-size: 3em;
+	text-align: center;
+	font-family: monospace;
+}
+
+#timeOtpForm .primary
+{
+	margin: 25px auto;
+	width: 735px;
+}
+
+#timeOtpForm .secondary
+{
+	margin: 50px auto;
+	width: 735px;
+	border: 1px solid gray;
+	padding: 15px;
+}
+
+#timeOtpForm .secondary td
+{
+	padding: 10px;
+}
+
+#timeOtpForm .qrCode
+{
+	float:left;
+}
+
+#timeOtpForm .numericCode
+{
+	float:left;
+	margin-top: 33px;
+	margin-left: 15px;
+}
+
+#timeOtpForm .buttons
+{
+	clear: both;
+	text-align: center;
+	margin-top: 15px;
+}
+
+#timeOtpForm input,
+#timeOtpForm select
+{
+	margin: 5px 10px;
+}
+
+#timeOtpForm .qrCode img
+{
+	margin: 15px;
+	/* providing the size here helps a bit with the jarred-loading */
+	width:177px;
+	height:177px;
+}
+
+.warning
+{
+	padding:10px;
+	margin:10px;
+	border: 2px solid red;
+}
+

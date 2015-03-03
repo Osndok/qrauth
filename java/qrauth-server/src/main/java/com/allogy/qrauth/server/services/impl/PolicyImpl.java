@@ -31,6 +31,7 @@ class PolicyImpl implements Policy, Runnable
 	private static final long   GLOBAL_LOGOUT_PERIOD    = TimeUnit.DAYS.toMillis(7);
 	private static final long   DEVEL_LOGOUT_PERIOD     = TimeUnit.HOURS.toMillis(1);
 	private static final long   SHORTEST_USABLE_SESSION = TimeUnit.MINUTES.toMillis(3);
+	private static final long   ADD_CREDENTIAL_TIMEOUT  = TimeUnit.MINUTES.toMillis(30);
 
 	private
 	JSONObject supremeTenantConfig = new JSONObject();
@@ -207,6 +208,13 @@ class PolicyImpl implements Policy, Runnable
 		{
 			return new Date(System.currentTimeMillis()+(long)(days*MS_PER_DAY));
 		}
+	}
+
+	@Override
+	public
+	long longestReasonableAddCredentialTaskLength()
+	{
+		return ADD_CREDENTIAL_TIMEOUT;
 	}
 
 	private

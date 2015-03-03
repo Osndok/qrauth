@@ -15,12 +15,13 @@ class Config
 {
 	private static final String QRAUTH_CONFIG_FILE = System.getProperty("QRAUTH_CONFIG_FILE", "/etc/qrauth.props");
 
-	private static Config INSTANCE;
+	private static
+	Config INSTANCE;
 
 	public static synchronized
 	Config get()
 	{
-		if (INSTANCE==null)
+		if (INSTANCE == null)
 		{
 			try
 			{
@@ -194,4 +195,5 @@ class Config
 			return yubicoClientCachingFactory.get();
 		}
 	}
+
 }
