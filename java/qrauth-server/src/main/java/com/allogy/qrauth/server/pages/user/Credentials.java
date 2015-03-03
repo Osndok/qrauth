@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.pages.user;
 
 import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.LogEntry;
+import com.allogy.qrauth.server.helpers.Death;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.grid.GridDataSource;
 import org.apache.tapestry5.hibernate.HibernateGridDataSource;
@@ -32,4 +33,9 @@ class Credentials extends AbstractUserPage
 	private
 	DBUserAuth userAuth;
 
+	public
+	String getDeadOrAlive()
+	{
+		return (Death.hathVisited(userAuth)?"dead":"alive");
+	}
 }

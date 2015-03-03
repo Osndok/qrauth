@@ -38,7 +38,8 @@ td.pubKey
 	max-width: 800px;
 }
 
-a.dead
+a.dead,
+tr.dead
 {
 	color: gray;
 	text-decoration: line-through;
@@ -47,4 +48,20 @@ a.dead
 tr.important
 {
 	background-color: #F08080 !important;
+}
+
+tr.important:hover
+{
+	background-color: #FF8080 !important;
+}
+
+.pagination > .active > a
+{
+	background-color: #667;
+	border-color: #888;
+}
+
+.pagination > li > a
+{
+	color: #888;
 }
