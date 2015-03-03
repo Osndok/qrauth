@@ -15,14 +15,10 @@
 			${logEntry.tenant}
 		</p:siteCell>
 		<p:usernameCell>
-			<t:if test="logEntry.username">
-				<t:pagelink page="user/names/edit" context="logEntry.username">${logEntry.username.displayValue}</t:pagelink>
-			</t:if>
+			<t:usernameLink value="logEntry.username"/>
 		</p:usernameCell>
 		<p:authMethodCell>
-			<t:if test="logEntry.userAuth">
-				<t:pagelink page="user/credentials/edit" context="logEntry.userAuth">${userAuthSummary}</t:pagelink>
-			</t:if>
+			<t:userAuthLink value="logEntry.userAuth"/>
 		</p:authMethodCell>
 	</t:grid>
 

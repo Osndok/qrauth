@@ -203,7 +203,7 @@ class AuthSessionImpl implements AuthSession
 		final
 		Date nowDate = new Date(now);
 
-		if (user.globalLogout.getTime() < now - policy.getShortestUsableSessionLength())
+		if (user.globalLogout.getTime() < now + policy.getShortestUsableSessionLength())
 		{
 			user.globalLogout = new Date(now + policy.getGlobalLogoutPeriod());
 			user.epoch++;
@@ -214,6 +214,7 @@ class AuthSessionImpl implements AuthSession
 		{
 			if (userAuth.millisGranted == null)
 			{
+				log.debug("new session (from unbounded auth method) hits global logout time");
 				sessionDeadline=user.globalLogout;
 			}
 			else

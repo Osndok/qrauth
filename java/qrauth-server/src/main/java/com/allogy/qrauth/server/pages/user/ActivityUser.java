@@ -12,6 +12,7 @@ import org.apache.tapestry5.hibernate.HibernateGridDataSource;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -23,6 +24,7 @@ class ActivityUser extends AbstractUserPage
 	public
 	GridDataSource getDataSource()
 	{
+		//TODO: how to best set the *initial* sorting on such an otherwise-nice high level widget?
 		return new HibernateGridDataSource(session, LogEntry.class)
 		{
 			@Override
@@ -30,6 +32,7 @@ class ActivityUser extends AbstractUserPage
 			void applyAdditionalConstraints(Criteria criteria)
 			{
 				criteria.add(Restrictions.eq("user", user));
+				//dnw: criteria.addOrder(Order.desc("time"));
 			}
 		};
 	}
@@ -54,15 +57,4 @@ class ActivityUser extends AbstractUserPage
 			return myIpAddress.equals(tenantIP.ipAddress);
 		}
 	}
-
-	public
-	String getUserAuthSummary()
-	{
-		final
-		DBUserAuth userAuth=logEntry.userAuth;
-
-		//TODO: use a user-specific (and type-specific?) counters, rather than the sequence number.
-		return userAuth.authMethod+"-"+userAuth.id;
-	}
-
 }

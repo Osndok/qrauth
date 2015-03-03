@@ -37,3 +37,10 @@ td.pubKey
 	overflow: hidden;
 	max-width: 800px;
 }
+
+a.dead
+{
+	color: gray;
+	text-decoration: line-through;
+}
+
