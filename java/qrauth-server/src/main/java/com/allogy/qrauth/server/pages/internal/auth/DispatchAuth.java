@@ -600,10 +600,13 @@ class DispatchAuth extends AbstractAPICall
 										   .add(Restrictions.eq("authMethod", AuthMethod.RSA))
 										   .list();
 
+			final
+			long now=System.currentTimeMillis();
+
 			//Try "alive" public keys first...
 			for (DBUserAuth rsaUserAuth : pubkeys)
 			{
-				if (!Death.hathVisited(rsaUserAuth))
+				if (!Death.hathVisited(rsaUserAuth, now))
 				{
 					journal.noticeAttempt(rsaUserAuth);
 
@@ -628,7 +631,7 @@ class DispatchAuth extends AbstractAPICall
 			//Only then, try dead keys; this separation is important in case two users bat a pubKey back-and-forth, as it will still match one of the dead keys.
 			for (DBUserAuth rsaUserAuth : pubkeys)
 			{
-				if (Death.hathVisited(rsaUserAuth))
+				if (Death.hathVisited(rsaUserAuth, now))
 				{
 					journal.noticeAttempt(rsaUserAuth);
 
