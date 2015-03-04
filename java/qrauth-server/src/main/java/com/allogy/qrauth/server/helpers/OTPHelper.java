@@ -74,7 +74,7 @@ class OTPHelper
 	public Format  format;
 	public Algo    algo;
 	public Integer period;
-	public Integer counter;
+	public Long    counter;
 
 	private String base32Secret;
 
@@ -97,7 +97,7 @@ class OTPHelper
 		format = Format.Eight_Digits;
 		algo = Algo.SHA1;
 		period = 30;
-		counter = 1;
+		counter = 0l; //???: ...or one?
 	}
 
 	public
@@ -138,7 +138,7 @@ class OTPHelper
 		algo=Algo.valueOf(bits[2]);
 		period=Integer.parseInt(bits[3]);
 		base32Secret=bits[4];
-		counter=Integer.parseInt(bits[5]);
+		counter=Long.parseLong(bits[5]);
 	}
 
 	private
@@ -209,7 +209,7 @@ class OTPHelper
 	}
 
 	public static
-	boolean matchesUserInput(DBUserAuth userAuth, long now, String response)
+	boolean matchesUserInput(DBUserAuth userAuth, long now, String response, int maxHotpAdvance)
 	{
 		final
 		AuthMethod authMethod=userAuth.authMethod;
@@ -221,13 +221,69 @@ class OTPHelper
 		else
 		if (authMethod==HMAC_OTP)
 		{
-			throw new UnsupportedOperationException();
-			//TODO: increment counter for hmac
+			//TODO: be doubly sure that a particular password cannot be reused (off-by-one errors, you know!)
+			return new OTPHelper(userAuth).hotpMatches(userAuth, response, maxHotpAdvance);
 		}
 		else
 		{
 			throw new UnsupportedOperationException(authMethod.toString());
 		}
+	}
+
+	/**
+	 * @param response - the user-provided input, trying to satisfy this request
+	 * @param maxHotpAdvance - the maximum number of passwords that can be skipped
+	 * @return true if (and only if) the user who supplied the response is overwhelmingly likely to be in possession of the token generator
+	 */
+	private
+	boolean hotpMatches(DBUserAuth userAuth, String response, int maxHotpAdvance)
+	{
+		if (response.length()!=format.intValue)
+		{
+			log.debug("incorrect response length to match {}", this);
+			return false;
+		}
+
+		final
+		int responseInteger=Integer.parseInt(response);
+
+		final
+		byte[] key=new Base32().decode(base32Secret);
+
+		final
+		long limit=counter+1+maxHotpAdvance;
+
+		final
+		String userAuthString=userAuth.toString();
+
+		try
+		{
+			for (long newCounter = counter + 1; newCounter < limit; newCounter++)
+			{
+				final
+				int code = calculateOtpHmacCode(key, newCounter);
+
+				if (code == responseInteger)
+				{
+					log.info("matched {} HOTP @ {} advance: {}", userAuthString, (newCounter-counter), code);
+					counter=newCounter;
+					userAuth.secret=dbSecretString();
+					return true;
+				}
+				else
+				{
+					//NB: if set too high, we will be logging tons of still-valid passwords in the log.
+					log.trace("{} HOTP non-match {} advance: {}", userAuthString, (newCounter - counter), code);
+					//continue...
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			log.error("unable to calculate HOTP advance for {} / {}", userAuth, this, e);
+		}
+
+		return false;
 	}
 
 	/**
@@ -243,18 +299,18 @@ class OTPHelper
 	{
 		if (response.length()!=format.intValue)
 		{
-			log.debug("incorrect response length");
+			log.debug("incorrect response length to match {}", this);
 			return false;
 		}
+
+		final
+		int responseInteger=Integer.parseInt(response);
 
 		final
 		byte[] key=new Base32().decode(base32Secret);
 
 		final
 		long window=now/(period*1000);
-
-		final
-		int responseInteger=Integer.parseInt(response);
 
 		try
 		{

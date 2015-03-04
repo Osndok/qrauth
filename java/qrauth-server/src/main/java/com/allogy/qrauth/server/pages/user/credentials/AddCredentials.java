@@ -52,14 +52,17 @@ class AddCredentials extends AbstractUserPage
 	private
 	AuthMethod authMethod;
 
-	void onActivate(AuthMethod authMethod)
+	Object onActivate(AuthMethod authMethod)
 	{
 		this.authMethod=authMethod;
 
 		if (OTPHelper.fitsAuthMethod(authMethod) && otpHelper==null)
 		{
+			//TODO: count the user's HOTP methods, and forbid them from adding too many
 			otpHelper=new OTPHelper(authMethod);
 		}
+
+		return null;
 	}
 
 	Object onPassivate()
@@ -99,14 +102,14 @@ class AddCredentials extends AbstractUserPage
 
 			case RSA:
 			case YUBIKEY_PUBLIC:
+			case HMAC_OTP:
+			case TIME_OTP:
 			case STATIC_OTP:
 			case STATIC_PASSWORD:
 			case ROLLING_PASSWORD:
 				return "Yes";
 
 			case YUBIKEY_CUSTOM:
-			case HMAC_OTP:
-			case TIME_OTP:
 			case PAPER_PASSWORDS:
 			case OPEN_ID:
 			case EMAILED_SECRET:
@@ -824,6 +827,7 @@ class AddCredentials extends AbstractUserPage
 	@CommitAfter
 	Object onSelectedFromOtpManual()
 	{
+		//TODO: !!!: we really need to verify that the provided seed is Base32
 		otpHelper.setBase32Secret(password);
 
 		userAuthReveal=otpHelper.toDBUserAuth();

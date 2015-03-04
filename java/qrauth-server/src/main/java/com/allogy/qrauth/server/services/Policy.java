@@ -25,4 +25,6 @@ interface Policy
 	Date passwordDeadlineGivenComplexity(double strength);
 
 	long longestReasonableAddCredentialTaskLength();
+
+	int hotpAdvanceMatch();
 }

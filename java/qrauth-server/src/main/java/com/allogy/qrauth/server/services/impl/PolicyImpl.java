@@ -217,6 +217,16 @@ class PolicyImpl implements Policy, Runnable
 		return ADD_CREDENTIAL_TIMEOUT;
 	}
 
+	/**
+	 * @return the number of times an OTP token can be independently activated and still work
+	 */
+	@Override
+	public
+	int hotpAdvanceMatch()
+	{
+		return 25;
+	}
+
 	private
 	boolean bool(String key, boolean _default)
 	{

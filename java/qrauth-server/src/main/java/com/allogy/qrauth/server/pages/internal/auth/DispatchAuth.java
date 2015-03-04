@@ -423,13 +423,22 @@ class DispatchAuth extends AbstractAPICall
 				}
 			}
 
-			case TIME_OTP:
 			case HMAC_OTP:
+			{
+				/*TODO: HMAC is probably more expensive than the others, so we can incur a performance tradeoff for
+				if (HEAVY_LOAD && Death.hathVisited(userAuth))
+				{
+					return false;
+				}
+				*/
+				//NB: fall through to TIME_OTP !
+			}
+			case TIME_OTP:
 			{
 				final
 				long now=System.currentTimeMillis();
 
-				return OTPHelper.matchesUserInput(userAuth, now, password);
+				return OTPHelper.matchesUserInput(userAuth, now, password, policy.hotpAdvanceMatch());
 			}
 
 			case YUBIKEY_CUSTOM:
