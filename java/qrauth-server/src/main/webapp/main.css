@@ -136,3 +136,21 @@ tr.important:hover
 {
 	width: 20px;
 }
+
+body.user_credentials_add td,
+body.user_credentials_add th
+{
+	vertical-align: middle !important;
+}
+
+body.user_credentials_add .main tr:hover
+{
+	background-color: #eee;
+}
+
+body.user_credentials_add .main table .btn
+{
+	padding: 2px 10px;
+}
+
+

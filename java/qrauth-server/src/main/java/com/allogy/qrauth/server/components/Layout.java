@@ -56,4 +56,14 @@ public class Layout
 	{
 		return BRAND_NAME;
 	}
+
+	@Inject
+	private
+	ComponentResources componentResources;
+
+	public
+	String getCssClassPageName()
+	{
+		return componentResources.getPageName().toLowerCase().replaceAll("\\/", "_");
+	}
 }
