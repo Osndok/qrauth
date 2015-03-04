@@ -46,6 +46,7 @@
         pubKey varchar(2048) unique,
         secret varchar(255),
         silentAlarm BOOLEAN DEFAULT 'f' not null,
+        lastTenantSession_id int8,
         user_id int8 not null,
         primary key (id)
     );
@@ -226,6 +227,11 @@
         add constraint FK11166EB1E4D1151E 
         foreign key (user_id) 
         references DBUser;
+
+    alter table DBUserAuth 
+        add constraint FK11166EB114009C2A 
+        foreign key (lastTenantSession_id) 
+        references TenantSession;
 
     alter table LogEntry 
         add constraint FK7A7043AEBD5D763E 

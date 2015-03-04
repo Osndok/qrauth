@@ -66,6 +66,11 @@ class DBUserAuth extends Attemptable implements Mortal
 	@Column(columnDefinition = Usual.CSV_30, length = 30)
 	public String disclose_csv;
 
+	@NonVisual
+	@ManyToOne(optional = true)
+	private
+	TenantSession lastTenantSession;
+
 	/* -------------------- Mortal Implementation ------------------ */
 
 	@NonVisual
