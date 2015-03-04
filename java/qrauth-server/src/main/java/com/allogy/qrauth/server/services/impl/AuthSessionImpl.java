@@ -111,6 +111,20 @@ class AuthSessionImpl implements AuthSession
 		}
 
 		final
+		DBUserAuth userAuth;
+		{
+			userAuth = getDBUserAuth();
+
+			if (userAuth==null)
+			{
+				//Well... we don't know who is even requesting the logout.
+				cookies.removeCookieValue(QRAUTH_COOKIE_NAME);
+				log.warn("authSessionMemo {} without userAuth?", authSessionMemo);
+				return;
+			}
+		}
+
+		final
 		Session session = hibernateSessionManager.getSession();
 
 		final
@@ -146,8 +160,8 @@ class AuthSessionImpl implements AuthSession
 		logEntry.actionKey = "logout";
 		logEntry.message = "Logout requested";
 		logEntry.username=getUsername(session, authSessionMemo);
-		logEntry.userAuth=getDBUserAuth();
-		logEntry.user=logEntry.userAuth.user;
+		logEntry.userAuth=userAuth;
+		logEntry.user=userAuth.user;
 		logEntry.tenant=tenant;
 		logEntry.tenantIP=network.needIPForThisRequest(tenant);
 		logEntry.tenantSession=tenantSession;
