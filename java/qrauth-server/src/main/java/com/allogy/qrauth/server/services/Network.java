@@ -64,4 +64,5 @@ interface Network
 	 */
 	boolean addressCacheShowsBan(HttpServletRequest request);
 
+	boolean ipMatch(TenantIP tenantIP, TenantIP rule);
 }

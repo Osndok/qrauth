@@ -323,6 +323,27 @@ class NetworkImpl implements Network, Runnable
 
 	@Override
 	public
+	boolean ipMatch(TenantIP tenantIP, TenantIP rule)
+	{
+		if (tenantIP==null || rule==null) return false;
+
+		String ip=tenantIP.ipAddress;
+		String ipOrSubnet=rule.ipAddress;
+
+		if (ipOrSubnet.endsWith(".*"))
+		{
+			String subnet=getSubnetWildcard(ip);
+
+			return subnet.equals(ipOrSubnet);
+		}
+		else
+		{
+			return ip.equals(ipOrSubnet);
+		}
+	}
+
+	@Override
+	public
 	boolean addressIsGenerallyBlocked()
 	{
 		final

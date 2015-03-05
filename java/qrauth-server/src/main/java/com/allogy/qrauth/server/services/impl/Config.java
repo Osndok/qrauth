@@ -196,4 +196,9 @@ class Config
 		}
 	}
 
+	public
+	String getSqrlServerFriendlyName()
+	{
+		return "Friendly Name Goes Here";
+	}
 }
