@@ -1,0 +1,125 @@
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+
+	<!--
+
+	This file exists solely for the purposes of generating database schemes (SQL/DDL).
+
+	At one time, everything got along fine, but recently the hibernate3-maven-plugin
+	has prevented war packaging... so the hibernate 'utility' (which is not needed for
+	the general project compile/package/deploy workflow) has been removed and placed
+	in this totally independent pom.xml file for special use as needed (e.g. from
+	the Makefile).
+
+	-->
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>qrauth-server-hibernate-generator</artifactId>
+	<groupId>com.allogy.qrauth.server.hibernate</groupId>
+	<version>not-important</version>
+
+	<packaging>war</packaging>
+
+	<name>qrauth-server</name>
+	<url>https://redmine.allogy.com/projects/qrauth</url>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${pgsql-version}</version>
+		</dependency>
+
+	</dependencies>
+
+    <build>
+		<plugins>
+			<!--
+			To generate the current sql structure from the "entities" package, run:
+				make sql
+			...or:
+				( cd qrauth-server ; mvn compile -X hibernate3:hbm2ddl );
+			... output file will appear here: java/qrauth-server/target/hibernate3/sql/structure.sql
+			-->
+			<plugin>
+				<!-- alternative?
+				<groupId>de.juplo</groupId>
+				<artifactId>hibernate4-maven-plugin</artifactId>
+				<version>1.0.5</version>
+
+				<executions>
+					<execution>
+						<goals>
+							<goal>export</goal>
+						</goals>
+					</execution>
+				</executions>
+				-->
+
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>hibernate3-maven-plugin</artifactId>
+				<!--
+				<version>2.2</version>
+
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>hbm2ddl</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<!- - could not get 3.0 to work... -->
+				<version>3.0</version>
+
+				<dependencies>
+
+					<dependency>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-core</artifactId>
+						<version>3.6.10.Final</version>
+					</dependency>
+
+					<dependency>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-entitymanager</artifactId>
+						<version>3.6.10.Final</version>
+					</dependency>
+
+				</dependencies>
+
+				<configuration>
+
+					<!-- 3.x -->
+					<hibernatetool>
+						<jpaconfiguration/>
+						<hbm2ddl outputfilename="structure.sql" export="false" console="true" format="true"/>
+					</hibernatetool>
+
+				</configuration>
+			</plugin>
+
+        </plugins>
+    </build>
+
+    <reporting/>
+
+    <repositories>
+
+        <!-- This repository is only needed when the Tapestry version is a preview release, rather
+             than a final release. -->
+        <repository>
+            <id>apache-staging</id>
+            <url>https://repository.apache.org/content/groups/staging/</url>
+        </repository>
+    </repositories>
+
+    <properties>
+
+		<pgsql-version>9.3-1101-jdbc41</pgsql-version>
+	</properties>
+
+</project>
