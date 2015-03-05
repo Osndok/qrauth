@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.Semaphore;
 
 /**
  * Created by robert on 3/4/15.
@@ -19,6 +20,12 @@ class Ed25519
 	private static final
 	Logger log = LoggerFactory.getLogger(Ed25519.class);
 
+	private static final
+	int NUM_PROCESSORS=Runtime.getRuntime().availableProcessors();
+
+	private static final
+	Semaphore processLimiter = new Semaphore(NUM_PROCESSORS*2, true);
+
 	/*
 	 * Parameters match pure-java implementation, for consistency.
 	 */
@@ -27,7 +34,15 @@ class Ed25519
 	{
 		if (QRAUTH_VERIFY.canExecute())
 		{
-			return exec(signature, message, publicKey);
+			processLimiter.acquire();
+			try
+			{
+				return exec(signature, message, publicKey);
+			}
+			finally
+			{
+				processLimiter.release();
+			}
 		}
 		else
 		{
