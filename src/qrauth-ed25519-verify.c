@@ -3,7 +3,7 @@
  * 
  * A small bit of glue code to hand the math-intensive ed25519 verification off to some much-more performant
  * code. Due largely to the java being... java? or simply the adaptive BigIntegers used, this utility will
- * verify a signature in about 30 milliseconds that takes the pure java implementation 2000 milliseconds.
+ * verify a signature in about 2 milliseconds that takes the pure java implementation 2000 milliseconds.
  * Nonetheless, the the pure-java implementation is kept as a fallback.
  *
  * Example compile command:
@@ -54,7 +54,7 @@ int main (int argc, char *argv[])
 			return 2;
 		}
 
-		fprintf(stderr, "message size is %zu bytes, read: 0x%2x\n", size, c);
+		//fprintf(stderr, "message size is %zu bytes, read: 0x%2x\n", size, c);
 
 		c=getc(stdin);
 	}

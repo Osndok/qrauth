@@ -448,6 +448,8 @@ class AddCredentials extends AbstractUserPage
 
 	Object onSelectedFromDoStaticPassword() throws UnimplementedHashFunctionException
 	{
+		//TODO: instead of blocking them outright... if it only matches an old *dead* password, let them re-affirm (with a little grief) that it is truly their wish...
+		//      This is important in case they really, truly, want to use a static password that they once set as a temporary password, etc.
 		if (alreadyHavePasswordOnFile())
 		{
 			return new ErrorResponse(400, "that password has already been used, and cannot therefore be reused");

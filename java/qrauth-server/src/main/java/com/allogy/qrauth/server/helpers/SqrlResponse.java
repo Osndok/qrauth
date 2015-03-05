@@ -3,6 +3,8 @@ package com.allogy.qrauth.server.helpers;
 import com.allogy.qrauth.server.entities.Nut;
 import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.services.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,34 +40,57 @@ class SqrlResponse extends HashMap<String,String> implements StreamResponse
 	public
 	String getContentType()
 	{
-		return "application/sqrl";
+		//return "application/sqrl";
+		//return "text/plain; charset=utf-8";
+		return "text/plain";
+	}
+
+	private byte[] finalizedData;
+
+	private static final Logger log = LoggerFactory.getLogger(SqrlResponse.class);
+
+	private
+	byte[] getFinalizedData()
+	{
+		if (finalizedData == null)
+		{
+			final
+			StringBuilder sb = new StringBuilder();
+
+			put("tif", Integer.toHexString(tif));
+
+			for (Map.Entry<String, String> me : entrySet())
+			{
+				sb.append(me.getKey());
+				sb.append('=');
+				sb.append(me.getValue());
+				sb.append("\r\n");
+			}
+
+			final
+			String responseString = sb.toString();
+
+			log.debug("string:\n{}", responseString);
+
+			finalizedData = SqrlHelper.encode(responseString).getBytes();
+		}
+
+		return finalizedData;
 	}
 
 	@Override
 	public
 	InputStream getStream() throws IOException
 	{
-		final
-		StringBuilder sb=new StringBuilder();
-
-		put("tif", Integer.toHexString(tif));
-
-		for (Map.Entry<String, String> me : entrySet())
-		{
-			sb.append(me.getKey());
-			sb.append('=');
-			sb.append(me.getValue());
-			sb.append("\r\n");
-		}
-
-		return new ByteArrayInputStream(sb.toString().getBytes());
+		return new ByteArrayInputStream(getFinalizedData());
 	}
 
 	@Override
 	public
 	void prepareResponse(Response response)
 	{
-		//no-op...
+		//response.setHeader("Charset", "utf-8");
+		response.setHeader("Content-Length", Integer.toString(getFinalizedData().length));
 	}
 
 	private
@@ -74,21 +99,21 @@ class SqrlResponse extends HashMap<String,String> implements StreamResponse
 	public
 	SqrlResponse tifCurrentIDMatch()
 	{
-		tif|=0x001;
+		tif |= 0x001;
 		return this;
 	}
 
 	public
 	SqrlResponse tifPreviousIDMatch()
 	{
-		tif|=0x002;
+		tif |= 0x002;
 		return this;
 	}
 
 	public
 	SqrlResponse tifIPsMatched()
 	{
-		tif|=0x004;
+		tif |= 0x004;
 		return this;
 	}
 

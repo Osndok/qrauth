@@ -24,7 +24,7 @@ class Ed25519
 	int NUM_PROCESSORS=Runtime.getRuntime().availableProcessors();
 
 	private static final
-	Semaphore processLimiter = new Semaphore(NUM_PROCESSORS*2, true);
+	Semaphore processLimiter = new Semaphore(NUM_PROCESSORS, true);
 
 	/*
 	 * Parameters match pure-java implementation, for consistency.
@@ -37,6 +37,9 @@ class Ed25519
 			processLimiter.acquire();
 			try
 			{
+				//TODO: if needed, we can probably get about 2x throughput by batching 64 verify requests together...
+				//      noting that we would then need to return either individual responses, or in the rare case of a
+				//      verify failure start a binary search to track down the culprit.
 				return exec(signature, message, publicKey);
 			}
 			finally

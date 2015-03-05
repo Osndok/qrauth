@@ -5,6 +5,7 @@ import com.allogy.qrauth.server.crypto.Ed25519_PureJava;
 import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.TenantIP;
 import com.allogy.qrauth.server.helpers.Death;
+import com.allogy.qrauth.server.helpers.SqrlHelper;
 import com.allogy.qrauth.server.helpers.SqrlResponse;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
 import com.allogy.qrauth.server.services.Nuts;
@@ -59,6 +60,9 @@ class DoSqrl extends AbstractAPICall
 	private
 	String nutStringValue;
 
+	/*
+	Removed, because GRC's reference implementation does not include these in the original url.
+
 	@ActivationRequestParameter("ver")
 	private
 	String supportedSqrlVersions;
@@ -66,6 +70,7 @@ class DoSqrl extends AbstractAPICall
 	@ActivationRequestParameter("sfn")
 	private
 	String serversFriendlyName;
+	*/
 
 	private
 	boolean useOldAndroidLogic;
@@ -79,7 +84,7 @@ class DoSqrl extends AbstractAPICall
 		this.nut=nut;
 		nutStringValue = nut.stringValue;
 		cachedUrl = null;
-		supportedSqrlVersions = SUPPORTED_SQRL_VERSIONS;
+		//supportedSqrlVersions = SUPPORTED_SQRL_VERSIONS;
 		//serversFriendlyName = limit64TenantNameOrNull(nut.tenant);
 		return this;
 	}
@@ -89,7 +94,7 @@ class DoSqrl extends AbstractAPICall
 	{
 		nutStringValue = nut;
 		cachedUrl = null;
-		supportedSqrlVersions = SUPPORTED_SQRL_VERSIONS;
+		//supportedSqrlVersions = SUPPORTED_SQRL_VERSIONS;
 		return this;
 	}
 
@@ -172,7 +177,10 @@ class DoSqrl extends AbstractAPICall
 		final
 		boolean incomingNutWasValid = consumedAndRotatedPerfectlyGoodNut();
 
-		response = new SqrlResponse(SUPPORTED_SQRL_VERSIONS, nut, getUrl(), FRIENDLY_NAME);
+		final
+		String newQueryPath=pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toRedirectURI();
+
+		response = new SqrlResponse(SUPPORTED_SQRL_VERSIONS, nut, newQueryPath, FRIENDLY_NAME);
 
 		/*
 		-------------------------- MARK: we can now generate a 'usable' sqrl response ------------------------
@@ -228,7 +236,7 @@ class DoSqrl extends AbstractAPICall
 				}
 				else
 				{
-					clientBytes=BASE64URL_CODEC.get().decode(client);
+					clientBytes= SqrlHelper.decode(client);
 					clientBytes2=client.getBytes("UTF-8");
 				}
 			}
@@ -254,11 +262,12 @@ class DoSqrl extends AbstractAPICall
 			}
 			else
 			{
-				idkPublicKey=BASE64URL_CODEC.get().decode(idk);
+				idkPublicKey = SqrlHelper.decode(idk);
 			}
 		}
 
-		log.debug("idk is a {} byte key", idkPublicKey.length);
+		//32
+		log.trace("idk is a {} byte key", idkPublicKey.length);
 
 		final
 		byte[] clientIdkSignature;
@@ -283,12 +292,14 @@ class DoSqrl extends AbstractAPICall
 				}
 				else
 				{
-					clientIdkSignature=BASE64URL_CODEC.get().decode(identitySignature);
+					clientIdkSignature= SqrlHelper.decode(identitySignature);
 				}
 			}
 		}
 
-		log.debug("ids is a {} byte signature", clientIdkSignature.length);
+		//64
+		log.trace("ids is a {} byte signature", clientIdkSignature.length);
+
 		{
 			final
 			byte[] serverBytes = parameters.get(PARAMETER_SERVER).getBytes();
@@ -364,8 +375,9 @@ class DoSqrl extends AbstractAPICall
 		*/
 
 		log.info("unimplemented function: {}", command);
-		return functionNotSupported();
-		//Remember to kill used nuts!
+		return response
+			.tifCommandFailed()
+			.tifFunctionNotSupported();
 	}
 
 	private
@@ -404,9 +416,12 @@ class DoSqrl extends AbstractAPICall
 	private
 	boolean signatureChecksOut(byte[] publicKey, byte[] signatureValue, byte[] utf8message)
 	{
-		log.debug(" public key: {}", bytesToHex(publicKey));
-		log.debug("  signature: {}", bytesToHex(signatureValue));
-		log.debug("utf8message: {}", bytesToHex(utf8message));
+		if (log.isTraceEnabled())
+		{
+			log.trace(" public key: {}", bytesToHex(publicKey));
+			log.trace("  signature: {}", bytesToHex(signatureValue));
+			log.trace("utf8message: {}", bytesToHex(utf8message));
+		}
 
 		try
 		{
@@ -536,7 +551,7 @@ class DoSqrl extends AbstractAPICall
 		}
 
 		final
-		String serverUrlClient = new String(BASE64URL_CODEC.get().decode(serverParameter));
+		String serverUrlClient = new String(SqrlHelper.decode(serverParameter));
 
 		if (serverUrlClient.equals(serverUrlMine))
 		{
@@ -655,7 +670,7 @@ class DoSqrl extends AbstractAPICall
 				"tif=240\r\n";
 
 		return new TextStreamResponse("application/sqrl",
-										 BASE64URL_CODEC.get().encodeAsString(message.getBytes())
+										 SqrlHelper.encode(message.getBytes())
 		);
 	}
 
@@ -707,20 +722,6 @@ class DoSqrl extends AbstractAPICall
 
 		return retval;
 	}
-
-	private static final
-	ThreadLocal<Base64> BASE64URL_CODEC = new ThreadLocal<Base64>()
-	{
-		@Override
-		protected
-		Base64 initialValue()
-		{
-			final
-			boolean urlSafe = true;
-
-			return new Base64(urlSafe);
-		}
-	};
 
 	@Inject
 	private
