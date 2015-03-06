@@ -43,10 +43,37 @@ class SqrlHelper
 		Base64 initialValue()
 		{
 			final
+			int lineLength=0;
+
+			final
+			byte[] lineSeperator=new byte[0];
+
+			final
 			boolean urlSafe = true;
 
-			return new Base64(urlSafe);
+			return new Base64(lineLength, lineSeperator, urlSafe);
 		}
 	};
 
+	public
+	enum Command
+	{
+		query,
+		ident,
+		enable,
+		disable,
+
+		/**
+		 * "login" is a command that the old Android client submits.
+		 */
+		@Deprecated
+		login
+	}
+
+	public
+	enum Option
+	{
+		sqrlonly,
+		hardlock
+	}
 }

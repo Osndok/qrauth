@@ -1,7 +1,6 @@
 package com.allogy.qrauth.server.pages.api.sqrl;
 
 import com.allogy.qrauth.server.crypto.Ed25519;
-import com.allogy.qrauth.server.crypto.Ed25519_PureJava;
 import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.TenantIP;
 import com.allogy.qrauth.server.helpers.Death;
@@ -10,7 +9,6 @@ import com.allogy.qrauth.server.helpers.SqrlResponse;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
 import com.allogy.qrauth.server.services.Nuts;
 import com.allogy.qrauth.server.services.impl.Config;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.annotations.ActivationRequestParameter;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
@@ -139,7 +137,8 @@ class DoSqrl extends AbstractAPICall
 				log.warn("client is missing 'Content-Type' header, so post variables were not parsed");
 				parameters = manuallyParsePostBody();
 			}
-			else if (contentType.equals("application/x-www-form-encoded"))
+			else
+			if (contentType.startsWith("application/x-www-form-urlencoded"))
 			{
 				parameters = new HashMap<String, String>();
 
@@ -186,6 +185,20 @@ class DoSqrl extends AbstractAPICall
 		-------------------------- MARK: we can now generate a 'usable' sqrl response ------------------------
 		 */
 
+		if (!agreeOnServerUrl(preNutRotationUrl))
+		{
+			return response.tifClientFailure();
+		}
+
+		if (useOldAndroidLogic)
+		{
+			response.compat_useFormEncoding=true;
+			//response.put("nut", originalNut.stringValue);
+			//response.setTif(0x21);
+			//response.remove("qry");
+			response.put("server", "required-for-happy-face");
+		}
+
 		if (!incomingNutWasValid)
 		{
 			log.debug("returning invalid-nut response");
@@ -194,11 +207,6 @@ class DoSqrl extends AbstractAPICall
 					   .tifClientFailure()
 					   .tifTransientFailure()
 					   .tifInvalidNut();
-		}
-
-		if (!agreeOnServerUrl(preNutRotationUrl))
-		{
-			return response.tifClientFailure();
 		}
 
 		if (ipMismatchIsCauseForAbort())
@@ -354,8 +362,63 @@ class DoSqrl extends AbstractAPICall
 			}
 		}
 
+		if (true) return response;
+
 		final
-		String command=clientParameters.get("cmd");
+		String commandBlock=clientParameters.get("cmd");
+
+		final
+		String[] commands=commandBlock.split("~");
+
+		for (String commandString : commands)
+		{
+			log.debug("command={}", commandString);
+
+			final
+			SqrlHelper.Command command;
+			{
+				try
+				{
+					command = SqrlHelper.Command.valueOf(commandString);
+				}
+				catch (IllegalArgumentException e)
+				{
+					log.info("function not supported: {}", commandString);
+					response.tifFunctionNotSupported();
+					continue;
+				}
+			}
+
+			try
+			{
+				switch(command)
+				{
+					case query:
+						//no-op
+						break;
+
+					case enable:
+					case disable:
+						response.tifFunctionNotSupported();
+						break;
+
+					case ident:
+					case login:
+						/* TODO
+						createAccountAndPublicKeyCredentials();
+						letLooseTheWaitingRosebush();
+						*/
+						break;
+				}
+			}
+			catch (Exception e)
+			{
+				log.debug("{} command failed", commandString, e);
+				response.tifFunctionNotSupported();
+			}
+		}
+
+		return response;
 
 		/*
 		final
@@ -372,12 +435,13 @@ class DoSqrl extends AbstractAPICall
 
 		final
 		String vuk=clientMap.get("vuk");
-		*/
+		* /
 
 		log.info("unimplemented function: {}", command);
 		return response
 			.tifCommandFailed()
 			.tifFunctionNotSupported();
+		*/
 	}
 
 	private
