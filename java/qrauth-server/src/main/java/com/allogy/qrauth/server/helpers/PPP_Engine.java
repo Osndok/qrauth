@@ -19,32 +19,43 @@ class PPP_Engine
 	/**
 	 * @param args the command line arguments
 	 */
-	private static int NO_OF_COLUMNS = 7;
-	private static int NO_OF_ROWS = 10;
-	private static int PASSCODE_LENGTH = 4;
-	private static char[] ALPHABET = {'!','#','%','+','2','3','4','5','6','7','8','9',':','=','?','@','A','B','C','D','E','F','G','H','J','K','L','M','N','P','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
-	private static int NO_OF_PASSCODES = 70;
-	private static char[] COLUMNS = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-	private String sequenceKey;
+	private static int    NO_OF_COLUMNS            = 7;
+	private static int    NO_OF_ROWS               = 10;
+	private static int    PASSCODE_LENGTH          = 4;
+	private static char[] ALPHABET                 = {'!', '#', '%', '+', '2', '3', '4', '5', '6', '7', '8', '9', ':', '=', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+	private static int    NO_OF_PASSCODES_PER_CARD = 70;
+	private static char[] COLUMNS                  = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
+	private
+	byte[] sequenceKeyBytes;
 
 	public
-	PPP_Engine(String sequenceKey){
-		this.sequenceKey = sequenceKey;
+	PPP_Engine(String sequenceKey)
+	{
+		sequenceKeyBytes = sequenceKeyToBytes(sequenceKey);
 	}
 
-	public static void setAlphabet(String alphabetIn){
-		ALPHABET = alphabetIn.toCharArray ();
+	public
+	PPP_Engine(byte[] sequenceKeyBytes)
+	{
+		this.sequenceKeyBytes = sequenceKeyBytes;
+	}
+
+	public static
+	void setAlphabet(String alphabetIn)
+	{
+		ALPHABET = alphabetIn.toCharArray();
 		ALPHABET = alphaSort(ALPHABET);
 	}
 
 	public static void setCardColumns(int columns){
 		NO_OF_COLUMNS = columns;
-		NO_OF_PASSCODES = NO_OF_COLUMNS * NO_OF_ROWS;
+		NO_OF_PASSCODES_PER_CARD = NO_OF_COLUMNS * NO_OF_ROWS;
 	}
 
 	public static void setCardRows(int rows){
 		NO_OF_ROWS = rows;
-		NO_OF_PASSCODES = NO_OF_COLUMNS * NO_OF_ROWS;
+		NO_OF_PASSCODES_PER_CARD = NO_OF_COLUMNS * NO_OF_ROWS;
 	}
 
 	public static void setPasscodeLength(int passcodeLengthIn){
@@ -58,8 +69,10 @@ class PPP_Engine
 	}
 	*/
 
-	public void setSequenceKey(String sequenceKey){
-		this.sequenceKey = sequenceKey;
+	public
+	void setSequenceKey(String sequenceKey)
+	{
+		this.sequenceKeyBytes=sequenceKeyToBytes(sequenceKey);
 	}
 
 	public String generatePasscodeCard(int cardNo){
@@ -82,9 +95,9 @@ class PPP_Engine
 		}
 		c += "\n";
 
-		int offset = (cardNo-1)*NO_OF_PASSCODES;
+		int offset = (cardNo-1)* NO_OF_PASSCODES_PER_CARD;
 
-		for (int i = offset; i < offset+NO_OF_PASSCODES; i++) {
+		for (int i = offset; i < offset+ NO_OF_PASSCODES_PER_CARD; i++) {
 
 			if (i % NO_OF_COLUMNS == 0) {
 				c += (((i-offset) / NO_OF_COLUMNS) + 1) + "\t";
@@ -115,13 +128,14 @@ class PPP_Engine
 		if ( cardIn < 0 ) {
 			throw new IllegalArgumentException("Card number must be positive integer");
 		}
-		long counter =  (tempcard) * NO_OF_PASSCODES + temp;
+		long counter =  (tempcard) * NO_OF_PASSCODES_PER_CARD + temp;
 
 		return getPasscode(counter);
 	}
 
-	public String getPasscode (long counter){
-		byte[] sequenceKeyBytes=sequenceKeyToBytes (sequenceKey);
+	public
+	String getPasscode (long counter)
+	{
 		byte[] counterBytes=counterToBytes(counter);
 		//Find starting character
 		int skip = divide( counterBytes, 1);
@@ -223,5 +237,22 @@ class PPP_Engine
 			big[i] = (byte)r;
 		}
 		return remainder;
+	}
+
+	/**
+	 * Translates the machine-sympathetic counter to the human-sympathetic card/coordinate identifier.
+	 *
+	 * @param counter
+	 * @return
+	 */
+	public static
+	String getChallenge(long counter)
+	{
+		long cardNumber = (counter / NO_OF_PASSCODES_PER_CARD)+1;
+		int inCard = (int)(counter % NO_OF_PASSCODES_PER_CARD);
+		char c = COLUMNS[inCard % NO_OF_COLUMNS];
+		int r = (inCard / NO_OF_COLUMNS)+1;
+
+		return "Card ["+cardNumber+"]: "+c+r;
 	}
 }

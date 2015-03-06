@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by robert on 2/18/15.
@@ -200,5 +201,33 @@ class Config
 	String getSqrlServerFriendlyName()
 	{
 		return "Friendly Name Goes Here";
+	}
+
+	/**
+	 * This is used by the PPP system to ensure it does not give a value that would be much too old to plausibly
+	 * be a true account in this system.
+	 *
+	 * @return
+	 */
+	public
+	long getOriginationTime()
+	{
+		final
+		String stringValue=properties.getProperty("origin.time");
+
+		if (stringValue==null)
+		{
+			return 1425671757000l;
+		}
+		else
+		{
+			return Long.parseLong(stringValue);
+		}
+	}
+
+	public
+	String getProperty(String name)
+	{
+		return properties.getProperty(name);
 	}
 }

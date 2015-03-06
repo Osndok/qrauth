@@ -746,11 +746,23 @@ class DispatchAuth extends AbstractAPICall
 	private
 	Username getUsername(String username)
 	{
-		return (Username) session.createCriteria(Username.class)
-							  .add(Restrictions.eq("matchValue", policy.usernameMatchFilter(username)))
-							  .uniqueResult()
-			;
+		final
+		Username retval = (Username)
+						session.createCriteria(Username.class)
+							.add(Restrictions.eq("matchValue", policy.usernameMatchFilter(username)))
+							.uniqueResult()
+							;
+
+		if (retval==null)
+		{
+			usernameScanDetector.usernameNotFound(username, network.getIpAddress());
+		}
+
+		return retval;
 	}
+
+	private static final
+	UsernameScanDetector usernameScanDetector=UsernameScanDetector.get();
 
 	private
 	DBUserAuth locateUserAuthByPublicKey(String pubKeyBlob)
