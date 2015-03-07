@@ -112,10 +112,10 @@ class AddCredentials extends AbstractUserPage
 			case STATIC_OTP:
 			case STATIC_PASSWORD:
 			case ROLLING_PASSWORD:
+			case PAPER_PASSWORDS:
 				return "Yes";
 
 			case YUBIKEY_CUSTOM:
-			case PAPER_PASSWORDS:
 			case OPEN_ID:
 			case EMAILED_SECRET:
 			default:
