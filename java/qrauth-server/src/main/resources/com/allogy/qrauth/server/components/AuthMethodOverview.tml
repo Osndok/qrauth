@@ -15,6 +15,25 @@
 			<th class="password">Password</th>
 		</tr>
 		<tr>
+			<th>Registration Sufficiency</th>
+			<!-- SQRL -->
+			<td title="SQRL provides not only an identity and proof-of-identity, but also can alert the user in the event that a login attempt would create an account."><yes/></td>
+			<!-- RSA -->
+			<td title="By providing a public key at the first login attempt (as opposed to a username), RSA provides enough information to create an account."><yes/></td>
+			<!-- HOTP -->
+			<td title="HOTP requires a shared secret, which must exist before the time of login."><no/></td>
+			<!-- TOTP -->
+			<td title="TOTP requires a shared secret, which must exist before the time of login."><no/></td>
+			<!-- PPP -->
+			<td title="PPP requires a shared secret, which must exist before the time of login."><no/></td>
+			<!-- OpenID -->
+			<td title="With OpenID the existence of an account on the remote/trusted server is sufficient cause for a local account, which servers as a 'pointer' to the remote account."><yes/></td>
+			<!-- Email -->
+			<td title="Since the email address can act as a sort of unique username, the subsequent proof of being able to read email addressed to that account is sufficient for an account."><yes/></td>
+			<!-- Password -->
+			<td title="Allowing a username/password combination to register an account from the login screen would result in many mis-typed usernames creating many errant accounts and confusion. Furthermore, passwords are discouraged, a password deadline would be needed, and self-destructing accounts are counter-productive."><no/>*</td>
+		</tr>
+		<tr>
 			<th>Secrets on Server</th>
 			<!-- SQRL -->
 			<td title="In SQRL, only the public key is revealed to (or stored on) the server."><no/></td>

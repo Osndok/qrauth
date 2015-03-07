@@ -41,7 +41,7 @@
 	<a data-tab="#qrauth_ppp"      target="_blank" href="noscript/ppp">PPP</a>
 	<a data-tab="#qrauth_rsa"      target="_blank" href="noscript/rsa">RSA</a>
 	<a data-tab="#qrauth_openid"   target="_blank" href="noscript/openid">OpenID</a>
-	<!--a data-tab="#qrauth_email"    target="_blank" href="noscript/email">Email</a-->
+	<a data-tab="#qrauth_email"    target="_blank" href="noscript/email">Email</a>
 	<a data-tab="#qrauth_overview" target="_blank" href="noscript/overview">Overview</a>
 	<a data-tab="#qrauth_options"  target="_blank" href="noscript/options">Options</a>
 </methods>
@@ -88,8 +88,8 @@
 		See <a href="https://www.grc.com/sqrl/sqrl.htm">the main sqrl page at grc.com</a>
 		for more information.
 		<br/><br/>
-		If allowed by the server, one can also *create* a new account by trying to login
-		by this mechanism.
+		If allowed by the server, one can also <b>create</b> or <b>register</b> a new account
+		by logging in using one of these methods: ${registrationMethods}
 	</lower>
 </arena>
 

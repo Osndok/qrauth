@@ -1,9 +1,6 @@
 package com.allogy.qrauth.server.components;
 
-import com.allogy.qrauth.server.entities.Nut;
-import com.allogy.qrauth.server.entities.Tenant;
-import com.allogy.qrauth.server.entities.TenantIP;
-import com.allogy.qrauth.server.entities.TenantSession;
+import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.pages.api.sqrl.DoSqrl;
 import com.allogy.qrauth.server.services.Network;
 import com.allogy.qrauth.server.services.Nuts;
@@ -13,6 +10,7 @@ import org.apache.tapestry5.annotations.Parameter;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.annotations.Symbol;
+import org.apache.tapestry5.ioc.internal.util.InternalUtils;
 import org.apache.tapestry5.services.BaseURLSource;
 import org.apache.tapestry5.services.Request;
 import org.slf4j.Logger;
@@ -106,4 +104,32 @@ class UserLoginForm
 	private
 	DoSqrl doSqrl;
 
+	private static String REGISTRATION_METHODS;
+
+	public
+	String getRegistrationMethods()
+	{
+		if (REGISTRATION_METHODS==null)
+		{
+			final
+			StringBuilder sb=new StringBuilder();
+
+			for (AuthMethod authMethod : AuthMethod.values())
+			{
+				if (authMethod.isRegistrationCapable())
+				{
+					if (sb.length() > 0)
+					{
+						sb.append(", ");
+					}
+
+					sb.append(InternalUtils.toUserPresentable(authMethod.toString()));
+				}
+			}
+
+			REGISTRATION_METHODS=sb.toString();
+		}
+
+		return REGISTRATION_METHODS;
+	}
 }
