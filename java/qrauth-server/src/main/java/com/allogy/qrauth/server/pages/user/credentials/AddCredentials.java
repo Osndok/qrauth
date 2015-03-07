@@ -7,6 +7,7 @@ import com.allogy.qrauth.server.entities.UnimplementedHashFunctionException;
 import com.allogy.qrauth.server.helpers.*;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
 import com.allogy.qrauth.server.pages.user.Credentials;
+import com.allogy.qrauth.server.pages.user.credentials.ppp.DisplayPPP;
 import com.allogy.qrauth.server.pages.user.credentials.rsa.ReclaimRSA;
 import com.allogy.qrauth.server.services.Hashing;
 import com.allogy.qrauth.server.services.Journal;
@@ -27,14 +28,13 @@ import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Path;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
-import org.apache.tapestry5.internal.structure.BlockImpl;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.internal.util.InternalUtils;
 import org.apache.tapestry5.services.Response;
+import org.apache.tapestry5.util.TextStreamResponse;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -60,6 +60,11 @@ class AddCredentials extends AbstractUserPage
 		{
 			//TODO: count the user's HOTP methods, and forbid them from adding too many
 			otpHelper=new OTPHelper(authMethod);
+		}
+		else
+		if (authMethod==AuthMethod.PAPER_PASSWORDS)
+		{
+			maybeLoadExistingPPP();
 		}
 
 		return null;
@@ -146,10 +151,10 @@ class AddCredentials extends AbstractUserPage
 			case RSA             : return rsaBlock;
 			case TIME_OTP        : return otpBlock;
 			case HMAC_OTP        : return otpBlock;
+			case PAPER_PASSWORDS : return pppBlock;
 
 			case SQRL:
 			case YUBIKEY_CUSTOM:
-			case PAPER_PASSWORDS:
 			case OPEN_ID:
 			case EMAILED_SECRET:
 			default:
@@ -859,6 +864,100 @@ class AddCredentials extends AbstractUserPage
 	String getGT()
 	{
 		return ">";
+	}
+
+
+
+	/*
+	-------------------------------------- PAPER_PASSWORDS -----------------------------------------
+	 */
+
+	@Inject
+	private
+	Block pppBlock;
+
+	@Property
+	private
+	DBUserAuth existingPPP;
+
+	void maybeLoadExistingPPP()
+	{
+		existingPPP = (DBUserAuth)
+						  session.createCriteria(DBUserAuth.class)
+							  .add(Restrictions.eq("user", user))
+							  .add(Restrictions.eq("authMethod", AuthMethod.PAPER_PASSWORDS))
+							  .uniqueResult()
+		;
+	}
+
+	@Property
+	private
+	String pppComment;
+
+	public
+	String getNewOrExistingPPP()
+	{
+		if (existingPPP==null)
+		{
+			return "a printable sheet of passwords that you can use to access your account.";
+		}
+		else
+		{
+			return "new password sheets to replace the ones previously attached to your account.";
+		}
+	}
+
+	@CommitAfter
+	public
+	Object onSelectedFromRenewPPP()
+	{
+		if (existingPPP==null)
+		{
+			if (comment==null || comment.isEmpty())
+			{
+				comment=Config.get().getBrandName();
+			}
+
+			existingPPP=new PPP_Helper(comment).toDBUserAuth(user);
+			session.save(existingPPP);
+		}
+		else
+		{
+			if (Death.hathVisited(existingPPP))
+			{
+				existingPPP.deadline=null;
+				existingPPP.deathMessage=null;
+			}
+
+			new PPP_Helper(existingPPP).advanceVolley();
+			session.save(existingPPP);
+		}
+
+		return displayPPP.with(existingPPP);
+	}
+
+	@InjectPage
+	private
+	DisplayPPP displayPPP;
+
+	@CommitAfter
+	public
+	Object onSelectedFromRevokePPP()
+	{
+		if (comment==null || comment.isEmpty())
+		{
+			existingPPP.deathMessage = "User opted to revoke paper passwords.";
+			existingPPP.deadline=new Date();
+			session.save(existingPPP);
+		}
+		else
+		{
+			existingPPP.deathMessage = comment;
+			existingPPP.deadline=new Date();
+			session.save(existingPPP);
+		}
+
+		return new TextStreamResponse("text/plain", "All previous paper passwords have now been disabled, you can now close this tab/window.");
 	}
 
 }

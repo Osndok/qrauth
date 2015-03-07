@@ -441,8 +441,20 @@ class DispatchAuth extends AbstractAPICall
 				return OTPHelper.matchesUserInput(userAuth, now, password, policy.hotpAdvanceMatch());
 			}
 
-			case YUBIKEY_CUSTOM:
 			case PAPER_PASSWORDS:
+			{
+				if (password.length()==PPP_Engine.PASSCODE_LENGTH)
+				{
+					return new PPP_Helper(userAuth).testAndIncrement(password);
+				}
+				else
+				{
+					log.debug("wrong password length for PPP");
+					return false;
+				}
+			}
+
+			case YUBIKEY_CUSTOM:
 			case EMAILED_SECRET:
 				log.error("unimplemented password-based auth method: {}", authMethod);
 				return false;
@@ -838,6 +850,11 @@ class DispatchAuth extends AbstractAPICall
 			}
 			session.save(userAuth);
 			journal.revokedUserAuth(userAuth);
+		}
+		else
+		if (userAuth.authMethod==AuthMethod.PAPER_PASSWORDS)
+		{
+			session.save(userAuth);
 		}
 
 		if (username!=null && Death.hathVisited(username))

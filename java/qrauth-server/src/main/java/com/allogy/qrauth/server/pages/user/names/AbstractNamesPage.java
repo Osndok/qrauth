@@ -28,6 +28,7 @@ class AbstractNamesPage
 	protected
 	DBUser user;
 
+	private
 	Object onActivate()
 	{
 		if (username == null)
@@ -48,6 +49,7 @@ class AbstractNamesPage
 	protected
 	AuthSession authSession;
 
+	private
 	Object onActivate(Username username)
 	{
 		this.username = username;

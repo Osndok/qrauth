@@ -23,6 +23,7 @@ class AbstractCredentialsPage
 	protected
 	DBUserAuth myAuth;
 
+	private
 	Object onActivate()
 	{
 		if (userAuth == null)
@@ -43,6 +44,7 @@ class AbstractCredentialsPage
 	protected
 	AuthSession authSession;
 
+	private
 	Object onActivate(DBUserAuth dbUserAuth)
 	{
 		this.userAuth = dbUserAuth;

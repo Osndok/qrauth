@@ -3,6 +3,7 @@ package com.allogy.qrauth.server.pages.api.sqrl;
 import com.allogy.qrauth.server.crypto.Ed25519;
 import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.TenantIP;
+import com.allogy.qrauth.server.helpers.Bytes;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.SqrlHelper;
 import com.allogy.qrauth.server.helpers.SqrlResponse;
@@ -312,7 +313,7 @@ class DoSqrl extends AbstractAPICall
 			final
 			byte[] serverBytes = parameters.get(PARAMETER_SERVER).getBytes();
 
-			if (signatureChecksOut(idkPublicKey, clientIdkSignature, concat(clientBytes2, serverBytes)))
+			if (signatureChecksOut(idkPublicKey, clientIdkSignature, Bytes.concat(clientBytes2, serverBytes)))
 			{
 				log.debug("AUTHENTIC request: {}", idk);
 			}
@@ -466,25 +467,14 @@ class DoSqrl extends AbstractAPICall
 		return sha256.digest();
 	}
 
-	public static
-	byte[] concat(byte[] a, byte[] b)
-	{
-		int aLen = a.length;
-		int bLen = b.length;
-		byte[] c= new byte[aLen+bLen];
-		System.arraycopy(a, 0, c, 0, aLen);
-		System.arraycopy(b, 0, c, aLen, bLen);
-		return c;
-	}
-
 	private
 	boolean signatureChecksOut(byte[] publicKey, byte[] signatureValue, byte[] utf8message)
 	{
 		if (log.isTraceEnabled())
 		{
-			log.trace(" public key: {}", bytesToHex(publicKey));
-			log.trace("  signature: {}", bytesToHex(signatureValue));
-			log.trace("utf8message: {}", bytesToHex(utf8message));
+			log.trace(" public key: {}", Bytes.toHex(publicKey));
+			log.trace("  signature: {}", Bytes.toHex(signatureValue));
+			log.trace("utf8message: {}", Bytes.toHex(utf8message));
 		}
 
 		try
@@ -496,24 +486,6 @@ class DoSqrl extends AbstractAPICall
 			log.error("unable to verify signature", e);
 			return false;
 		}
-	}
-
-	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-
-	/**
-	 * @url http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
-	 */
-	public static
-	String bytesToHex(byte[] bytes)
-	{
-		char[] hexChars = new char[bytes.length * 2];
-		for ( int j = 0; j < bytes.length; j++ )
-		{
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = hexArray[v >>> 4];
-			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-		}
-		return new String(hexChars);
 	}
 
 	private

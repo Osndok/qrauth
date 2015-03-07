@@ -19,12 +19,14 @@ class PPP_Engine
 	/**
 	 * @param args the command line arguments
 	 */
-	private static int    NO_OF_COLUMNS            = 7;
-	private static int    NO_OF_ROWS               = 10;
-	private static int    PASSCODE_LENGTH          = 4;
-	private static char[] ALPHABET                 = {'!', '#', '%', '+', '2', '3', '4', '5', '6', '7', '8', '9', ':', '=', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-	private static int    NO_OF_PASSCODES_PER_CARD = 70;
-	private static char[] COLUMNS                  = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+	public static final int    NO_OF_COLUMNS            = 7;
+	public static final int    NO_OF_ROWS               = 10;
+	public static final int    PASSCODE_LENGTH          = 4;
+	public static final char[] ALPHABET                 = {'!', '#', '%', '+', '2', '3', '4', '5', '6', '7', '8', '9', ':', '=', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+	public static final char[] COLUMNS                  = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
+	public static final
+	int NO_OF_PASSCODES_PER_CARD = 70;
 
 	private
 	byte[] sequenceKeyBytes;
@@ -38,9 +40,15 @@ class PPP_Engine
 	public
 	PPP_Engine(byte[] sequenceKeyBytes)
 	{
+		if ( sequenceKeyBytes.length != 32 )
+		{
+			throw new IllegalArgumentException("Sequence key should be 32 bytes long");
+		}
+
 		this.sequenceKeyBytes = sequenceKeyBytes;
 	}
 
+	/*
 	public static
 	void setAlphabet(String alphabetIn)
 	{
@@ -62,7 +70,6 @@ class PPP_Engine
 		PASSCODE_LENGTH = passcodeLengthIn;
 	}
 
-	/*
 	public static String hashSequenceKey(String input){
 		sha256 sha = new sha256();
 		return sha.hash (input);
@@ -160,7 +167,7 @@ class PPP_Engine
 
 	private byte[] sequenceKeyToBytes(String hex){
 		if ( hex.length() != 64 ) {
-			throw new IllegalArgumentException("Sequence key length incorrect");
+			throw new IllegalArgumentException("Sequence key should be 64 characters (32 bytes)");
 		}
 		byte [] out = new byte[32];
 		for ( int i = 0; i < 32; ++i ) {
@@ -254,5 +261,11 @@ class PPP_Engine
 		int r = (inCard / NO_OF_COLUMNS)+1;
 
 		return "Card ["+cardNumber+"]: "+c+r;
+	}
+
+	public static
+	int getPageNumberOfCounter(long counter)
+	{
+		return (int)(counter / NO_OF_PASSCODES_PER_CARD)+1;
 	}
 }

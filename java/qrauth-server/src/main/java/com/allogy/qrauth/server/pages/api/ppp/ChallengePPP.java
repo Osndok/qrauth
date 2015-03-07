@@ -4,10 +4,7 @@ import com.allogy.qrauth.server.entities.AuthMethod;
 import com.allogy.qrauth.server.entities.DBUser;
 import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.Username;
-import com.allogy.qrauth.server.helpers.ErrorResponse;
-import com.allogy.qrauth.server.helpers.PPP_Engine;
-import com.allogy.qrauth.server.helpers.Timing;
-import com.allogy.qrauth.server.helpers.UsernameScanDetector;
+import com.allogy.qrauth.server.helpers.*;
 import com.allogy.qrauth.server.services.DBTiming;
 import com.allogy.qrauth.server.services.Network;
 import com.allogy.qrauth.server.services.Policy;
@@ -100,7 +97,7 @@ class ChallengePPP
 			}
 			else
 			{
-				retval = realChallenge(pppUserAuth);
+				retval = new PPP_Helper(pppUserAuth).getChallenge();
 				pppTiming.shorterPath(startTime);
 			}
 		}
@@ -108,13 +105,6 @@ class ChallengePPP
 		log.debug("challenge: '{}'", retval);
 
 		return new TextStreamResponse("text/plain", retval);
-	}
-
-	private
-	String realChallenge(DBUserAuth userAuth)
-	{
-		//PPP_Engine pppEngine=from(userAuth.secret);
-		return "unimplemented:real";
 	}
 
 	public static
@@ -255,12 +245,12 @@ class ChallengePPP
 	DBUserAuth getPPPUserAuthFor(String matchableUsername)
 	{
 		final
-		DBUser dbUser = (DBUser)
+		Username username = (Username)
 							session.createCriteria(Username.class)
 								.add(Restrictions.eq("matchValue", matchableUsername))
 								.uniqueResult();
 
-		if (dbUser == null)
+		if (username == null)
 		{
 			log.debug("username dne:{}", matchableUsername);
 			usernameScanDetector.usernameNotFound(matchableUsername, network.getIpAddress());
@@ -269,7 +259,7 @@ class ChallengePPP
 
 		return (DBUserAuth)
 				   session.createCriteria(DBUserAuth.class)
-					   .add(Restrictions.eq("user", dbUser))
+					   .add(Restrictions.eq("user", username.user))
 					   .add(Restrictions.eq("authMethod", AuthMethod.PAPER_PASSWORDS))
 					   .uniqueResult()
 			;

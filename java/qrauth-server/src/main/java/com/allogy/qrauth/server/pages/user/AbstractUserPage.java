@@ -33,6 +33,7 @@ class AbstractUserPage
 	protected
 	String myIpAddress;
 
+	private
 	Object onActivate()
 	{
 		myIpAddress = network.getIpAddress();
