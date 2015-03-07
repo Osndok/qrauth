@@ -363,13 +363,13 @@ class DoSqrl extends AbstractAPICall
 			}
 		}
 
-		if (true) return response;
-
 		final
 		String commandBlock=clientParameters.get("cmd");
 
 		final
 		String[] commands=commandBlock.split("~");
+
+		log.debug("{} commands in block", commands.length);
 
 		for (String commandString : commands)
 		{
@@ -589,6 +589,11 @@ class DoSqrl extends AbstractAPICall
 		final
 		String serverUrlClient = new String(SqrlHelper.decode(serverParameter));
 
+		if (looksLikeDataDumpAsOpposedToAURL(serverUrlClient))
+		{
+			return verifyEmbeddedMAC(serverUrlClient);
+		}
+		else
 		if (serverUrlClient.equals(serverUrlMine))
 		{
 			log.debug("agree on server url: {}", serverUrlClient);
@@ -608,6 +613,20 @@ class DoSqrl extends AbstractAPICall
 			log.debug("serverUrl-mine={}", serverUrlMine);
 			return false;
 		}
+	}
+
+	private
+	boolean looksLikeDataDumpAsOpposedToAURL(String keyValuesOrUrl)
+	{
+		return keyValuesOrUrl.indexOf('\n')>=0;
+	}
+
+	private
+	boolean verifyEmbeddedMAC(String serverDataDump)
+	{
+		//TODO: use an embedded message-authentication-code to detect tampering
+		log.error("unable to verify MAC (unimplemented):\n{}", serverDataDump);
+		return true;
 	}
 
 	private

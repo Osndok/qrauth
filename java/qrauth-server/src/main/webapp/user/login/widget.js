@@ -7,6 +7,9 @@
 
 function qrauth_sqrlClick()
 {
+	//TODO: this indicates the sqrl code has been clicked, we should simply obscure the code.
+	return true;
+
 	var syncQuery;
 
 	if (window.XMLHttpRequest)
