@@ -920,16 +920,19 @@ class AddCredentials extends AbstractUserPage
 
 			existingPPP=new PPP_Helper(comment).toDBUserAuth(user);
 			session.save(existingPPP);
+			journal.addedUserAuthCredential(existingPPP);
 		}
 		else
 		{
+			new PPP_Helper(existingPPP).advanceVolley();
+
 			if (Death.hathVisited(existingPPP))
 			{
 				existingPPP.deadline=null;
 				existingPPP.deathMessage=null;
+				journal.addedUserAuthCredential(existingPPP);
 			}
 
-			new PPP_Helper(existingPPP).advanceVolley();
 			session.save(existingPPP);
 		}
 

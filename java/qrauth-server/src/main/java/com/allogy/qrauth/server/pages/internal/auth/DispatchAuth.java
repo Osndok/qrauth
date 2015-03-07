@@ -132,25 +132,36 @@ class DispatchAuth extends AbstractAPICall
 
 		journal.noticeAttempt(allMatchingTenantIPs);
 
+		String username=request.getParameter("otp_username");
+		{
+			if (username == null || username.isEmpty())
+			{
+				username = request.getParameter("ppp_username");
+			}
+		}
+
+		String password=request.getParameter("otp_password");
+		{
+			if (password==null || password.isEmpty())
+			{
+				password = request.getParameter("ppp_response");
+			}
+		}
+
 		if (request.getParameter("do_sqrl") != null)
 		{
 			//only relevant for noscript support (a button appears for noscript), we only need to check to see if the
 			//session is connected, and issue a redirect.
 			return new ErrorResponse(500, "noscript sqrl is unimplemented");
 		}
-		else if (request.getParameter("do_otp") != null)
+		else if (request.getParameter("do_otp") != null || request.getParameter("do_ppp_2")!=null)
 		{
-			return do_otp_attempt(request.getParameter("otp_username"), request.getParameter("otp_password"));
+			return do_otp_attempt(username, password);
 		}
 		else if (request.getParameter("do_ppp_1")!=null)
 		{
 			//only relevant for noscript support (which also means provider has this as the default?)
 			return new ErrorResponse(500, "noscript ppp is unimplemented");
-		}
-		else
-		if (request.getParameter("do_ppp_2")!=null)
-		{
-			return do_ppp_attempt();
 		}
 		else
 		if (request.getParameter("do_rsa")!=null)
@@ -492,7 +503,9 @@ class DispatchAuth extends AbstractAPICall
 	boolean mightContainHardwareOTPIdentity(String s)
 	{
 		//Yubikeys tend to start with several c's... until they make a certain number of them, I suppose.
-		return s.startsWith("cc");
+		//return s.startsWith("cc");
+		//How about... the are much longer than most people's passwords (and are always the same size)?
+		return s.length()==44;
 	}
 
 	private
@@ -562,12 +575,6 @@ class DispatchAuth extends AbstractAPICall
 				return false;
 			}
 		}
-	}
-
-	private
-	Object do_ppp_attempt()
-	{
-		return new ErrorResponse(500, "ppp unimplemented");
 	}
 
 	private

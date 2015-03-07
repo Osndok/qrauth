@@ -25,7 +25,7 @@
 </noscript>
 
 <!-- NB: due to overlapping divs, you cannot safely insert elements at the top of the 'outer' form -->
-<form class="outer" method="POST" accept-charset="UTF-8" action="${base}/internal/auth/dispatch">
+<form class="outer" method="POST" accept-charset="UTF-8" action="${base}/internal/auth/dispatch" onSubmit="return qrauth_submit_check();">
 
 <div style="display:none">
 	<input type="text" name="nut" value="${nut.stringValue}"/>
@@ -107,7 +107,7 @@
 			<td>&nbsp;</td>
 		</tr>
 		<tr>
-			<td>Password:</td>
+			<td>Password:<img src="${base}${context:images/yubikey.ico}" title="Yubikeys are welcome in this field (with or without a username) for both registration and authentication."/></td>
 			<!--
 			NOTICE: The password field is not marked as a password, and therefore will be exposed when typing.
 			 OTPs *should* be one-time, so it's okay to expose them.
@@ -130,7 +130,7 @@
 	as well as any password provided to you via email or over the phone.
 	<br/><br/>
 	For the system that uses one-time passwords on a <b><u>printed card</u></b>, please use
-	the "PPP" (Perfect Paper Passwords) tab instead.
+	the "PPP" (Perfect Paper Passwords) tab to receive the coordinates of your next passcode.
 	<br/><br/>
 	For legacy systems that rely on a static username and password, that can be entered here
 	for migration, but are not recommended for long-term use.
@@ -147,28 +147,38 @@
 		<tr>
 			<td class="num">1</td>
 			<td class="instr"><label for="ppp_username">Provide username:</label></td>
-			<td class="field"><input name="ppp_username"/></td>
-			<td class="action"><input type="submit" name="do_ppp_1" value="Submit"/></td>
+			<td class="field">
+				<input name="ppp_username" id="ppp_username"
+					url="${base}/api/ppp/challenge"
+					onKeypress="return qrauth_ppp_keyup(event);"
+					/>
+			</td>
+			<td class="action">
+				<input type="submit" name="do_ppp_1" value="Request Challenge"
+					onClick="return qrauth_ppp_challenge();"
+					/>
+			</td>
 		</tr>
 		<tr>
 			<td class="num">2</td>
 			<td class="instr">Receive challenge:</td>
-			<td class="field">Sheet 4: A9</td>
+			<td class="field" id="ppp_challenge"></td>
 			<td class="action">Locate Password</td>
 		</tr>
 		<tr>
 			<td class="num">3</td>
 			<td class="instr">Provide response:</td>
-			<td class="field"><input name="ppp_response"/></td>
+			<td class="field"><input name="ppp_response" id="ppp_response"/></td>
 			<td class="action"><input type="submit" name="do_ppp_2" value="Submit"/></td>
 		</tr>
 	</table>
 	<img src="${base}${context:user/login/blackspy.png}"/>
 	<b>Perfect Paper Passwords (PPP)</b> are a "something you have" authentication mechanism where you can
 	provide a <b><u>very short</u></b> password from a pre-established set of response cards (which are
-	about the size of a credit card and require no batteries) knowing that each password can be used
-	(and will only be requested) once... <b>ever</b>. You can retire entire sheets en-masse if they are
-	observed or fall out of your control. For more information, please see
+	about the size of a credit card and require no batteries). Knowing that each password can only be used
+	once... <b>ever</b>... you can also (to some degree) verify that you are logging into the correct server
+	by striking through previously used passwords. Once logged in, you can retire entire sheets en-masse
+	if they are observed or fall out of your control. For more information, please see
 	<a href="https://www.grc.com/ppp.htm">the PPP page on grc.com</a>.
 </arena>
 
