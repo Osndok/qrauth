@@ -933,6 +933,11 @@ class AddCredentials extends AbstractUserPage
 				journal.addedUserAuthCredential(existingPPP);
 			}
 
+			if (comment!=null && !comment.isEmpty())
+			{
+				existingPPP.comment=comment;
+			}
+
 			session.save(existingPPP);
 		}
 
