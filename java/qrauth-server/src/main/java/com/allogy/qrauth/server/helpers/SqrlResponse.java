@@ -2,22 +2,28 @@ package com.allogy.qrauth.server.helpers;
 
 import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.Nut;
+import com.allogy.qrauth.server.services.impl.Config;
 import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.services.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by robert on 3/4/15.
  */
 public
-class SqrlResponse extends HashMap<String,String> implements StreamResponse
+class SqrlResponse extends TreeMap<String,String> implements StreamResponse
 {
 
 	/**
@@ -35,6 +41,11 @@ class SqrlResponse extends HashMap<String,String> implements StreamResponse
 		put("nut", nut.stringValue);
 		put("qry", queryPath);
 		put("sfn", friendlyName);
+	}
+
+	private
+	SqrlResponse()
+	{
 	}
 
 	@Override
@@ -98,6 +109,7 @@ class SqrlResponse extends HashMap<String,String> implements StreamResponse
 			else
 			{
 				put("tif", Integer.toHexString(tif));
+				put("mac", calculateMessageAuthenticationCode());
 
 				for (Map.Entry<String, String> me : entrySet())
 				{
@@ -124,6 +136,75 @@ class SqrlResponse extends HashMap<String,String> implements StreamResponse
 		}
 
 		return finalizedData;
+	}
+
+	private
+	String calculateMessageAuthenticationCode()
+	{
+		final
+		Mac mac;
+		{
+			try
+			{
+				mac = Mac.getInstance("HmacSHA1");
+				mac.init(Config.get().getHmacSha1SigningKey());
+			}
+			catch (RuntimeException e)
+			{
+				throw e;
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		for (Map.Entry<String, String> me : entrySet())
+		{
+			final
+			String key=me.getKey();
+
+			if (!key.equals("mac"))
+			{
+				mac.update(key.getBytes());
+				mac.update(me.getValue().getBytes());
+			}
+		}
+
+		return Bytes.toHex(mac.doFinal());
+	}
+
+	public static
+	SqrlResponse fromMacSignedServerResponse(String base64Blob) throws IOException
+	{
+		final
+		SqrlResponse sr=new SqrlResponse();
+
+		SqrlHelper.getParameterMap(base64Blob.getBytes(), sr);
+
+		final
+		String providedMac=sr.get("mac");
+
+		if (providedMac==null)
+		{
+			log.error("no 'mac' field in server blob");
+			return null;
+		}
+
+		final
+		String calculatedMac=sr.calculateMessageAuthenticationCode();
+
+		//TODO: consider using the salt/peppered 'hashing' instead of standard mac???
+		if (providedMac.equals(calculatedMac))
+		{
+			log.debug("mac code matches");
+			return sr;
+		}
+		else
+		{
+			log.error("mac code mismatch: {} != {}", calculatedMac, providedMac);
+			return null;
+		}
 	}
 
 	public

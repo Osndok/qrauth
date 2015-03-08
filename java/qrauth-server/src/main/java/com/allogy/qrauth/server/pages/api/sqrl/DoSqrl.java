@@ -255,7 +255,7 @@ class DoSqrl extends AbstractAPICall
 		log.debug("client parameter is {} bytes", clientBytes.length);
 
 		final
-		Map<String,String> untrustedClientParameters=decodeParameterMap(clientBytes);
+		Map<String,String> untrustedClientParameters=SqrlHelper.getParameterMap(clientBytes, new HashMap<String, String>());
 
 		final
 		String idkString;
@@ -753,9 +753,17 @@ class DoSqrl extends AbstractAPICall
 	private
 	boolean verifyEmbeddedMAC(String serverDataDump)
 	{
-		//TODO: use an embedded message-authentication-code to detect tampering
-		log.error("unable to verify MAC (unimplemented):\n{}", serverDataDump);
-		return true;
+		try
+		{
+			SqrlResponse sr = SqrlResponse.fromMacSignedServerResponse(serverDataDump);
+			//TODO: We will probably need to pull values from the old response here
+			return sr != null;
+		}
+		catch (IOException e)
+		{
+			log.error("unable to verify MAC'd server blob", e);
+			return false;
+		}
 	}
 
 	private
@@ -865,46 +873,6 @@ class DoSqrl extends AbstractAPICall
 		int firstColon = url.indexOf(':');
 
 		return url.substring(firstColon + 3);
-	}
-
-	private
-	Map<String, String> decodeParameterMap(byte[] bytes) throws IOException
-	{
-		final
-		Map<String, String> retval = new HashMap<String, String>();
-
-		final
-		BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)));
-
-		try
-		{
-			String line = br.readLine();
-
-			while (line != null)
-			{
-				final
-				int equalsSign = line.indexOf('=');
-
-				if (equalsSign > 0)
-				{
-					final
-					String key = line.substring(0, equalsSign);
-
-					final
-					String value = line.substring(equalsSign + 1);
-
-					retval.put(key, value);
-				}
-
-				line = br.readLine();
-			}
-		}
-		finally
-		{
-			br.close();
-		}
-
-		return retval;
 	}
 
 	@Inject

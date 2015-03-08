@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.services.impl;
 
 import com.yubico.client.v2.YubicoClient;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -229,5 +230,18 @@ class Config
 	String getProperty(String name)
 	{
 		return properties.getProperty(name);
+	}
+
+	private
+	SecretKeySpec hmacSha1SigningKey;
+
+	public
+	SecretKeySpec getHmacSha1SigningKey()
+	{
+		if (hmacSha1SigningKey==null)
+		{
+			hmacSha1SigningKey=new SecretKeySpec(getHashingPepper().getBytes(), "HmacSHA1");
+		}
+		return hmacSha1SigningKey;
 	}
 }
