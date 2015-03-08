@@ -73,21 +73,8 @@ class UserLoginForm
 
 	void setupRender()
 	{
-		final
-		Tenant tenant;
-		{
-			if (tenantSession==null)
-			{
-				tenant=null;
-			}
-			else
-			{
-				tenant=tenantSession.tenant;
-			}
-		}
-
-		tenantIP = network.needIPForThisRequest(tenant);
-		nut = nuts.allocate(tenant, tenantIP);
+		tenantIP = network.needIPForSession(tenantSession);
+		nut = nuts.allocate(tenantSession, tenantIP);
 
 		doSqrl.with(nut);
 

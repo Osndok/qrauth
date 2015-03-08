@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.services;
 
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.TenantIP;
+import com.allogy.qrauth.server.entities.TenantSession;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -65,4 +66,6 @@ interface Network
 	boolean addressCacheShowsBan(HttpServletRequest request);
 
 	boolean ipMatch(TenantIP tenantIP, TenantIP rule);
+
+	TenantIP needIPForSession(TenantSession tenantSession);
 }

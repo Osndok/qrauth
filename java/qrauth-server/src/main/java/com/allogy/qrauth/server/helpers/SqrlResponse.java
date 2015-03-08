@@ -1,5 +1,6 @@
 package com.allogy.qrauth.server.helpers;
 
+import com.allogy.qrauth.server.entities.DBUserAuth;
 import com.allogy.qrauth.server.entities.Nut;
 import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.services.Response;
@@ -244,5 +245,27 @@ class SqrlResponse extends HashMap<String,String> implements StreamResponse
 	void setTif(int tif)
 	{
 		this.tif = tif;
+	}
+
+	public
+	void foundCurrentIdentity(DBUserAuth userAuth)
+	{
+		//TODO: the spec is a bit unclear... if this flag should only be set if vuk & suk are present (as "").
+		tifCurrentIDMatch();
+
+		final
+		String sukAndVuk=userAuth.idRecoveryLock;
+
+		if (sukAndVuk!=null)
+		{
+			final
+			String[] bits=sukAndVuk.split(":");
+
+			if (bits.length==2)
+			{
+				put("suk", bits[0]);
+				put("vuk", bits[1]);
+			}
+		}
 	}
 }

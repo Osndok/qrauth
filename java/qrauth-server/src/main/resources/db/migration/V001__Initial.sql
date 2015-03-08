@@ -71,12 +71,14 @@
 
     create table Nut (
         id  bigserial not null,
+        command varchar(255),
         created TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP not null,
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
+        mutex varchar(255),
         stringValue varchar(30) not null unique,
-        tenant_id int8,
         tenantIP_id int8 not null,
+        tenantSession_id int8,
         user_id int8,
         primary key (id)
     );
@@ -269,9 +271,9 @@
         references DBUser;
 
     alter table Nut 
-        add constraint FK1336D9C6CD340 
-        foreign key (tenant_id) 
-        references Tenant;
+        add constraint FK1336D93A9F594 
+        foreign key (tenantSession_id) 
+        references TenantSession;
 
     alter table Nut 
         add constraint FK1336D35152060 

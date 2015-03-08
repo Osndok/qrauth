@@ -1,9 +1,12 @@
 package com.allogy.qrauth.server.entities;
 
+import com.allogy.qrauth.server.helpers.Death;
 import org.apache.tapestry5.beaneditor.NonVisual;
 
 import javax.persistence.*;
 import java.util.Date;
+
+import static com.allogy.qrauth.server.entities.NutState.*;
 
 /**
  * At a high level, a nut is simply a blob of characters. The length and character set is defined by the
@@ -41,19 +44,58 @@ class Nut /* extends Attemptable */ implements Mortal
 	@Column(nullable = false, unique = true, length = 30)
 	public String stringValue;
 
-	@ManyToOne
-	public Tenant tenant;
+	@ManyToOne(optional = true)
+	public TenantSession tenantSession;
 
+	/**
+	 * This is the hinge upon which the SQRL authentication mechanism pivots.
+	 */
 	@ManyToOne
 	public DBUser user;
 
+	/**
+	 * This allows the SQRL subsystem to lock a nut while it is being considered by the user.
+	 * If not null, then this nut is in limbo, which means that the SQRL client has requested
+	 * server data, but not actually authenticated... For a bit of extra security, any web page
+	 * that notices that this field becoming not-null should hide the qr code immediately.
+	 */
+	public String mutex;
+
+	/**
+	 * This field is provided for the connection of non-login activities to SQRL activity.
+	 */
+	public String command;
+
 	public
-	boolean isClaimable()
+	NutState getState()
 	{
-		return (user == null
-				/*	&& attempts < 10 */
-					&& (deadline == null || deadline.getTime() > System.currentTimeMillis())
-		);
+		if (Death.hathVisited(this))
+		{
+			if (user == null)
+			{
+				return FAILED;
+			}
+			else
+			{
+				return COMPLETE;
+			}
+		}
+
+		if (user == null)
+		{
+			if (mutex == null)
+			{
+				return LIMBO;
+			}
+			else
+			{
+				return INIT;
+			}
+		}
+		else
+		{
+			return READY;
+		}
 	}
 
 	/* -------------------- Mortal Implementation ------------------ */

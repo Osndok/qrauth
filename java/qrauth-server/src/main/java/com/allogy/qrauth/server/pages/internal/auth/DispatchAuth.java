@@ -797,7 +797,7 @@ class DispatchAuth extends AbstractAPICall
 	Policy policy;
 
 	@CommitAfter
-	private
+	public
 	void createUserWithNewStipulation(DBUserAuth userAuth)
 	{
 		final

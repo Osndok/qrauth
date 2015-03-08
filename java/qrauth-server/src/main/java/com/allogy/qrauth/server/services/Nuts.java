@@ -3,6 +3,7 @@ package com.allogy.qrauth.server.services;
 import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.TenantIP;
+import com.allogy.qrauth.server.entities.TenantSession;
 
 /**
  * Created by robert on 2/16/15.
@@ -19,5 +20,5 @@ interface Nuts
 	 */
 	byte[] fromStringValue(String value);
 
-	Nut allocate(Tenant tenant, TenantIP tenantIP);
+	Nut allocate(TenantSession tenantSession, TenantIP tenantIP);
 }

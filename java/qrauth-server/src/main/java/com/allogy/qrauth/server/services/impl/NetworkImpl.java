@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.services.impl;
 
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.TenantIP;
+import com.allogy.qrauth.server.entities.TenantSession;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.Timing;
 import com.allogy.qrauth.server.services.DBTiming;
@@ -339,6 +340,20 @@ class NetworkImpl implements Network, Runnable
 		else
 		{
 			return ip.equals(ipOrSubnet);
+		}
+	}
+
+	@Override
+	public
+	TenantIP needIPForSession(TenantSession tenantSession)
+	{
+		if (tenantSession==null)
+		{
+			return needIPForThisRequest(null);
+		}
+		else
+		{
+			return needIPForThisRequest(tenantSession.tenant);
 		}
 	}
 

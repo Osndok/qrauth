@@ -1,17 +1,18 @@
 package com.allogy.qrauth.server.pages.api.sqrl;
 
 import com.allogy.qrauth.server.crypto.Ed25519;
-import com.allogy.qrauth.server.entities.Nut;
-import com.allogy.qrauth.server.entities.TenantIP;
+import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.helpers.Bytes;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.SqrlHelper;
 import com.allogy.qrauth.server.helpers.SqrlResponse;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
+import com.allogy.qrauth.server.pages.internal.auth.DispatchAuth;
 import com.allogy.qrauth.server.services.Nuts;
 import com.allogy.qrauth.server.services.impl.Config;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.annotations.ActivationRequestParameter;
+import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.annotations.Symbol;
@@ -50,7 +51,7 @@ class DoSqrl extends AbstractAPICall
 
 	private static final String CLIENT_PARAMETER_IDK = "idk";
 
-	private static final String FRIENDLY_NAME    = Config.get().getSqrlServerFriendlyName();
+	private static final String FRIENDLY_NAME = Config.get().getSqrlServerFriendlyName();
 
 	//For debugging, it is easier to be able to repeat old nuts. Has no effect in production.
 	private static final boolean DEBUG_CONSUME_NUTS = false;
@@ -72,7 +73,7 @@ class DoSqrl extends AbstractAPICall
 	*/
 
 	private
-	boolean useOldAndroidLogic;
+	boolean useOriginalAndroidLogic;
 
 	private
 	SqrlResponse response;
@@ -80,7 +81,7 @@ class DoSqrl extends AbstractAPICall
 	public
 	DoSqrl with(Nut nut)
 	{
-		this.nut=nut;
+		this.nut = nut;
 		nutStringValue = nut.stringValue;
 		cachedUrl = null;
 		//supportedSqrlVersions = SUPPORTED_SQRL_VERSIONS;
@@ -123,6 +124,7 @@ class DoSqrl extends AbstractAPICall
 	private
 	Map<String, String> clientParameters;
 
+	@CommitAfter
 	Object onActivate() throws IOException
 	{
 		log.debug("onActivate()");
@@ -138,8 +140,7 @@ class DoSqrl extends AbstractAPICall
 				log.warn("client is missing 'Content-Type' header, so post variables were not parsed");
 				parameters = manuallyParsePostBody();
 			}
-			else
-			if (contentType.startsWith("application/x-www-form-urlencoded"))
+			else if (contentType.startsWith("application/x-www-form-urlencoded"))
 			{
 				parameters = new HashMap<String, String>();
 
@@ -191,7 +192,7 @@ class DoSqrl extends AbstractAPICall
 			return response.tifClientFailure();
 		}
 
-		if (useOldAndroidLogic)
+		if (useOriginalAndroidLogic)
 		{
 			response.compat_useFormEncoding=true;
 			//response.put("nut", originalNut.stringValue);
@@ -257,21 +258,21 @@ class DoSqrl extends AbstractAPICall
 		Map<String,String> untrustedClientParameters=decodeParameterMap(clientBytes);
 
 		final
-		String idk;
+		String idkString;
 
 		final
 		byte[] idkPublicKey;
 		{
-			idk = untrustedClientParameters.get(CLIENT_PARAMETER_IDK);
+			idkString = untrustedClientParameters.get(CLIENT_PARAMETER_IDK);
 
-			if (idk==null || idk.isEmpty())
+			if (idkString==null || idkString.isEmpty())
 			{
 				log.debug("missing idk client parameter");
 				return response.tifClientFailure();
 			}
 			else
 			{
-				idkPublicKey = SqrlHelper.decode(idk);
+				idkPublicKey = SqrlHelper.decode(idkString);
 			}
 		}
 
@@ -309,13 +310,17 @@ class DoSqrl extends AbstractAPICall
 		//64
 		log.trace("ids is a {} byte signature", clientIdkSignature.length);
 
+		final
+		byte[] authMessageBytes;
 		{
 			final
 			byte[] serverBytes = parameters.get(PARAMETER_SERVER).getBytes();
 
-			if (signatureChecksOut(idkPublicKey, clientIdkSignature, Bytes.concat(clientBytes2, serverBytes)))
+			authMessageBytes=Bytes.concat(clientBytes2, serverBytes);
+
+			if (signatureChecksOut(idkPublicKey, clientIdkSignature, authMessageBytes))
 			{
-				log.debug("AUTHENTIC request: {}", idk);
+				log.debug("AUTHENTIC request: {}", idkString);
 			}
 			else
 			{
@@ -330,12 +335,65 @@ class DoSqrl extends AbstractAPICall
 
 		clientParameters=untrustedClientParameters;
 
-		/**
+		DBUserAuth currentIdentity=byPublicKey(idkString);
+		{
+			if (currentIdentity == null)
+			{
+				log.debug("no current-id match");
+			}
+			else
+			{
+				log.debug("found match for current id (idk): {}", currentIdentity);
+				response.foundCurrentIdentity(currentIdentity);
+			}
+		}
+
+		final
+		DBUserAuth previousIdentity=getOptionalPreviousIdentity(authMessageBytes);
+		{
+			if (previousIdentity != null)
+			{
+				log.debug("valid previous-id match");
+				//response.foundPreviousIdentity(previousIdentity);
+				response.tifPreviousIDMatch();
+			}
+		}
+
+		//The first SQRL client to scan the code gets it.
+		//If a second SQRL client scans the code (before the auth finishes), the nut is nullified.
+		if (originalNut.mutex==null)
+		{
+			if (originalNut.user!=null && !sameUser(originalNut.user, currentIdentity))
+			{
+				//This nut was allocated for a special purpose, and someone else got to it...
+				terminateMultiClientNut(originalNut);
+				return response.tifCommandFailed();
+			}
+			else
+			{
+				originalNut.mutex = idkString;
+			}
+		}
+		else
+		if (!originalNut.mutex.equals(idkString))
+		{
+			log.error("{} was scanned by one SQRL client, then another");
+
+			if (!Death.hathVisited(nut))
+			{
+				terminateMultiClientNut(originalNut);
+			}
+
+			//TODO: we can instead send a new nut and set 'transient error'
+			return response.tifCommandFailed();
+		}
+
+		/* *
 		 * From the SQRL specification:
 		 * ----------------------------
 		 * The value of the client's “server=” name=value pair, contains this data, exactly as received,
 		 * base64url encoded if necessary.
-		 */
+		 * /
 		final
 		String server = parameters.get(PARAMETER_SERVER);
 		{
@@ -351,6 +409,7 @@ class DoSqrl extends AbstractAPICall
 
 		final
 		String unlockRequestSignature = parameters.get("urs");
+		*/
 
 		if (log.isDebugEnabled())
 		{
@@ -390,6 +449,8 @@ class DoSqrl extends AbstractAPICall
 				}
 			}
 
+			//TODO: do something with previous-identity...
+
 			try
 			{
 				switch(command)
@@ -405,11 +466,29 @@ class DoSqrl extends AbstractAPICall
 
 					case ident:
 					case login:
-						/* TODO
-						createAccountAndPublicKeyCredentials();
-						letLooseTheWaitingRosebush();
+					{
+						if (currentIdentity == null)
+						{
+							currentIdentity=maybeCreateAccountAndPublicKeyCredentials(idkString);
+						}
+						else
+						if (!response.containsKey("suk"))
+						{
+							maybeRememberSukAndVuk(currentIdentity);
+						}
+
+						session.save(currentIdentity);
+
+						originalNut.user=currentIdentity.user;
+						session.save(originalNut);
+
+						//TODO: if (nut.command!=null)...
+
+						/*
+						TODO: letLooseTheSessionRosebush();
 						*/
 						break;
+					}
 				}
 			}
 			catch (Exception e)
@@ -420,29 +499,79 @@ class DoSqrl extends AbstractAPICall
 		}
 
 		return response;
+	}
 
-		/*
+	private
+	boolean sameUser(DBUser user, DBUserAuth userAuth)
+	{
+		if (userAuth==null)
+		{
+			return false;
+		}
+		else
+		{
+			return user.id.equals(userAuth.user.id);
+		}
+	}
+
+	@CommitAfter
+	private
+	void terminateMultiClientNut(Nut nut)
+	{
+		nut.deadline=new Date();
+		nut.deathMessage="The nut you are trying to use was already seen/scanned by another SQRL client.";
+		session.save(nut);
+	}
+
+	private
+	DBUserAuth maybeCreateAccountAndPublicKeyCredentials(String pubKey)
+	{
+		log.debug("creating new user/credential pair for SQRL login");
+
 		final
-		String clientVersion=clientMap.get("ver");
+		DBUserAuth userAuth = new DBUserAuth();
+
+		userAuth.authMethod = AuthMethod.SQRL;
+		userAuth.millisGranted = (int)AuthMethod.SQRL.getDefaultLoginLength();
+		userAuth.pubKey = pubKey;
+
+		maybeRememberSukAndVuk(userAuth);
+		dispatchAuth.createUserWithNewStipulation(userAuth);
+
+		return userAuth;
+	}
+
+	@InjectPage
+	private
+	DispatchAuth dispatchAuth;
+
+	private
+	void maybeRememberSukAndVuk(DBUserAuth userAuth)
+	{
+		final
+		String suk=clientParameters.get("suk");
 
 		final
-		String identityKey=clientMap.get("idk");
+		String vuk=clientParameters.get("vuk");
 
-		final
-		String previousIdentityKey=clientMap.get("pidk");
+		if (empty(suk) || empty(vuk))
+		{
+			log.debug("missing suk or vuk");
+		}
+		else
+		{
+			userAuth.idRecoveryLock=suk+":"+vuk;
+		}
+	}
 
-		final
-		String serverUnlockKey=clientMap.get("suk");
-
-		final
-		String vuk=clientMap.get("vuk");
-		* /
-
-		log.info("unimplemented function: {}", command);
-		return response
-			.tifCommandFailed()
-			.tifFunctionNotSupported();
-		*/
+	private
+	DBUserAuth byPublicKey(String pubKey)
+	{
+		return (DBUserAuth)
+			session.createCriteria(DBUserAuth.class)
+				.add(Restrictions.eq("pubKey", pubKey))
+				.uniqueResult()
+			;
 	}
 
 	private
@@ -554,7 +683,7 @@ class DoSqrl extends AbstractAPICall
 			return false;
 		}
 
-		tenantIP=network.needIPForThisRequest(originalNut.tenant);
+		tenantIP=network.needIPForSession(originalNut.tenantSession);
 
 		if (Death.hathVisited(originalNut))
 		{
@@ -603,7 +732,7 @@ class DoSqrl extends AbstractAPICall
 		{
 			log.warn("adjusting protocol to suite old android client (protocol missing from server url): {}",
 						serverUrlClient);
-			useOldAndroidLogic = true;
+			useOriginalAndroidLogic = true;
 			return true;
 		}
 		else
@@ -847,4 +976,58 @@ class DoSqrl extends AbstractAPICall
 		return new URI(cachedUrl).getHost();
 	}
 
+	public
+	DBUserAuth getOptionalPreviousIdentity(byte[] authMessageBytes)
+	{
+		final
+		String pidkString=clientParameters.get("pidk");
+
+		final
+		String pidsSignature=parameters.get("pids");
+
+		if (empty(pidkString) && empty(pidsSignature))
+		{
+			//Common case...
+			log.debug("no previous identity info");
+			return null;
+		}
+		else
+		if (empty(pidkString))
+		{
+			log.debug("missing previous identity key");
+			response.tifClientFailure();
+			return null;
+		}
+		else
+		if (empty(pidsSignature))
+		{
+			log.debug("missing previous identity signature");
+			response.tifClientFailure();
+			return null;
+		}
+
+		final
+		byte[] pidkPublicKey=SqrlHelper.decode(pidkString);
+
+		final
+		byte[] clientPidkSignature=SqrlHelper.decode(pidsSignature);
+
+		if (signatureChecksOut(pidkPublicKey, clientPidkSignature, authMessageBytes))
+		{
+			log.debug("AUTHENTIC previous-id: {}", pidkString);
+			return byPublicKey(pidkString);
+		}
+		else
+		{
+			log.debug("previous-identity signature check failed");
+			response.tifClientFailure();
+			return null;
+		}
+	}
+
+	private
+	boolean empty(String s)
+	{
+		return (s==null || s.isEmpty());
+	}
 }
