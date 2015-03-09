@@ -487,6 +487,8 @@ class DoSqrl extends AbstractAPICall
 						/*
 						TODO: letLooseTheSessionRosebush();
 						*/
+						log.debug("SQRL ident completed successfully");
+
 						break;
 					}
 				}

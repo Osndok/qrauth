@@ -113,14 +113,16 @@ class SqrlResponse extends TreeMap<String,String> implements StreamResponse
 
 				for (Map.Entry<String, String> me : entrySet())
 				{
-					if (sb.length()!=0)
-					{
-						sb.append("\r\n");
-					}
-
+					/*
+					Quote the spec:
+					-----------------------
+					When returned by a web server in response to a client's query, the name=value pairs occupy the
+					body of the reply, appearing one per line with each pair terminated by a CRLF character pair.
+					 */
 					sb.append(me.getKey());
 					sb.append('=');
 					sb.append(me.getValue());
+					sb.append("\r\n");
 				}
 
 				final
