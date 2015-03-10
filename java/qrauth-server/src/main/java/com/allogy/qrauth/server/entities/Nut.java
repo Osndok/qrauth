@@ -48,7 +48,8 @@ class Nut /* extends Attemptable */ implements Mortal
 	 * To aid in a graceful session handoff, and to better defend against "over the shoulder" attacks,
 	 * we desire a "secret" value that is required by the underlying api calls which (while being
 	 * embedded *IN* the webpage) is never rendered *ON* the webpage, neither in the QR code. This
-	 * does not offer any protection against the well-known MITM attack/weakness.
+	 * does not offer any protection against the well-known MITM attack/weakness. In fact, this value
+	 * is clearly visible to tenants.
 	 */
 	@Column(nullable = false, length = 30)
 	public String semiSecretValue;
@@ -94,11 +95,11 @@ class Nut /* extends Attemptable */ implements Mortal
 		{
 			if (mutex == null)
 			{
-				return LIMBO;
+				return INIT;
 			}
 			else
 			{
-				return INIT;
+				return LIMBO;
 			}
 		}
 		else
