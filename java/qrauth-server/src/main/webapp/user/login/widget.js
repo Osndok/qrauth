@@ -15,6 +15,38 @@ function qrauth_sqrlClick()
 	qrCode.setAttribute('src', qrCode.getAttribute('pending'));
 
 	return true;
+}
+
+var qrauth_nut_state="INIT";
+
+function qrauth_nut_state_change(newState)
+{
+	if (newState=="LIMBO")
+	{
+		var qrCode=document.getElementById('qrauth_sqrl_qr_nut');
+    	qrCode.setAttribute('src', qrCode.getAttribute('pending'));
+    	return false;
+	}
+	else
+	if (newState=="READY")
+	{
+		//TODO: test various browsers to determine if any common ones will forbid clicking a submit button inside a noscript tag
+		//document.getElementById('qrauth_do_sqrl').click();
+		document.qrauth_form.do_sqrl.click();
+		return true;
+	}
+	else
+	{
+		var qrCode=document.getElementById('qrauth_sqrl_qr_nut');
+    	qrCode.setAttribute('src', qrCode.getAttribute('failure'));
+    	return true;
+	}
+}
+
+function qrauth_poll_nut()
+{
+	var qrCode=document.getElementById('qrauth_sqrl_qr_nut');
+	var url=qrCode.getAttribute('poll');
 
 	var syncQuery;
 
@@ -27,15 +59,36 @@ function qrauth_sqrlClick()
 		syncQuery = new ActiveXObject('MSXML2.XMLHTTP.3.0');
 	}
 
-	syncQuery.open( 'GET', 'sync.htm' );
+	syncQuery.open( 'GET', url );
+
+	var startTime=new Date().getTime();
 
 	syncQuery.onreadystatechange = function()
 	{
 		if ( syncQuery.readyState == 4 )
 		{
-			document.location.href = 'demo.htm';
+			var duration=new Date().getTime()-startTime;
+
+			if (syncQuery.status==200)
+			{
+				var newState=syncQuery.response;
+
+				if (newState!=qrauth_nut_state)
+				{
+					console.log("nut state change: "+qrauth_nut_state+" -> "+newState);
+
+					if (qrauth_nut_state_change(newState))
+					{
+						return;
+					}
+
+					qrauth_nut_state=newState;
+				}
+			}
+
+			setTimeout(qrauth_poll_nut, 1500+3*duration);
 		}
-	}
+	};
 
 	syncQuery.send();
 }
@@ -89,3 +142,15 @@ function qrauth_submit_check()
 tabby.init();
 
 new ZeroClipboard(document.getElementById('qrauth_clipboard1'));
+
+/*
+ * It is reasonable to wait anywhere from 6 to 12 seconds before beginning to poll the nut.
+ * 6 seconds is the measured "power user" with the default sqrl client at standby (short password, quick decode).
+ */
+setTimeout(qrauth_poll_nut, 6000);
+
+/*
+Since the user obviously has javascript enabled, we can hide the "do_sqrl" submit button, which we would not
+be able to access if we were to hide in a noscript tag (as usual "no javascript compatibility" widgets go).
+*/
+document.qrauth_form.do_sqrl.setAttribute("style", "display:none;");

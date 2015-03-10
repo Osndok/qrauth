@@ -126,7 +126,7 @@
 
 #qrauth right
 {
-	height: 232px;
+	height: 240px;
 
 	position: absolute;
 	left: 30%;
@@ -143,7 +143,7 @@
 #qrauth lower
 {
 	position: relative;
-	top: 237px;
+	top: 257px;
 	display:block;
 	padding: 10px;
 }

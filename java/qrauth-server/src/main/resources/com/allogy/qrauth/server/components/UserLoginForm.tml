@@ -25,7 +25,14 @@
 </noscript>
 
 <!-- NB: due to overlapping divs, you cannot safely insert elements at the top of the 'outer' form -->
-<form class="outer" method="POST" accept-charset="UTF-8" action="${base}/internal/auth/dispatch" onSubmit="return qrauth_submit_check();">
+<form
+	name="qrauth_form"
+	class="outer"
+	method="POST"
+	accept-charset="UTF-8"
+	action="${base}/internal/auth/dispatch"
+	onSubmit="return qrauth_submit_check();"
+	>
 
 <div style="display:none">
 	<input type="text" name="nut" value="${nut.stringValue}"/>
@@ -73,10 +80,8 @@
 		</a>
 		<br/>
 		<hostname>${doSqrl.domain}</hostname>
-		<noscript>
-			<br/>
-			<input type="submit" name="do_sqrl" value="Authentication Sent"/>
-		</noscript>
+		<br/>
+		<input type="submit" name="do_sqrl" value="I Have Sent the SQRL"/>
 	</left>
 	<right>
 		<b>SQRL</b> is a new authentication mechanism that does not require the server to
