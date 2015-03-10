@@ -1,17 +1,21 @@
 package com.allogy.qrauth.server.components;
 
 import com.allogy.qrauth.server.entities.*;
+import com.allogy.qrauth.server.pages.api.nut.StateNut;
 import com.allogy.qrauth.server.pages.api.sqrl.DoSqrl;
 import com.allogy.qrauth.server.services.Network;
 import com.allogy.qrauth.server.services.Nuts;
+import org.apache.tapestry5.Asset;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.Parameter;
+import org.apache.tapestry5.annotations.Path;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.apache.tapestry5.ioc.internal.util.InternalUtils;
 import org.apache.tapestry5.services.BaseURLSource;
+import org.apache.tapestry5.services.PageRenderLinkSource;
 import org.apache.tapestry5.services.Request;
 import org.slf4j.Logger;
 
@@ -119,4 +123,20 @@ class UserLoginForm
 
 		return REGISTRATION_METHODS;
 	}
+
+	@InjectPage
+	private
+	StateNut stateNutPage;
+
+	@Inject
+	private
+	PageRenderLinkSource pageRenderLinkSource;
+
+	public
+	String getPollStateUrl()
+	{
+		stateNutPage.with(nut);
+		return pageRenderLinkSource.createPageRenderLink(StateNut.class).toRedirectURI();
+	}
+
 }

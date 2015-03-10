@@ -63,7 +63,13 @@
 <arena id="qrauth_sqrl" class="active">
 	<left>
 		<a href="${doSqrl.url}" onClick="window.setTimeout( qrauth_sqrlClick, 1 );">
-			<img src="${base}/api/sqrl/qr/${nut.stringValue}/sqrl.png"/>
+			<img
+				id="qrauth_sqrl_qr_nut"
+				src="${base}/api/sqrl/qr/${nut.stringValue}/sqrl.png"
+				poll="${base}${pollStateUrl}"
+				pending="${base}${context:images/qr-pending.png}"
+				failure="${base}${context:images/qr-failure.png}"
+				/>
 		</a>
 		<br/>
 		<hostname>${doSqrl.domain}</hostname>
