@@ -482,6 +482,8 @@ class DoSqrl extends AbstractAPICall
 						originalNut.user=currentIdentity.user;
 						session.save(originalNut);
 
+						response.foundCurrentIdentity(currentIdentity);
+
 						//TODO: if (nut.command!=null)...
 
 						/*

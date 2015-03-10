@@ -336,6 +336,41 @@ class SqrlResponse extends TreeMap<String,String> implements StreamResponse
 		//TODO: the spec is a bit unclear... if this flag should only be set if vuk & suk are present (as "").
 		tifCurrentIDMatch();
 
+		if (userAuth.isDisabledBySqrlRequest())
+		{
+			final
+			String sukAndVuk = userAuth.idRecoveryLock;
+
+			if (sukAndVuk != null)
+			{
+				final
+				String[] bits = sukAndVuk.split(":");
+
+				if (bits.length == 2)
+				{
+					put("suk", bits[0]);
+					put("vuk", bits[1]);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Quote the spec:
+	 * ---------------------
+	 * "This vuk key is generated with and always accompanies the suk key"
+	 * ---------------------
+	 * The server retains [the suk value] as part of the client's identity and returns it to
+	 * the client in its response to client queries that might require identity lock privilege.
+	 * Specifically: any server responses with TIF bits 0x02 (previous identity) or
+	 * 0x08 (identity disabled) set.
+	 * ---------------------
+	 */
+	public
+	void foundPreviousIdentity(DBUserAuth userAuth)
+	{
+		tifPreviousIDMatch();
+
 		final
 		String sukAndVuk=userAuth.idRecoveryLock;
 
@@ -351,4 +386,5 @@ class SqrlResponse extends TreeMap<String,String> implements StreamResponse
 			}
 		}
 	}
+
 }

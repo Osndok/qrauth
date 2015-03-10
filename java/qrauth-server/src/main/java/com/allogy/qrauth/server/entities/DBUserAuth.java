@@ -95,5 +95,11 @@ class DBUserAuth extends Attemptable implements Mortal
 
 	/* ------------------------------------------------------------- */
 
+	public
+	boolean isDisabledBySqrlRequest()
+	{
+		//TODO: implement isDisabledBySqrlRequest(), more specific than just a 'death' check...
+		return false;
+	}
 
 }
