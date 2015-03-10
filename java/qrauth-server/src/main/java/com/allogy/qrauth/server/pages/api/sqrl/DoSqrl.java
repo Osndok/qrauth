@@ -25,9 +25,7 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -55,6 +53,15 @@ class DoSqrl extends AbstractAPICall
 
 	//For debugging, it is easier to be able to repeat old nuts. Has no effect in production.
 	private static final boolean DEBUG_CONSUME_NUTS = false;
+
+	/**
+	 * Originally, it was envisioned that each response would use a new nut. It is unclear if
+	 * this would provide any additional security, and it makes the implementation more complex.
+	 * Setting this to true without significant code changes would result in the SQRL subsystem
+	 * being broken. It is here, at least, to preserve what was already done towards this end
+	 * (in case it is found useful later) and to mark where in the code such logic is important.
+	 */
+	public static final boolean REQUIRES_NEW_NUTS_FOR_EACH_RESPONSE = false;
 
 	@ActivationRequestParameter(PARAMETER_NUT)
 	private
@@ -177,6 +184,15 @@ class DoSqrl extends AbstractAPICall
 
 		final
 		boolean incomingNutWasValid = consumedAndRotatedPerfectlyGoodNut();
+
+		if (REQUIRES_NEW_NUTS_FOR_EACH_RESPONSE)
+		{
+			with(nuts.allocate(null, tenantIP));
+		}
+		else
+		{
+			with(originalNut);
+		}
 
 		final
 		String newQueryPath=pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toRedirectURI();
@@ -672,7 +688,7 @@ class DoSqrl extends AbstractAPICall
 		if (incomingNutString == null)
 		{
 			log.debug("no incoming nut string");
-			with(nuts.allocate(null, network.needIPForThisRequest(null)));
+			tenantIP=network.needIPForThisRequest(null);
 			return false;
 		}
 
@@ -683,7 +699,7 @@ class DoSqrl extends AbstractAPICall
 		if (originalNut == null)
 		{
 			log.debug("bad nut / not found");
-			with(nuts.allocate(null, network.needIPForThisRequest(null)));
+			tenantIP=network.needIPForThisRequest(null);
 			return false;
 		}
 
@@ -692,17 +708,15 @@ class DoSqrl extends AbstractAPICall
 		if (Death.hathVisited(originalNut))
 		{
 			log.debug("bad nut / consumed");
-			with(nuts.allocate(null, tenantIP));
 			return false;
 		}
 
-		if (productionMode || DEBUG_CONSUME_NUTS)
+		if (REQUIRES_NEW_NUTS_FOR_EACH_RESPONSE && (productionMode || DEBUG_CONSUME_NUTS))
 		{
 			originalNut.deadline=new Date();
 			session.save(originalNut);
 		}
 
-		with(nuts.allocate(null, tenantIP));
 		return true;
 	}
 
