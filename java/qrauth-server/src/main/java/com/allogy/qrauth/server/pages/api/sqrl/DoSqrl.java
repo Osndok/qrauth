@@ -9,6 +9,7 @@ import com.allogy.qrauth.server.helpers.SqrlResponse;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
 import com.allogy.qrauth.server.pages.internal.auth.DispatchAuth;
 import com.allogy.qrauth.server.services.Nuts;
+import com.allogy.qrauth.server.services.Policy;
 import com.allogy.qrauth.server.services.impl.Config;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.annotations.ActivationRequestParameter;
@@ -379,7 +380,7 @@ class DoSqrl extends AbstractAPICall
 		//If a second SQRL client scans the code (before the auth finishes), the nut is nullified.
 		if (originalNut.mutex==null)
 		{
-			if (originalNut.user!=null && !sameUser(originalNut.user, currentIdentity))
+			if (originalNut.userAuth!=null && !sameUser(originalNut.userAuth.user, currentIdentity))
 			{
 				//This nut was allocated for a special purpose, and someone else got to it...
 				terminateMultiClientNut(originalNut);
@@ -495,7 +496,9 @@ class DoSqrl extends AbstractAPICall
 
 						session.save(currentIdentity);
 
-						originalNut.user=currentIdentity.user;
+						originalNut.userAuth=currentIdentity;
+						originalNut.deadline=new Date(System.currentTimeMillis()+policy.getMaximumSqrlHandoffPeriod());
+						originalNut.deathMessage="SQRL hand-off timed out";
 						session.save(originalNut);
 
 						response.foundCurrentIdentity(currentIdentity);
@@ -521,10 +524,14 @@ class DoSqrl extends AbstractAPICall
 		return response;
 	}
 
+	@Inject
+	private
+	Policy policy;
+
 	private
 	boolean sameUser(DBUser user, DBUserAuth userAuth)
 	{
-		if (userAuth==null)
+		if (userAuth == null)
 		{
 			return false;
 		}
@@ -538,8 +545,8 @@ class DoSqrl extends AbstractAPICall
 	private
 	void terminateMultiClientNut(Nut nut)
 	{
-		nut.deadline=new Date();
-		nut.deathMessage="The nut you are trying to use was already seen/scanned by another SQRL client.";
+		nut.deadline = new Date();
+		nut.deathMessage = "The nut you are trying to use was already seen/scanned by another SQRL client.";
 		session.save(nut);
 	}
 
@@ -552,7 +559,7 @@ class DoSqrl extends AbstractAPICall
 		DBUserAuth userAuth = new DBUserAuth();
 
 		userAuth.authMethod = AuthMethod.SQRL;
-		userAuth.millisGranted = (int)AuthMethod.SQRL.getDefaultLoginLength();
+		userAuth.millisGranted = (int) AuthMethod.SQRL.getDefaultLoginLength();
 		userAuth.pubKey = pubKey;
 
 		maybeRememberSukAndVuk(userAuth);
@@ -569,10 +576,10 @@ class DoSqrl extends AbstractAPICall
 	void maybeRememberSukAndVuk(DBUserAuth userAuth)
 	{
 		final
-		String suk=clientParameters.get("suk");
+		String suk = clientParameters.get("suk");
 
 		final
-		String vuk=clientParameters.get("vuk");
+		String vuk = clientParameters.get("vuk");
 
 		if (empty(suk) || empty(vuk))
 		{
@@ -580,7 +587,7 @@ class DoSqrl extends AbstractAPICall
 		}
 		else
 		{
-			userAuth.idRecoveryLock=suk+":"+vuk;
+			userAuth.idRecoveryLock = suk + ":" + vuk;
 		}
 	}
 
@@ -588,9 +595,9 @@ class DoSqrl extends AbstractAPICall
 	DBUserAuth byPublicKey(String pubKey)
 	{
 		return (DBUserAuth)
-			session.createCriteria(DBUserAuth.class)
-				.add(Restrictions.eq("pubKey", pubKey))
-				.uniqueResult()
+				   session.createCriteria(DBUserAuth.class)
+					   .add(Restrictions.eq("pubKey", pubKey))
+					   .uniqueResult()
 			;
 	}
 
@@ -688,22 +695,22 @@ class DoSqrl extends AbstractAPICall
 		if (incomingNutString == null)
 		{
 			log.debug("no incoming nut string");
-			tenantIP=network.needIPForThisRequest(null);
+			tenantIP = network.needIPForThisRequest(null);
 			return false;
 		}
 
 		originalNut = (Nut) session.createCriteria(Nut.class)
-								 .add(Restrictions.eq("stringValue", incomingNutString))
-								 .uniqueResult();
+								.add(Restrictions.eq("stringValue", incomingNutString))
+								.uniqueResult();
 
 		if (originalNut == null)
 		{
 			log.debug("bad nut / not found");
-			tenantIP=network.needIPForThisRequest(null);
+			tenantIP = network.needIPForThisRequest(null);
 			return false;
 		}
 
-		tenantIP=network.needIPForSession(originalNut.tenantSession);
+		tenantIP = network.needIPForSession(originalNut.tenantSession);
 
 		if (Death.hathVisited(originalNut))
 		{
@@ -713,7 +720,7 @@ class DoSqrl extends AbstractAPICall
 
 		if (REQUIRES_NEW_NUTS_FOR_EACH_RESPONSE && (productionMode || DEBUG_CONSUME_NUTS))
 		{
-			originalNut.deadline=new Date();
+			originalNut.deadline = new Date();
 			session.save(originalNut);
 		}
 
@@ -725,9 +732,9 @@ class DoSqrl extends AbstractAPICall
 	boolean agreeOnServerUrl(String serverUrlMine) throws UnknownHostException
 	{
 		final
-		String serverParameter=parameters.get(PARAMETER_SERVER);
+		String serverParameter = parameters.get(PARAMETER_SERVER);
 
-		if (serverParameter==null || serverParameter.isEmpty())
+		if (serverParameter == null || serverParameter.isEmpty())
 		{
 			log.debug("server parameter is missing or empty");
 			return false;
@@ -740,8 +747,7 @@ class DoSqrl extends AbstractAPICall
 		{
 			return verifyEmbeddedMAC(serverUrlClient);
 		}
-		else
-		if (serverUrlClient.equals(serverUrlMine))
+		else if (serverUrlClient.equals(serverUrlMine))
 		{
 			log.debug("agree on server url: {}", serverUrlClient);
 			return true;
@@ -765,7 +771,7 @@ class DoSqrl extends AbstractAPICall
 	private
 	boolean looksLikeDataDumpAsOpposedToAURL(String keyValuesOrUrl)
 	{
-		return keyValuesOrUrl.indexOf('\n')>=0;
+		return keyValuesOrUrl.indexOf('\n') >= 0;
 	}
 
 	private
@@ -966,10 +972,10 @@ class DoSqrl extends AbstractAPICall
 	DBUserAuth getOptionalPreviousIdentity(byte[] authMessageBytes)
 	{
 		final
-		String pidkString=clientParameters.get("pidk");
+		String pidkString = clientParameters.get("pidk");
 
 		final
-		String pidsSignature=parameters.get("pids");
+		String pidsSignature = parameters.get("pids");
 
 		if (empty(pidkString) && empty(pidsSignature))
 		{
@@ -977,15 +983,13 @@ class DoSqrl extends AbstractAPICall
 			log.debug("no previous identity info");
 			return null;
 		}
-		else
-		if (empty(pidkString))
+		else if (empty(pidkString))
 		{
 			log.debug("missing previous identity key");
 			response.tifClientFailure();
 			return null;
 		}
-		else
-		if (empty(pidsSignature))
+		else if (empty(pidsSignature))
 		{
 			log.debug("missing previous identity signature");
 			response.tifClientFailure();
@@ -993,10 +997,10 @@ class DoSqrl extends AbstractAPICall
 		}
 
 		final
-		byte[] pidkPublicKey=SqrlHelper.decode(pidkString);
+		byte[] pidkPublicKey = SqrlHelper.decode(pidkString);
 
 		final
-		byte[] clientPidkSignature=SqrlHelper.decode(pidsSignature);
+		byte[] clientPidkSignature = SqrlHelper.decode(pidsSignature);
 
 		if (signatureChecksOut(pidkPublicKey, clientPidkSignature, authMessageBytes))
 		{
@@ -1014,6 +1018,6 @@ class DoSqrl extends AbstractAPICall
 	private
 	boolean empty(String s)
 	{
-		return (s==null || s.isEmpty());
+		return (s == null || s.isEmpty());
 	}
 }

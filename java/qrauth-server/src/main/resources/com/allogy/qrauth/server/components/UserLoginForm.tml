@@ -36,6 +36,7 @@
 
 <div style="display:none">
 	<input type="text" name="nut" value="${nut.stringValue}"/>
+	<input type="text" name="nut_secret" value="${nut.semiSecretValue}"/>
 	<input type="text" name="tenantSession" value="${tenantSession?.session_id}"/>
 
 </div>

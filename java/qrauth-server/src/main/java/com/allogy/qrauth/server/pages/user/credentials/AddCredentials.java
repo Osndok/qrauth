@@ -103,7 +103,7 @@ class AddCredentials extends AbstractUserPage
 		switch (authMethod)
 		{
 			case SQRL:
-				return "almost";
+				return "Basic*";
 
 			case RSA:
 			case YUBIKEY_PUBLIC:

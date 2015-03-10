@@ -227,6 +227,27 @@ class PolicyImpl implements Policy, Runnable
 		return 25;
 	}
 
+	/**
+	 * We certainly want to impose some contemporanious check regarding the sqrl handoff, because there is
+	 * a window of time where someone else (in theory) might grab the session (less likely now with the nut's
+	 * semi-secret value).
+	 *
+	 * Also, since SQRL is still vulnerable to MITM/phishing attacks, and the vast majority of SQRL handoffs
+	 * are less than two seconds, this *might* be an indication of a MITM... because the intermediate processing
+	 * (plus possibly going into another country, having a poor server setup, or having to re-dispatch the
+	 * session takeover to a botnet with covert transmission delays to hide their ip address) would show up
+	 * as semi-usable signal here as handoff lag time.
+	 *
+	 * The only complicating fact is that some users might not be using javascript, in which case the handoff
+	 * can be as long as it takes them to click the submit button.
+	 */
+	@Override
+	public
+	long getMaximumSqrlHandoffPeriod()
+	{
+		return 30000;
+	}
+
 	private
 	boolean bool(String key, boolean _default)
 	{

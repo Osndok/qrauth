@@ -150,9 +150,7 @@ class DispatchAuth extends AbstractAPICall
 
 		if (request.getParameter("do_sqrl") != null)
 		{
-			//only relevant for noscript support (a button appears for noscript), we only need to check to see if the
-			//session is connected, and issue a redirect.
-			return new ErrorResponse(500, "noscript sqrl is unimplemented");
+			return do_sqrl();
 		}
 		else if (request.getParameter("do_otp") != null || request.getParameter("do_ppp_2")!=null)
 		{
@@ -932,5 +930,59 @@ class DispatchAuth extends AbstractAPICall
 		yet 401 (unauthorized) is not correct because we must then provide basic http authentication. Hmm...
 		 */
 		return new ErrorResponse(403, message);
+	}
+
+	@CommitAfter
+	private
+	Object do_sqrl()
+	{
+		final
+		Nut nut;
+		{
+			final
+			String secret=request.getParameter("nut_secret");
+
+			if (secret==null)
+			{
+				return missingParameter("nut_secret");
+			}
+
+			nut=getNut();
+
+			if (nut==null)
+			{
+				return missingOrInvalidParameter("nut");
+			}
+
+			if (!nut.semiSecretValue.equals(secret))
+			{
+				return invalidParameter("nut_secret");
+			}
+		}
+
+		final
+		NutState nutState=nut.getState();
+
+		if (nutState==NutState.READY)
+		{
+			log.debug("finally consuming {}", nut);
+			nut.deadline=new Date();
+			nut.deathMessage=null;
+			session.save(nut);
+		}
+		else
+		if (Death.hathVisited(nut))
+		{
+			return new ErrorResponse(400, Death.noteMightSay(nut, "nut is no longer valid"));
+		}
+		else
+		{
+			nut.deadline=new Date();
+			nut.deathMessage="sqrl protocol anachronism, you will probably need to refresh the login page and try again; beware of fake web pages";
+			session.save(nut);
+			return new ErrorResponse(400, nut.deathMessage);
+		}
+
+		return maybeAuthenticateUser(nut.userAuth, null);
 	}
 }

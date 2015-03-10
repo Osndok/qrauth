@@ -58,10 +58,12 @@ class Nut /* extends Attemptable */ implements Mortal
 	public TenantSession tenantSession;
 
 	/**
-	 * This is the hinge upon which the SQRL authentication mechanism pivots.
+	 * This is the hinge upon which the SQRL authentication mechanism pivots. If this is set, then
+	 * this must point to the sqrl id that actually authenticated against this nut in order to perform
+	 * the session handoff.
 	 */
 	@ManyToOne
-	public DBUser user;
+	public DBUserAuth userAuth;
 
 	/**
 	 * This allows the SQRL subsystem to lock a nut while it is being considered by the user.
@@ -81,7 +83,7 @@ class Nut /* extends Attemptable */ implements Mortal
 	{
 		if (Death.hathVisited(this))
 		{
-			if (user == null)
+			if (userAuth == null)
 			{
 				return FAILED;
 			}
@@ -91,7 +93,7 @@ class Nut /* extends Attemptable */ implements Mortal
 			}
 		}
 
-		if (user == null)
+		if (userAuth == null)
 		{
 			if (mutex == null)
 			{

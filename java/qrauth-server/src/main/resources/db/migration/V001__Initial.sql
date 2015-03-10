@@ -80,7 +80,7 @@
         stringValue varchar(30) not null unique,
         tenantIP_id int8 not null,
         tenantSession_id int8,
-        user_id int8,
+        userAuth_id int8,
         primary key (id)
     );
 
@@ -267,9 +267,9 @@
         references TenantIP;
 
     alter table Nut 
-        add constraint FK1336DE4D1151E 
-        foreign key (user_id) 
-        references DBUser;
+        add constraint FK1336DBD5D763E 
+        foreign key (userAuth_id) 
+        references DBUserAuth;
 
     alter table Nut 
         add constraint FK1336D93A9F594 
