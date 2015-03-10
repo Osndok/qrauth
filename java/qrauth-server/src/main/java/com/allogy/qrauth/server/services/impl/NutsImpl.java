@@ -4,6 +4,8 @@ import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.TenantIP;
 import com.allogy.qrauth.server.entities.TenantSession;
+import com.allogy.qrauth.server.helpers.Bytes;
+import com.allogy.qrauth.server.helpers.SqrlHelper;
 import com.allogy.qrauth.server.services.Nuts;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
@@ -58,15 +60,22 @@ class NutsImpl implements Nuts
 			log.debug("origin: {}", Arrays.toString(bytes));
 		}
 
+		/*
 		final
 		String base64 = javax.xml.bind.DatatypeConverter.printBase64Binary(bytes);
 
 		final
-		String nutty = toUrlSafeCharacters(base64);
+		String retval = toUrlSafeCharacters(base64);
 
 		log.debug("generated: {} -> {}", base64, nutty);
+		*/
 
-		return nutty;
+		final
+		String retval = SqrlHelper.encode(bytes);
+
+		log.debug("generated: {}", retval);
+
+		return retval;
 	}
 
 	private
@@ -137,6 +146,7 @@ class NutsImpl implements Nuts
 		nut.tenantSession=tenantSession;
 		nut.tenantIP=tenantIP;
 		nut.stringValue=toStringValue(generateBytes());
+		nut.semiSecretValue=toStringValue(generateBytes());
 
 		hibernateSessionManager.getSession().save(nut);
 		hibernateSessionManager.commit();

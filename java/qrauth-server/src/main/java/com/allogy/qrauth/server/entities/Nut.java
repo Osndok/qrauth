@@ -44,6 +44,15 @@ class Nut /* extends Attemptable */ implements Mortal
 	@Column(nullable = false, unique = true, length = 30)
 	public String stringValue;
 
+	/**
+	 * To aid in a graceful session handoff, and to better defend against "over the shoulder" attacks,
+	 * we desire a "secret" value that is required by the underlying api calls which (while being
+	 * embedded *IN* the webpage) is never rendered *ON* the webpage, neither in the QR code. This
+	 * does not offer any protection against the well-known MITM attack/weakness.
+	 */
+	@Column(nullable = false, length = 30)
+	public String semiSecretValue;
+
 	@ManyToOne(optional = true)
 	public TenantSession tenantSession;
 

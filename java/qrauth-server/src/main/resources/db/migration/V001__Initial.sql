@@ -76,6 +76,7 @@
         deadline TIMESTAMP WITHOUT TIME ZONE,
         deathMessage varchar(255),
         mutex varchar(255),
+        semiSecretValue varchar(30) not null,
         stringValue varchar(30) not null unique,
         tenantIP_id int8 not null,
         tenantSession_id int8,
