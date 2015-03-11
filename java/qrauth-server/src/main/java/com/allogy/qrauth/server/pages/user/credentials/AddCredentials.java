@@ -325,6 +325,10 @@ class AddCredentials extends AbstractUserPage
 	private
 	String password;
 
+	@Property
+	private
+	String password2;
+
 	@Inject
 	private
 	Hashing hashing;
@@ -333,6 +337,15 @@ class AddCredentials extends AbstractUserPage
 	private
 	Policy policy;
 
+	private
+	boolean emptyOrNonMatchingPasswords()
+	{
+		final
+		String password=this.password;
+
+		return password == null || password.isEmpty() || !password.equals(password2);
+	}
+
 	Object onSelectedFromDoRollingPassword() throws UnimplementedHashFunctionException
 	{
 		if (alreadyHavePasswordOnFile())
@@ -340,9 +353,9 @@ class AddCredentials extends AbstractUserPage
 			return new ErrorResponse(400, "that password has already been used, and cannot therefore be reused");
 		}
 
-		if (password == null || password.isEmpty())
+		if (emptyOrNonMatchingPasswords())
 		{
-			return new ErrorResponse(400, "the password cannot be empty");
+			return new ErrorResponse(400, "the password fields cannot be empty, and must match");
 		}
 
 		//NB: password is escaping!
@@ -469,9 +482,9 @@ class AddCredentials extends AbstractUserPage
 			return new ErrorResponse(400, "you must select a deadline for this password");
 		}
 
-		if (password == null || password.isEmpty())
+		if (emptyOrNonMatchingPasswords())
 		{
-			return new ErrorResponse(400, "the password cannot be empty");
+			return new ErrorResponse(400, "the password fields cannot be empty, and must match");
 		}
 
 		if (comment == null || comment.isEmpty())
