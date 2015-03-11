@@ -16,7 +16,7 @@ class StateNut
 	}
 
 	private
-	Nut nut;
+	Long nutId;
 
 	private
 	String secret;
@@ -25,7 +25,7 @@ class StateNut
 	{
 		//WARNING: the second parameter *CANNOT* read "nut.semiSecretValue"! or else basic programming errors might leak the secret!
 		return new Object[] {
-			nut.id,
+			nutId,
 			secret
 		};
 	}
@@ -33,7 +33,7 @@ class StateNut
 	public
 	StateNut with(Nut nut)
 	{
-		this.nut=nut;
+		this.nutId=nut.id;
 		this.secret=nut.semiSecretValue;
 		return this;
 	}
@@ -45,7 +45,7 @@ class StateNut
 			return new ErrorResponse(404, "invalid nut id/secret combination");
 		}
 
-		this.nut=nut;
+		this.nutId=nut.id;
 		this.secret=providedSecret;
 
 		return new TextStreamResponse("text/plain", nut.getState().toString());

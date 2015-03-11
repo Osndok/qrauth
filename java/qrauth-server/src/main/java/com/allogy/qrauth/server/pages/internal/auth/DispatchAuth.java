@@ -148,6 +148,12 @@ class DispatchAuth extends AbstractAPICall
 			}
 		}
 
+		if (request.getParameter("do_something") != null)
+		{
+			log.debug("user probably hit enter within an one-line input field");
+			return do_otp_attempt(username, password);
+		}
+		else
 		if (request.getParameter("do_sqrl") != null)
 		{
 			return do_sqrl();
@@ -867,6 +873,26 @@ class DispatchAuth extends AbstractAPICall
 			log.debug("dead: {}", username);
 			return new ErrorResponse(403, Death.noteMightSay(userAuth,
 																"that username is no longer acceptable"));
+		}
+
+		if (username==null)
+		{
+			username=userAuth.defaultUsername;
+
+			if (username==null)
+			{
+				log.debug("no username, and auth method has no default username");
+			}
+			else
+			if (Death.hathVisited(username))
+			{
+				log.debug("default username for {} is dead: {}", username, userAuth);
+				username=null;
+			}
+			else
+			{
+				log.debug("{} implies default username: {}", userAuth, username);
+			}
 		}
 
 		final

@@ -1,16 +1,17 @@
 package com.allogy.qrauth.server.pages.user.credentials;
 
-import com.allogy.qrauth.server.entities.AuthMethod;
-import com.allogy.qrauth.server.entities.DBUserAuth;
-import com.allogy.qrauth.server.entities.OutputStreamResponse;
-import com.allogy.qrauth.server.entities.UnimplementedHashFunctionException;
+import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.helpers.*;
+import com.allogy.qrauth.server.pages.api.nut.StateNut;
+import com.allogy.qrauth.server.pages.api.sqrl.DoSqrl;
+import com.allogy.qrauth.server.pages.api.sqrl.QrSqrl;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
 import com.allogy.qrauth.server.pages.user.Credentials;
 import com.allogy.qrauth.server.pages.user.credentials.ppp.DisplayPPP;
 import com.allogy.qrauth.server.pages.user.credentials.rsa.ReclaimRSA;
 import com.allogy.qrauth.server.services.Hashing;
 import com.allogy.qrauth.server.services.Journal;
+import com.allogy.qrauth.server.services.Nuts;
 import com.allogy.qrauth.server.services.Policy;
 import com.allogy.qrauth.server.services.impl.Config;
 import com.google.zxing.BarcodeFormat;
@@ -30,6 +31,7 @@ import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.internal.util.InternalUtils;
+import org.apache.tapestry5.services.PageRenderLinkSource;
 import org.apache.tapestry5.services.Response;
 import org.apache.tapestry5.util.TextStreamResponse;
 import org.hibernate.criterion.Restrictions;
@@ -38,8 +40,10 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -152,8 +156,8 @@ class AddCredentials extends AbstractUserPage
 			case TIME_OTP        : return otpBlock;
 			case HMAC_OTP        : return otpBlock;
 			case PAPER_PASSWORDS : return pppBlock;
+			case SQRL            : return sqrlBlock;
 
-			case SQRL:
 			case YUBIKEY_CUSTOM:
 			case OPEN_ID:
 			case EMAILED_SECRET:
@@ -589,6 +593,11 @@ class AddCredentials extends AbstractUserPage
 			return new ErrorResponse(400, "user/credential mismatch");
 		}
 
+		if (requested.authMethod != authMethod)
+		{
+			return new ErrorResponse(400, "auth/type mismatch");
+		}
+
 		if (requested.created.getTime() < oldestRevealableTime())
 		{
 			return new ErrorResponse(400, "sorry, only recently-created credentials can be revealed");
@@ -968,4 +977,176 @@ class AddCredentials extends AbstractUserPage
 		return new TextStreamResponse("text/plain", "All previous paper passwords have now been disabled, you can now close this tab/window.");
 	}
 
+
+
+	/*
+	-------------------------------------- SQRL -----------------------------------------
+	 */
+
+	@Inject
+	private
+	Block sqrlBlock;
+
+	Object onSelectedFromYesSqrlQrCode()
+	{
+		log.debug("onSelectedFromYesSqrlQrCode()");
+		return beginSqrlAttach(true);
+	}
+
+	Object onSelectedFromNoSqrlQrCode()
+	{
+		log.debug("onSelectedFromNoSqrlQrCode()");
+		return beginSqrlAttach(false);
+	}
+
+	@CommitAfter
+	private
+	Object beginSqrlAttach(boolean showQrCode)
+	{
+		//TODO: if the user has any "somewhat recently used" sqrl identity, then they must be authenticated against one of those to add a new sqrl identity
+		deleteOldPlaceholdersForThisUser();
+
+		//create a transient SQRL DBUserAuth "placeholder" that expires soon-ish.
+		final
+		DBUserAuth ua=new DBUserAuth();
+
+		ua.user=user;
+		ua.authMethod=AuthMethod.SQRL;
+		ua.millisGranted=ua.authMethod.getDefaultLoginLength();
+		ua.comment=SQRL_PLACEHOLDER+(showQrCode?YES_SQRL_QR:NO_SQRL_QR);
+
+		session.save(ua);
+
+		//forward to our same page with that as the revealed auth method
+		userAuthReveal=ua;
+		return this;
+	}
+
+	//TODO: yes it avoids having a bunch of placeholders, but is deleting them really the best option?
+	private
+	void deleteOldPlaceholdersForThisUser()
+	{
+		final
+		List<DBUserAuth> list=
+			session.createCriteria(DBUserAuth.class)
+				.add(Restrictions.eq("user", user))
+				.add(Restrictions.eq("authMethod", AuthMethod.SQRL))
+				.add(Restrictions.isNull("pubKey"))
+				.list()
+				;
+
+		for (DBUserAuth userAuth : list)
+		{
+			log.debug("delete placeholder: {} / {}", userAuth, userAuth.user);
+			deleteAnyNutsFor(userAuth);
+			session.delete(userAuth);
+		}
+	}
+
+	private
+	void deleteAnyNutsFor(DBUserAuth userAuth)
+	{
+		final
+		List<Nut> list=
+			session.createCriteria(Nut.class)
+				.add(Restrictions.eq("userAuth", userAuth))
+				.list()
+			;
+
+		for (Nut nut : list)
+		{
+			log.debug("delete placeholder nut: {}", nut);
+			session.delete(nut);
+		}
+	}
+
+	private static final String SQRL_PLACEHOLDER = "SQRL link attempt ";
+	private static final String NO_SQRL_QR       = "with QR Code";
+	private static final String YES_SQRL_QR      = "without QR Code";
+
+	private
+	boolean shouldShowTrueQRCode()
+	{
+		return userAuthReveal.comment.contains(YES_SQRL_QR);
+	}
+
+	private
+	Nut nut;
+
+	@Inject
+	private
+	Nuts nuts;
+
+	public
+	Nut getNut()
+	{
+		if (nut == null)
+		{
+			nut = nuts.allocateSpecial(userAuthReveal, "attach");
+		}
+
+		return nut;
+	}
+
+	@InjectPage
+	private
+	DoSqrl doSqrl;
+
+	@InjectPage
+	private
+	QrSqrl qrSqrl;
+
+	private
+	String sqrlUrl;
+
+	public
+	String getSqrlUrl() throws UnknownHostException
+	{
+		if (sqrlUrl == null)
+		{
+			sqrlUrl=doSqrl.with(getNut()).getUrl();
+		}
+
+		return sqrlUrl;
+	}
+
+	@Inject
+	@Path("context:images/qr-sqrl.png")
+	private
+	Asset fakeSqrlQrCode;
+
+	@Inject
+	private
+	PageRenderLinkSource pageRenderLinkSource;
+
+	public
+	String getTrueOrFakeQRCode()
+	{
+		if (shouldShowTrueQRCode())
+		{
+			qrSqrl.with(getNut());
+			return pageRenderLinkSource.createPageRenderLink(QrSqrl.class).toURI();
+		}
+		else
+		{
+			return fakeSqrlQrCode.toClientURL();
+		}
+	}
+
+	@InjectPage
+	private
+	StateNut stateNutPage;
+
+	public
+	String getPollStateUrl()
+	{
+		stateNutPage.with(nut);
+		return pageRenderLinkSource.createPageRenderLink(StateNut.class).toRedirectURI();
+	}
+
+	Object onSuccessFromSqrlForm()
+	{
+		log.debug("sqrlAttach->continue");
+		return editCredentials.with(userAuthReveal);
+	}
 }

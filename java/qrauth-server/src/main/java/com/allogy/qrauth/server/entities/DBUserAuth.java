@@ -42,6 +42,13 @@ class DBUserAuth extends Attemptable implements Mortal
 	public String pubKey;
 
 	/**
+	 * Particularly for those auth methods that do not require a username, this will let us assume a
+	 * username by default for each auth-method.
+	 */
+	@ManyToOne
+	public Username defaultUsername;
+
+	/**
 	 * This idea is that (particularly for the yubikey, which has two operating modes:
 	 * short press & long press), we can have one of them *work* yet silently raise an
 	 * alarm tenant-side (or plausibly lock/disable an account). For that matter, we
@@ -95,6 +102,7 @@ class DBUserAuth extends Attemptable implements Mortal
 
 	/* ------------------------------------------------------------- */
 
+	@NonVisual
 	public
 	boolean isDisabledBySqrlRequest()
 	{

@@ -1,20 +1,22 @@
 package com.allogy.qrauth.server.services.impl;
 
-import com.allogy.qrauth.server.entities.Nut;
-import com.allogy.qrauth.server.entities.Tenant;
-import com.allogy.qrauth.server.entities.TenantIP;
-import com.allogy.qrauth.server.entities.TenantSession;
+import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.helpers.Bytes;
 import com.allogy.qrauth.server.helpers.SqrlHelper;
+import com.allogy.qrauth.server.services.Network;
 import com.allogy.qrauth.server.services.Nuts;
+import com.allogy.qrauth.server.services.Policy;
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.hibernate.HibernateSessionManager;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
 import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -153,6 +155,43 @@ class NutsImpl implements Nuts
 
 		return nut;
 	}
+
+	@Override
+	public
+	Nut allocateSpecial(DBUserAuth userAuthRestriction, String command)
+	{
+		final
+		Nut nut=new Nut();
+
+		nut.userAuth=userAuthRestriction;
+		nut.command=command;
+		nut.tenantIP=network.needIPForThisRequest(null);
+		nut.stringValue=toStringValue(generateBytes());
+		nut.semiSecretValue=toStringValue(generateBytes());
+
+		//if (productionMode)
+		{
+			nut.deadline=new Date(System.currentTimeMillis()+policy.longestReasonableAddCredentialTaskLength());
+		}
+
+		hibernateSessionManager.getSession().save(nut);
+		hibernateSessionManager.commit();
+
+		return nut;
+	}
+
+	@Inject
+	@Symbol(SymbolConstants.PRODUCTION_MODE)
+	private
+	boolean productionMode;
+
+	@Inject
+	private
+	Policy policy;
+
+	@Inject
+	private
+	Network network;
 
 	@Inject
 	private

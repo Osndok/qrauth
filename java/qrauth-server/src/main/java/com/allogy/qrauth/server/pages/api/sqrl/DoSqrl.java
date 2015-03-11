@@ -2,12 +2,10 @@ package com.allogy.qrauth.server.pages.api.sqrl;
 
 import com.allogy.qrauth.server.crypto.Ed25519;
 import com.allogy.qrauth.server.entities.*;
-import com.allogy.qrauth.server.helpers.Bytes;
-import com.allogy.qrauth.server.helpers.Death;
-import com.allogy.qrauth.server.helpers.SqrlHelper;
-import com.allogy.qrauth.server.helpers.SqrlResponse;
+import com.allogy.qrauth.server.helpers.*;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
 import com.allogy.qrauth.server.pages.internal.auth.DispatchAuth;
+import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Nuts;
 import com.allogy.qrauth.server.services.Policy;
 import com.allogy.qrauth.server.services.impl.Config;
@@ -380,14 +378,19 @@ class DoSqrl extends AbstractAPICall
 		//If a second SQRL client scans the code (before the auth finishes), the nut is nullified.
 		if (originalNut.mutex==null)
 		{
-			if (originalNut.userAuth!=null && !sameUser(originalNut.userAuth.user, currentIdentity))
+			final
+			DBUserAuth nutAuth = originalNut.userAuth;
+
+			if (nutAuth!=null && currentIdentity!=null && currentIdentity.user!=null && !sameUser(nutAuth.user, currentIdentity))
 			{
 				//This nut was allocated for a special purpose, and someone else got to it...
+				log.error("no mutex, and pre-set userAuths do not match: {} != {}", nutAuth.user, currentIdentity.user);
 				terminateMultiClientNut(originalNut);
 				return response.tifCommandFailed();
 			}
 			else
 			{
+				log.debug("no mutex, set to: {}", idkString);
 				originalNut.mutex = idkString;
 			}
 		}
@@ -484,6 +487,54 @@ class DoSqrl extends AbstractAPICall
 					case ident:
 					case login:
 					{
+						final
+						String qrauthCommand=nut.command;
+
+						if (qrauthCommand!=null)
+						{
+							if (qrauthCommand.equals("attach"))
+							{
+								//the user *and* the userAuth are already ready... we just need to claim it.
+								if (currentIdentity==null)
+								{
+									currentIdentity = nut.userAuth;
+									currentIdentity.pubKey = idkString;
+									currentIdentity.comment = attachmentComment(nut.tenantIP, tenantIP);
+									currentIdentity.deadline = null;
+
+									log.info("{} is claiming {} for {}", tenantIP, currentIdentity,
+												currentIdentity.user);
+									journal.addedUserAuthCredential(currentIdentity);
+								}
+								else
+								{
+									//TODO: consider handling *informed* take-over/transfer... sorta like yubikey? except with an "are you sure?"
+									if (sameUser(nut.userAuth.user, currentIdentity))
+									{
+										log.warn("trying to attach SQRL id already in use by another user");
+										nut.userAuth.comment = "Tried to re-attach SQRL identity already in use by this account.";
+										nut.userAuth.deadline = new Date();
+										session.save(nut.userAuth);
+									}
+									else
+									{
+										log.warn("trying to attach SQRL id already in use by another user");
+										nut.userAuth.comment = "Tried to attach SQRL identity already in use by " + currentIdentity.user;
+										nut.userAuth.deadline = new Date();
+										session.save(nut.userAuth);
+
+										currentIdentity.comment += " " + nut.userAuth.user + " tried to transfer this SQRL identity to his/her account on " + DateHelper.iso8601();
+									}
+								}
+							}
+							else
+							{
+								log.error("unknown qrauth-command: {}", qrauthCommand);
+							}
+
+							maybeRememberSukAndVuk(currentIdentity);
+						}
+						else
 						if (currentIdentity == null)
 						{
 							currentIdentity=maybeCreateAccountAndPublicKeyCredentials(idkString);
@@ -524,6 +575,23 @@ class DoSqrl extends AbstractAPICall
 		return response;
 	}
 
+	private
+	String attachmentComment(TenantIP generator, TenantIP claimant)
+	{
+		if (network.ipMatch(generator, claimant))
+		{
+			return "New SQRL identity attached from same IP address";
+		}
+		else
+		{
+			return "New SQRL identity attached from a different IP address: "+claimant;
+		}
+	}
+
+	@Inject
+	private
+	Journal journal;
+
 	@Inject
 	private
 	Policy policy;
@@ -533,6 +601,7 @@ class DoSqrl extends AbstractAPICall
 	{
 		if (userAuth == null)
 		{
+			log.debug("userAuth==null -> sameUser()=false");
 			return false;
 		}
 		else
@@ -829,7 +898,8 @@ class DoSqrl extends AbstractAPICall
 					if (key == null) return retval;
 					sb.delete(0, sb.length());
 
-					String value = null;
+					final
+					String value;
 					{
 						while ((c = br.read()) > 0 && c != '&')
 						{

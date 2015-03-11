@@ -1,9 +1,6 @@
 package com.allogy.qrauth.server.services;
 
-import com.allogy.qrauth.server.entities.Nut;
-import com.allogy.qrauth.server.entities.Tenant;
-import com.allogy.qrauth.server.entities.TenantIP;
-import com.allogy.qrauth.server.entities.TenantSession;
+import com.allogy.qrauth.server.entities.*;
 
 /**
  * Created by robert on 2/16/15.
@@ -21,4 +18,6 @@ interface Nuts
 	byte[] fromStringValue(String value);
 
 	Nut allocate(TenantSession tenantSession, TenantIP tenantIP);
+
+	Nut allocateSpecial(DBUserAuth userAuthReveal, String command);
 }

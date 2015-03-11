@@ -1,5 +1,6 @@
 package com.allogy.qrauth.server.pages.api.sqrl;
 
+import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.OutputStreamResponse;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.google.zxing.BarcodeFormat;
@@ -23,9 +24,31 @@ import java.util.Map;
 public
 class QrSqrl
 {
+	private
+	String nutStringValue;
+
+	private
+	String filename;
+
 	Object onActivate()
 	{
 		return new ErrorResponse(404, "missing nut string value or file name");
+	}
+
+	Object[] onPassivate()
+	{
+		return new Object[]{
+			nutStringValue,
+			filename
+		};
+	}
+
+	public
+	QrSqrl with(Nut nut)
+	{
+		nutStringValue=nut.stringValue;
+		filename="qr.png";
+		return this;
 	}
 
 	@InjectPage

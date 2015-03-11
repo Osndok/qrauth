@@ -58,9 +58,18 @@ class Nut /* extends Attemptable */ implements Mortal
 	public TenantSession tenantSession;
 
 	/**
-	 * This is the hinge upon which the SQRL authentication mechanism pivots. If this is set, then
-	 * this must point to the sqrl id that actually authenticated against this nut in order to perform
-	 * the session handoff.
+	 * This is the hinge upon which the SQRL authentication mechanism pivots, and has three distinct
+	 * purposes.
+	 *
+	 * For basic authentication, this begins as null and when later set becomes the the final
+	 * SQRL identity that used this nut to authenticate. This is neccesary in order to perform
+	 * the session handoff when a mobile SQRL client is used (and the QR code is scanned visually).
+	 *
+	 * When adding a sql identity this will point to the DBUserAuth that is currently adding a
+	 * SQRL identity, and later pivot to the sqrl identity (while holding the same user).
+	 *
+	 * When requesting SQRL-authorization for a specific task, this might point to a specific
+	 * SQRL identity that must match the request (now offloaded/aided by the 'mutex' field).
 	 */
 	@ManyToOne
 	public DBUserAuth userAuth;
@@ -93,16 +102,14 @@ class Nut /* extends Attemptable */ implements Mortal
 			}
 		}
 
+		if (mutex == null)
+		{
+			return INIT;
+		}
+
 		if (userAuth == null)
 		{
-			if (mutex == null)
-			{
-				return INIT;
-			}
-			else
-			{
-				return LIMBO;
-			}
+			return LIMBO;
 		}
 		else
 		{

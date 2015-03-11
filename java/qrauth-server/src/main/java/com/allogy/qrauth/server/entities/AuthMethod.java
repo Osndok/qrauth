@@ -177,9 +177,9 @@ enum AuthMethod
 	}
 
 	public
-	long getDefaultLoginLength()
+	int getDefaultLoginLength()
 	{
-		return FIRST_RANK_MILLIS/rank;
+		return (int)(FIRST_RANK_MILLIS/rank);
 	}
 
 	/**

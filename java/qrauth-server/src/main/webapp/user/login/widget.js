@@ -139,9 +139,17 @@ function qrauth_submit_check()
 	return true;
 }
 
-tabby.init();
+{
+	var clip1=document.getElementById('qrauth_clipboard1');
 
-new ZeroClipboard(document.getElementById('qrauth_clipboard1'));
+	if (clip1)
+	{
+		new ZeroClipboard(clip1);
+
+		//TODO: technically unrelated to this test, but presence of clippable element is a decent test for login form/standalone-sqrl
+		tabby.init();
+	}
+}
 
 /*
  * It is reasonable to wait anywhere from 6 to 12 seconds before beginning to poll the nut.
@@ -153,4 +161,6 @@ setTimeout(qrauth_poll_nut, 6000);
 Since the user obviously has javascript enabled, we can hide the "do_sqrl" submit button, which we would not
 be able to access if we were to hide in a noscript tag (as usual "no javascript compatibility" widgets go).
 */
-document.qrauth_form.do_sqrl.setAttribute("style", "display:none;");
+document.addEventListener('DOMContentLoaded', function() {
+	document.qrauth_form.do_sqrl.setAttribute("style", "display:none;");
+});

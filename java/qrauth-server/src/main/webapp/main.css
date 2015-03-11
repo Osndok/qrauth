@@ -177,6 +177,12 @@ body.user_credentials_add .main table .btn
 	padding: 2px 10px;
 }
 
+body.user_credentials_add .main form .btn
+{
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
 .user_names_add #username
 {
 	margin-bottom: 10px;
