@@ -16,15 +16,17 @@ target/qrauth-pubkey2ssh: src/qrauth-pubkey2ssh.c
 	mkdir -p target
 	gcc -Wall -Werror -Wfatal-errors $^ -lcrypto -o $@
 
-target/qrauth-ed25519-verify: src/qrauth-ed25519-verify.c ext/ed25519-donna/ed25519.o
+target/qrauth-ed25519-verify: src/qrauth-ed25519-verify.c target/ed25519.o
 	rm -fv $@
-	gcc ext/ed25519-donna/ed25519.o -lcrypto -Wall -o $@ src/qrauth-ed25519-verify.c -Iext/ed25519-donna
+	gcc target/ed25519.o -lcrypto -Wall -o $@ src/qrauth-ed25519-verify.c -Iext/ed25519-donna
 
-ext/ed25519-donna/ed25519.o: ext/ed25519-donna/*.c ext/ed25519-donna/*.h
-	cd ext/ed25519-donna ; gcc ed25519.c -m64 -O3 -c -Wall -DED25519_SSE2
+target/ed25519.o: ext/ed25519-donna/*.c ext/ed25519-donna/*.h
+	mkdir -p target
+	cd ext/ed25519-donna ; gcc ed25519.c -m64 -O3 -c -Wall -DED25519_SSE2 -o "../../$@"
 
-test: target/qrauth-ssh-keys
+test: target/qrauth-ssh-keys target/qrauth-ed25519-verify
 	DEBUG=1 target/qrauth-ssh-keys $(shell whoami)
+	DEBUG=1 target/qrauth-ed25519-verify < test/ed25519-verify-test.data
 	( cd java ; $(MVN) test )
 
 prereqs:

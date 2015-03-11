@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -21,10 +23,13 @@ class Ed25519
 	Logger log = LoggerFactory.getLogger(Ed25519.class);
 
 	private static final
-	int NUM_PROCESSORS=Runtime.getRuntime().availableProcessors();
+	int NUM_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
 	private static final
 	Semaphore processLimiter = new Semaphore(NUM_PROCESSORS, true);
+
+	private static final
+	String ED25519_DIVERT_HACK = System.getenv("ED25519_DIVERT_HACK");
 
 	/*
 	 * Parameters match pure-java implementation, for consistency.
@@ -60,7 +65,17 @@ class Ed25519
 		Process process = Runtime.getRuntime().exec(QRAUTH_VERIFY.getAbsolutePath());
 
 		final
-		OutputStream out = process.getOutputStream();
+		OutputStream out;
+		{
+			if (ED25519_DIVERT_HACK==null)
+			{
+				out = process.getOutputStream();
+			}
+			else
+			{
+				out=new FileOutputStream(Files.createTempFile(ED25519_DIVERT_HACK, ".data").toFile());
+			}
+		}
 
 		out.write(publicKey);
 		out.write(signature);
