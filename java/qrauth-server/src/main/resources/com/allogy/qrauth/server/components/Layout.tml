@@ -44,7 +44,7 @@
             <ul class="nav navbar-nav">
            		<li><t:pagelink page="index">About</t:pagelink></li>
                	<t:if test="loggedIn">
-               		<li><t:pagelink page="user/activity">Activity</t:pagelink></li>
+               		<li><t:pagelink page="user/activity" context="[]">Activity</t:pagelink></li>
                		<li><t:pagelink page="user/names">Usernames</t:pagelink></li>
                		<li><t:pagelink page="user/sites">Sites</t:pagelink></li>
                		<li><t:pagelink page="user/credentials">Credentials</t:pagelink></li>

@@ -1,14 +1,12 @@
 package com.allogy.qrauth.server.pages.user;
 
-import com.allogy.qrauth.server.entities.LogEntry;
 import com.allogy.qrauth.server.entities.TenantUser;
+import com.allogy.qrauth.server.services.Policy;
 import org.apache.tapestry5.annotations.Property;
-import org.apache.tapestry5.grid.GridDataSource;
-import org.apache.tapestry5.hibernate.HibernateGridDataSource;
 import org.apache.tapestry5.ioc.annotations.Inject;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+
+import java.util.List;
 
 /**
  * Created by robert on 2/25/15.
@@ -16,22 +14,40 @@ import org.hibernate.criterion.Restrictions;
 public
 class SitesUser extends AbstractUserPage
 {
-	public
-	GridDataSource getDataSource()
+	@Property
+	private
+	List<TenantUser> tenantUsers;
+
+	private
+	void onActivate()
 	{
-		return new HibernateGridDataSource(session, TenantUser.class)
-		{
-			@Override
-			protected
-			void applyAdditionalConstraints(Criteria criteria)
-			{
-				criteria.add(Restrictions.eq("user", user));
-			}
-		};
+		tenantUsers=session.createCriteria(TenantUser.class)
+			.add(Restrictions.eq("user", user))
+			.list()
+			;
 	}
 
 	@Property
 	private
 	TenantUser tenantUser;
 
+	@Inject
+	private
+	Policy policy;
+
+	public
+	boolean getCanRegisterTenancy()
+	{
+		int numAdmin = 0;
+
+		for (TenantUser tenantUser : tenantUsers)
+		{
+			if (tenantUser.authAdmin)
+			{
+				numAdmin++;
+			}
+		}
+
+		return numAdmin < policy.getMaximumTenantsForUser(user);
+	}
 }

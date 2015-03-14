@@ -29,4 +29,8 @@ interface Policy
 	int hotpAdvanceMatch();
 
 	long getMaximumSqrlHandoffPeriod();
+
+	int getMaximumTenantsForUser(DBUser user);
+
+	boolean isAcceptableTenantName(String name);
 }

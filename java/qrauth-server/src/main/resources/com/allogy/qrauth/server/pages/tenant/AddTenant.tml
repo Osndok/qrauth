@@ -1,0 +1,39 @@
+<html t:type="layout" title="Add Tenant"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter"
+      >
+
+	<div class="warning">
+		<b>WARNING:</b>
+		You <b><u>MUST</u></b> copy... <u>and retain</u>... <b><u>BOTH</u></b> of these api keys.
+		The first is for common use in scripts and web applications, the second one serves as a
+		backup in case your infrastructure is compromised, *AND* is a means to rotate to a new
+		api key. For security reasons, these values will not be available through this interface
+		again. Due to a human review process, it may take a while to accept or confirm your
+		tenant name. For some browsers, using the back button (such as the case with form errors)
+		will cause the api keys to *change*.
+	</div>
+
+	<h3>Request Tenant Access</h3>
+
+	<t:form>
+		<t:label for="requestedName"/>
+		<br/>
+		<t:textfield value="tenant.requestedName" t:id="requestedName"/>
+		<br/>
+		<t:label for="primaryApiKey"/>
+		<br/>
+		<t:textfield value="primaryApiKey" t:id="primaryApiKey"/>
+		<br/>
+		<t:label for="secondaryApiKey"/>
+		<br/>
+		<t:textfield value="secondaryApiKey" t:id="secondaryApiKey"/>
+		<br/>
+		<t:checkbox value="tenant.newUsers"/>&nbsp;Allow new users to join (open web site)<br/>
+		<t:checkbox value="tenant.requireUsername"/>&nbsp;Require username (e.g. if your site would break without one).<br/>
+		<t:checkbox value="tenant.fixedUsername"/>&nbsp;Fixed (unchanging) usernames (e.g. if your site would break if a user used a different username).<br/>
+
+		<t:submit/>
+	</t:form>
+
+</html>

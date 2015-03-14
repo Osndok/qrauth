@@ -2,7 +2,24 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
-	<t:grid t:source="dataSource" row="tenantUser">
-	</t:grid>
+	<t:grid t:source="tenantUsers" row="tenantUser" add="name,actions">
+		<p:nameCell>
+			${tenantUser.tenant.requestedName}
+		</p:nameCell>
+		<p:actionsCell>
+			<t:pagelink page="user/activity" context="tenantUser.tenant">Activity</t:pagelink>
+			<t:if test="tenantUser.authAdmin">
+				,&nbsp;<a href="javascript:alert('TODO');">Admin</a>
+			</t:if>
+		</p:actionsCell>
+   		<p:empty>
+   			No sites on record...
+   			<br/>
+   		</p:empty>
+   	</t:grid>
+
+	<t:if test="canRegisterTenancy">
+		<t:pagelink page="tenant/add" class="btn btn-primary">Request New Tenant Account</t:pagelink>
+	</t:if>
 
 </html>

@@ -187,3 +187,14 @@ body.user_credentials_add .main form .btn
 {
 	margin-bottom: 10px;
 }
+
+.tenant_add #primaryApiKey,
+.tenant_add #secondaryApiKey
+{
+	font-family: monospace;
+}
+
+.tenant_add .btn
+{
+	margin-top: 10px;
+}

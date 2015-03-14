@@ -23,6 +23,11 @@ class CreateTenant extends AbstractTenantAPICall
 
 	Object onActivate()
 	{
+		if (true)
+		{
+			return new ErrorResponse(400, "CreateTenant API is disabled");
+		}
+
 		final
 		long startTime=System.currentTimeMillis();
 

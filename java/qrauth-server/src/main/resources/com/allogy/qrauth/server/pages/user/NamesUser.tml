@@ -7,6 +7,10 @@
    			<t:pagelink page="user/names/edit" context="username">Edit</t:pagelink>,
    			<t:pagelink page="user/names/revoke" context="username">Revoke</t:pagelink>
    		</p:commandsCell>
+   		<p:empty>
+   			No usernames currently registered...
+   			<br/>
+   		</p:empty>
    	</t:grid>
 
    	<t:pagelink page="user/names/add" class="btn btn-primary">Add</t:pagelink>

@@ -248,6 +248,20 @@ class PolicyImpl implements Policy, Runnable
 		return 30000;
 	}
 
+	@Override
+	public
+	int getMaximumTenantsForUser(DBUser user)
+	{
+		return 20;
+	}
+
+	@Override
+	public
+	boolean isAcceptableTenantName(String name)
+	{
+		return wouldAllowUsernameToBeRegistered(name);
+	}
+
 	private
 	boolean bool(String key, boolean _default)
 	{

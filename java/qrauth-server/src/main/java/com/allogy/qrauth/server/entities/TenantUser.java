@@ -60,6 +60,7 @@ class TenantUser extends Attemptable implements Mortal
 	 * of transparency, we may allow users read-only access to this field, so they might get a peek into what a
 	 * Tenant knows about them.
 	 */
+	@NonVisual
 	@Column(nullable = false, columnDefinition = Usual.JSON_OBJECT_2k, length = 2000)
 	public String configJson;
 

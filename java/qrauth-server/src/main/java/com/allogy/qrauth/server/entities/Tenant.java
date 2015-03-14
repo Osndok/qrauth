@@ -14,6 +14,8 @@ import java.util.Date;
 public
 class Tenant extends Attemptable implements Mortal
 {
+	@Column(nullable = false)
+	public String requestedName;
 
 	@Column(unique = true)
 	public String name;
@@ -47,8 +49,24 @@ class Tenant extends Attemptable implements Mortal
 	@Column(unique = true)
 	public String unhashedShellKey;
 
+	/**
+	 * True if (and only if) the tenant accepts previously-unseen users. False indicates that no TenantUser records
+	 * should be automatically fabricated for this tenant.
+	 */
 	@Column(nullable = false, columnDefinition = Usual.TRUE_BOOLEAN)
 	public boolean newUsers;
+
+	/**
+	 * True if (and only if) the tenant is unable to process users that have no username.
+	 */
+	@Column(nullable = false, columnDefinition = Usual.TRUE_BOOLEAN)
+	public boolean requireUsername;
+
+	/**
+	 * True if (and only if) the tenant is unable to process usernames that change.
+	 */
+	@Column(nullable = false, columnDefinition = Usual.TRUE_BOOLEAN)
+	public boolean fixedUsername;
 
 	@Column(unique = true)
 	public String qrauthHostAndPort;

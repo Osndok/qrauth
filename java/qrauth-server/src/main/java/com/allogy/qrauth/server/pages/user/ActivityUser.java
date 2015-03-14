@@ -1,11 +1,9 @@
 package com.allogy.qrauth.server.pages.user;
 
-import com.allogy.qrauth.server.entities.DBUser;
-import com.allogy.qrauth.server.entities.DBUserAuth;
-import com.allogy.qrauth.server.entities.LogEntry;
-import com.allogy.qrauth.server.entities.TenantIP;
+import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Network;
+import org.apache.tapestry5.annotations.PageActivationContext;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.grid.GridDataSource;
 import org.apache.tapestry5.hibernate.HibernateGridDataSource;
@@ -21,6 +19,10 @@ import org.hibernate.criterion.Restrictions;
 public
 class ActivityUser extends AbstractUserPage
 {
+	@PageActivationContext
+	private
+	Tenant tenant;
+
 	public
 	GridDataSource getDataSource()
 	{
@@ -32,6 +34,12 @@ class ActivityUser extends AbstractUserPage
 			void applyAdditionalConstraints(Criteria criteria)
 			{
 				criteria.add(Restrictions.eq("user", user));
+
+				if (tenant!=null)
+				{
+					criteria.add(Restrictions.eq("tenant", tenant));
+				}
+
 				//dnw: criteria.addOrder(Order.desc("time"));
 			}
 		};
