@@ -6,6 +6,10 @@ import java.util.Date;
  * This class serves as both a place for the AuthSession service to jot down 'memos' (primarily to remember who
  * is responsible/authenticated for the current request), and also to load/store those credentials directly from
  * the primary authentication cookie much like a wire protocol. See the AuthSession service more more details.
+ *
+ * TODO: this class *might* be best put in the private scope of the authSession class (if Tapestry supports it), so
+ * that other classes are not tempted to pull it from the environment and muck with it. Although, it is easier to
+ * audit here... as it *does* meet the definition of an 'entity'.
  */
 public
 class AuthSessionMemo implements Mortal

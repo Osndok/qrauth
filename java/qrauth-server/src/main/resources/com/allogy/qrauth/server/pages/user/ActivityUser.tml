@@ -2,7 +2,7 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
-	<t:grid t:source="dataSource" row="logEntry" rowClass="importance" add="site,ipAddress,username,authMethod" reorder="time,ipAddress,message,site,username,authMethod">
+	<t:grid t:source="dataSource" row="logEntry" rowClass="importance" model="beanModel">
 		<p:ipAddressCell>
 			<t:if test="fromMyIp">
 				<code class="blue" title="${message:from-my-ip}">${logEntry.tenantIp?.ipAddress}</code>
@@ -12,7 +12,9 @@
 			</t:if>
 		</p:ipAddressCell>
 		<p:siteCell>
-			${logEntry.tenant}
+			<t:if test="logEntry.tenant">
+				<t:pagelink page="user/activity" context="logEntry.tenant">${logEntry.tenant}</t:pagelink>
+			</t:if>
 		</p:siteCell>
 		<p:usernameCell>
 			<t:usernameLink value="logEntry.username"/>

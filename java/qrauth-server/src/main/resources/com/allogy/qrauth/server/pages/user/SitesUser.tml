@@ -9,6 +9,7 @@
 		<p:actionsCell>
 			<t:pagelink page="user/activity" context="tenantUser.tenant">Activity</t:pagelink>
 			<t:if test="tenantUser.authAdmin">
+				,&nbsp;<a href="javascript:alert('TODO');">Config</a>
 				,&nbsp;<a href="javascript:alert('TODO');">Admin</a>
 			</t:if>
 		</p:actionsCell>

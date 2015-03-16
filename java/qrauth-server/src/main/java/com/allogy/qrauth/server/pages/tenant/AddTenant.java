@@ -7,6 +7,7 @@ import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
 import com.allogy.qrauth.server.pages.user.SitesUser;
 import com.allogy.qrauth.server.services.Hashing;
+import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
@@ -116,7 +117,13 @@ class AddTenant extends AbstractUserPage
 		tenantUser.shellAccess=true;
 		tenantUser.configJson="{}";
 		session.save(tenantUser);
+
+		journal.newTenantAccountCreated(tenantUser);
 	}
+
+	@Inject
+	private
+	Journal journal;
 
 	@Inject
 	private

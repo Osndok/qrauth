@@ -304,6 +304,25 @@ class AuthSessionImpl implements AuthSession
 			.write();
 	}
 
+	@Override
+	public
+	Username getUsername()
+	{
+		final
+		AuthSessionMemo authSessionMemo=environment.peek(AuthSessionMemo.class);
+
+		if (authSessionMemo==null)
+		{
+			log.debug("no AuthSessionMemo, so no username");
+			return null;
+		}
+
+		final
+		Session session = hibernateSessionManager.getSession();
+
+		return getUsername(session, authSessionMemo);
+	}
+
 	@Inject
 	private
 	Journal journal;

@@ -31,4 +31,6 @@ interface Journal
 	void allocatedUsername(Username username);
 
 	void revokedUsername(Username username);
+
+	void newTenantAccountCreated(TenantUser tenantUser);
 }

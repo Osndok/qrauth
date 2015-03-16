@@ -57,4 +57,5 @@ interface AuthSession extends Dispatcher
 	 */
 	void authenticateRemoteBrowser(DBUserAuth dbUserAuth, Username username, TenantSession tenantSession);
 
+	Username getUsername();
 }
