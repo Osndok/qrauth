@@ -1,9 +1,13 @@
 package com.allogy.qrauth.server.pages.api.tenant;
 
 import com.allogy.qrauth.server.entities.*;
+import com.allogy.qrauth.server.helpers.BlockHelper;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.services.Journal;
+import org.apache.tapestry5.Block;
+import org.apache.tapestry5.ComponentResources;
+import org.apache.tapestry5.annotations.ContentType;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.hibernate.annotations.CommitAfter;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -41,6 +45,14 @@ class LoginTenant extends StandardTenantAPICall
 	private
 	TenantIP tenantIP;
 
+	@Inject
+	private
+	Block loginForm;
+
+	@Inject
+	private
+	Block redirector;
+
 	private
 	Object onActivate()
 	{
@@ -73,22 +85,21 @@ class LoginTenant extends StandardTenantAPICall
 
 		if (Death.hathVisited(tenantIP))
 		{
-			return forbiddenCode(403, 1, Death.noteMightSay(tenantIP, tenantIP+" is banned"));
+			return forbiddenCode(403, 1, Death.noteMightSay(tenantIP, tenantIP + " is banned"));
 		}
 
 		tenantSession = (TenantSession) session.createCriteria(TenantSession.class)
-			.add(Restrictions.eq("tenant", tenant))
-			.add(Restrictions.eq("session_id", preHashedSessionId))
-			.uniqueResult()
-			;
+											.add(Restrictions.eq("tenant", tenant))
+											.add(Restrictions.eq("session_id", preHashedSessionId))
+											.uniqueResult()
+		;
 
-		if (tenantSession==null)
+		if (tenantSession == null)
 		{
 			log.debug("creating tenantSession for session_id: {}", preHashedSessionId);
-			tenantSession=createNewTenantSession(preHashedSessionId, userIp);
+			tenantSession = createNewTenantSession(preHashedSessionId);
 		}
-		else
-		if (tenantSession.userAuth==null)
+		else if (tenantSession.userAuth == null)
 		{
 			log.debug("found existing (but unauthenticated) tenantSession");
 		}
@@ -99,8 +110,12 @@ class LoginTenant extends StandardTenantAPICall
 		}
 
 		//Render the login form...
-		return null;
+		return BlockHelper.toResponse("text/html", componentResources, loginForm);
 	}
+
+	@Inject
+	private
+	ComponentResources componentResources;
 
 	@Inject
 	private
@@ -122,13 +137,14 @@ class LoginTenant extends StandardTenantAPICall
 
 	@CommitAfter
 	private
-	TenantSession createNewTenantSession(String sessionId, String userIp)
+	TenantSession createNewTenantSession(String sessionId)
 	{
 		final
 		TenantSession tenantSession = new TenantSession();
 
 		tenantSession.tenant = tenant;
 		tenantSession.tenantIP = tenantIP;
+		tenantSession.session_id = sessionId;
 
 		session.save(tenantSession);
 		return tenantSession;

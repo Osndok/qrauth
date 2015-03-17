@@ -1105,10 +1105,4 @@ class DoSqrl extends AbstractAPICall
 		}
 	}
 
-	private
-	boolean empty(String s)
-	{
-		return (s == null || s.isEmpty());
-	}
-
 }

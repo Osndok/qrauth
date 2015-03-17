@@ -219,6 +219,7 @@ class AuthSessionImpl implements AuthSession
 
 		if (user.globalLogout.getTime() < now + policy.getShortestUsableSessionLength())
 		{
+			log.debug("advancing user's globalLogout");
 			user.globalLogout = new Date(now + policy.getGlobalLogoutPeriod());
 			user.epoch++;
 		}
@@ -236,6 +237,8 @@ class AuthSessionImpl implements AuthSession
 				sessionDeadline=theSoonerOf(user.globalLogout, new Date(now + userAuth.millisGranted));
 			}
 		}
+
+		log.debug("session timings:\nnow={}\nnowDate={}\nglobalLogout={}\nmillisGranted={}\nsessionDeadline={}", now, nowDate, user.globalLogout, userAuth.millisGranted, sessionDeadline);
 
 		user.attempts++;
 		user.successes++;
@@ -264,6 +267,8 @@ class AuthSessionImpl implements AuthSession
 			tenantSession.username=username;
 			tenantSession.userAuth=userAuth;
 			tenantSession.deadline = sessionDeadline;
+
+			//TODO: BUG: "connected" field seems to be getting the sessionDeadline value?!?!?
 			tenantSession.connected = nowDate;
 
 			if (tenantSession.return_url==null)

@@ -2,6 +2,13 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
-      <t:userLoginForm tenantSession="tenantSession"/>
+	<t:block id="loginForm">
+		<t:userLoginForm tenantSession="tenantSession"/>
+	</t:block>
+
+	<t:block id="redirector">
+		TODO: need to do some redirection (rather than a login form)...
+		e.g. to satisfy a "needs username" requirement.
+	</t:block>
 
 </t:container>

@@ -18,6 +18,26 @@ class StandardTenantAPICall extends AbstractTenantAPICall
 	private
 	Object onActivate()
 	{
+		if (log.isDebugEnabled())
+		{
+			for (String name : request.getHeaderNames())
+			{
+				final
+				String value=request.getHeader(name);
+
+				log.debug("header: {} -> {}", name, value);
+			}
+
+
+			for (String name : request.getParameterNames())
+			{
+				final
+				String value=request.getParameter(name);
+
+				log.debug("parameter: {} -> {}", name, value);
+			}
+		}
+
 		log.debug("lookup provided api_key");
 
 		final

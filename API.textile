@@ -212,11 +212,11 @@ API 5 - Standard Login & account maintenance
 ** USER_IP
 ** CSS_REPLACE (url [can be relative, or even blank] that *REPLACES* default css file)
 ** TODO: ability to add extra panels for backwards compatibility?
-** {uid:12345, username:bob, alarm:false, security_rank:4, groups:{...}, permissions:[...]}
+** {uid:12345, unixName:bob, displayName:"Robert", alarm:false, security_rank:4, groups:{...}, permissions:[...]}
 ** returns either:
 *** (1) the json login info (status 200),
 *** (2) the html that would allow authentication (status 202), or
-*** (3) if the session should be destroyed and retried (status 409)
+*** (3) if the session should be destroyed and retried (status 403)
 ** may be called often (e.g. every 2 minutes), but not at every request, to ensure the user is *still* logged in (for global logout feature)
 
 

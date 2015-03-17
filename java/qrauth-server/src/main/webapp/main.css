@@ -52,12 +52,12 @@ tr.dead
 
 tr.important
 {
-	background-color: #F08080 !important;
+	background-color: #F2B0D3 !important;
 }
 
 tr.important:hover
 {
-	background-color: #FF8080 !important;
+	background-color: #FF80C8 !important;
 }
 
 .pagination > .active > a
