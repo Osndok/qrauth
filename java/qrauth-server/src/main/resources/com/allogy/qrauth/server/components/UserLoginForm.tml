@@ -81,7 +81,7 @@
 				/>
 		</a>
 		<br/>
-		<hostname>${doSqrl.domain}</hostname>
+		<hostname>${doSqrl.serverFriendlyName}</hostname>
 		<br/>
 		<input type="submit" name="do_sqrl" value="I Have Sent the SQRL"/>
 	</left>

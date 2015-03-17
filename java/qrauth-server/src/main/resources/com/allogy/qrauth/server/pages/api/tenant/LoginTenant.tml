@@ -1,7 +1,7 @@
-<html t:type="layout" title="User Login"
+<t:container
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
-      <t:userLoginForm />
+      <t:userLoginForm tenantSession="tenantSession"/>
 
-</html>
+</t:container>

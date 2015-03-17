@@ -309,6 +309,28 @@ class JournalImpl implements Journal
 		hibernateSessionManager.getSession().save(logEntry);
 	}
 
+	@Override
+	public
+	void newTenantUser(TenantUser tenantUser, TenantSession tenantSession, TenantIP tenantIP)
+	{
+		final
+		LogEntry logEntry = new LogEntry();
+
+		logEntry.time = new Date();
+		logEntry.actionKey = "tenantuser-created";
+		logEntry.message = "First user authentication to "+Config.get().presentableTenantIdentification(tenantUser.tenant);
+		logEntry.user=tenantUser.user;
+		logEntry.username=tenantSession.username;
+		logEntry.userAuth=tenantSession.userAuth;
+		logEntry.tenant=tenantUser.tenant;
+		logEntry.tenantIP=tenantIP;
+		logEntry.tenantSession=tenantSession;
+		logEntry.deadline=null;
+		logEntry.important=false;
+
+		hibernateSessionManager.getSession().save(logEntry);
+	}
+
 	private
 	TenantIP getTenantIP(Tenant tenant)
 	{

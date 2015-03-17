@@ -122,4 +122,10 @@ class AbstractAPICall
 	protected
 	Network network;
 
+	protected
+	boolean empty(String parameterValue)
+	{
+		return parameterValue==null || parameterValue.length()==0;
+	}
+
 }

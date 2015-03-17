@@ -33,4 +33,6 @@ interface Journal
 	void revokedUsername(Username username);
 
 	void newTenantAccountCreated(TenantUser tenantUser);
+
+	void newTenantUser(TenantUser tenantUser, TenantSession tenantSession, TenantIP tenantIP);
 }

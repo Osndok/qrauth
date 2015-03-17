@@ -922,7 +922,7 @@ class DispatchAuth extends AbstractAPICall
 
 		authSession.authenticateRemoteBrowser(userAuth, username, tenantSession);
 
-		//TODO: !!!: where do we send them?!?! (a) if tenantSession == null, (b) if tenant session is not null, (c) user selected 'configure' option...
+		//TODO: !!!: where do we send them?!?! (a) if tenantSession == null, (b) if tenant session is not null, (c) user selected 'configure' option, (d) requires username allocate/select...
 		return ActivityUser.class;
 	}
 

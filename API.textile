@@ -4,7 +4,8 @@
 API 0 - affero license compliance
 
 * GET /api/affero/hash
-** "f572d396fae9206628714fb2ce00f72e94f2258f" (the git source-control identifier of the commit that is running)
+** Returns the git source-control identifier of the commit that is running
+** For example, "f572d396fae9206628714fb2ce00f72e94f2258f"
 ** baked into the war file at compile time
 
 * GET /api/affero/source
@@ -209,9 +210,13 @@ API 5 - Standard Login & account maintenance
 ** API_KEY (unhashed)
 ** SESSION_ID (hashed)
 ** USER_IP
-** CSS (url [can be relative, or even blank] that *REPLACES* default css file)
+** CSS_REPLACE (url [can be relative, or even blank] that *REPLACES* default css file)
+** TODO: ability to add extra panels for backwards compatibility?
 ** {uid:12345, username:bob, alarm:false, security_rank:4, groups:{...}, permissions:[...]}
-** returns either (1) the json login info, (2) the html that would allow this connection, or (3) if the session should be destroyed
+** returns either:
+*** (1) the json login info (status 200),
+*** (2) the html that would allow authentication (status 202), or
+*** (3) if the session should be destroyed and retried (status 409)
 ** may be called often (e.g. every 2 minutes), but not at every request, to ensure the user is *still* logged in (for global logout feature)
 
 

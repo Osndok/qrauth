@@ -80,7 +80,7 @@ class TenantSession implements Mortal
 
 	/**
 	 * The time that we noticed who is associated with this session. The null-ness of this field should always match
-	 * the null-ness of the person (person_id) field.
+	 * the null-ness of the user (user_id) field.
 	 */
 	@Column(nullable = true, columnDefinition = Usual.TIMESTAMP)
 	public Date connected;

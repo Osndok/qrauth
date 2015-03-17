@@ -52,17 +52,23 @@ class NetworkImpl implements Network, Runnable
 	TenantIP needIPForThisRequest(Tenant tenantFilter)
 	{
 		final
-		long startTime = System.currentTimeMillis();
-
-		final
 		String ipAddress = getIpAddress();
 		{
 			if (ipAddress == null)
 			{
-				//dbTiming.concerning("ip-fetch").shorterPath(startTime);
 				return null;
 			}
 		}
+
+		return needNonRequestTenantIp(tenantFilter, ipAddress);
+	}
+
+	@Override
+	public
+	TenantIP needNonRequestTenantIp(Tenant tenantFilter, String ipAddress)
+	{
+		final
+		long startTime = System.currentTimeMillis();
 
 		final
 		Object[] addressStringsToMatch;

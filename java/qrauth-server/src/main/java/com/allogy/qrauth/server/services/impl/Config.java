@@ -1,6 +1,8 @@
 package com.allogy.qrauth.server.services.impl;
 
+import com.allogy.qrauth.server.entities.Tenant;
 import com.yubico.client.v2.YubicoClient;
+import org.apache.tapestry5.services.Request;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
@@ -199,9 +201,82 @@ class Config
 	}
 
 	public
-	String getSqrlServerFriendlyName()
+	String getSqrlServerFriendlyName(Request request, Tenant tenant)
 	{
-		return "Friendly Name Goes Here";
+		final
+		String bestSqrlProviderName;
+		{
+			/**
+			 * "main" is the possibly-longer, standalone identifier; such as "Allogy Interactive", or "Gibson Research Corporation"
+			 */
+			final
+			String main = getProperty("sqrl.sfn.main");
+
+			/**
+			 * "short" or "shorter" is the possibly-shorter, identifier; such as "Allogy", or "GRC".
+			 */
+			final
+			String shorter = properties.getProperty("sqrl.sfn.short", getProperty("sqrl.sfn.shorter"));
+
+			if (shorter!=null && tenant!=null)
+			{
+				bestSqrlProviderName=shorter;
+			}
+			else
+			if (main!=null)
+			{
+				bestSqrlProviderName=main;
+			}
+			else
+			{
+				final
+				String hostHeaderOfArbitraryRequest = request.getHeader("Host");
+
+				if (hostHeaderOfArbitraryRequest == null || hostHeaderOfArbitraryRequest.length() == 0)
+				{
+					//NB: waits for another (non-api?) request with a host header
+					if (tenant == null)
+					{
+						return "Unknown";
+					}
+					else
+					{
+						return presentableTenantIdentification(tenant);
+					}
+				}
+				else
+				{
+					//TODO: remove all but registered and top-level domains from 'host' header.
+					bestSqrlProviderName = hostHeaderOfArbitraryRequest;
+				}
+			}
+		}
+
+		if (tenant==null)
+		{
+			return bestSqrlProviderName;
+		}
+		else
+		{
+			final
+			String suffix = properties.getProperty("sqrl.sfn.suffix", " (via "+bestSqrlProviderName+")");
+
+			return presentableTenantIdentification(tenant)+suffix;
+		}
+	}
+
+	public
+	String presentableTenantIdentification(Tenant tenant)
+	{
+		if (tenant.name==null)
+		{
+			//NB: our policy is that we cannot display unapproved user-provided possibly-duplicate tenant names.
+			return tenant.toString()+" [name pending]";
+		}
+		else
+		{
+			return tenant.name;
+		}
 	}
 
 	/**

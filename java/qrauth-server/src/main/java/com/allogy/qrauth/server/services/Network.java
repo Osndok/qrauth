@@ -68,4 +68,6 @@ interface Network
 	boolean ipMatch(TenantIP tenantIP, TenantIP rule);
 
 	TenantIP needIPForSession(TenantSession tenantSession);
+
+	TenantIP needNonRequestTenantIp(Tenant tenant, String userIp);
 }

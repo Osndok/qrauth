@@ -3,6 +3,7 @@ package com.allogy.qrauth.server.pages.user;
 import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Network;
+import com.allogy.qrauth.server.services.impl.Config;
 import org.apache.tapestry5.annotations.PageActivationContext;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.annotations.Retain;
@@ -120,6 +121,12 @@ class ActivityUser extends AbstractUserPage
 								.add(Restrictions.eq("user", user))
 								.uniqueResult()
 			;
+	}
+
+	public
+	String getTenantName()
+	{
+		return Config.get().presentableTenantIdentification(logEntry.tenant);
 	}
 
 	@Property

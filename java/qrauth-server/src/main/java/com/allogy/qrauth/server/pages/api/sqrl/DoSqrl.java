@@ -48,8 +48,6 @@ class DoSqrl extends AbstractAPICall
 
 	private static final String CLIENT_PARAMETER_IDK = "idk";
 
-	private static final String FRIENDLY_NAME = Config.get().getSqrlServerFriendlyName();
-
 	//For debugging, it is easier to be able to repeat old nuts. Has no effect in production.
 	private static final boolean DEBUG_CONSUME_NUTS = false;
 
@@ -95,6 +93,12 @@ class DoSqrl extends AbstractAPICall
 		return this;
 	}
 
+	/**
+	 * @deprecated does not retrieve or set 'nut' which may break "server friendly name" side effects, etc.
+	 * @param nut
+	 * @return
+	 */
+	@Deprecated
 	public
 	DoSqrl with(String nut)
 	{
@@ -196,7 +200,7 @@ class DoSqrl extends AbstractAPICall
 		final
 		String newQueryPath=pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toRedirectURI();
 
-		response = new SqrlResponse(SUPPORTED_SQRL_VERSIONS, nut, newQueryPath, FRIENDLY_NAME);
+		response = new SqrlResponse(SUPPORTED_SQRL_VERSIONS, nut, newQueryPath, getServerFriendlyName());
 
 		/*
 		-------------------------- MARK: we can now generate a 'usable' sqrl response ------------------------
@@ -573,6 +577,22 @@ class DoSqrl extends AbstractAPICall
 		}
 
 		return response;
+	}
+
+	public
+	String getServerFriendlyName()
+	{
+		final
+		TenantSession tenantSession=nut.tenantSession;
+
+		if (tenantSession==null)
+		{
+			return Config.get().getSqrlServerFriendlyName(request, null);
+		}
+		else
+		{
+			return Config.get().getSqrlServerFriendlyName(request, tenantSession.tenant);
+		}
 	}
 
 	private
@@ -1090,4 +1110,5 @@ class DoSqrl extends AbstractAPICall
 	{
 		return (s == null || s.isEmpty());
 	}
+
 }

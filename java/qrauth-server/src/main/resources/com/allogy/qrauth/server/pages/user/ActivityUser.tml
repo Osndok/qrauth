@@ -13,7 +13,7 @@
 		</p:ipAddressCell>
 		<p:siteCell>
 			<t:if test="logEntry.tenant">
-				<t:pagelink page="user/activity" context="logEntry.tenant">${logEntry.tenant}</t:pagelink>
+				<t:pagelink page="user/activity" context="logEntry.tenant">${tenantName}</t:pagelink>
 			</t:if>
 		</p:siteCell>
 		<p:usernameCell>

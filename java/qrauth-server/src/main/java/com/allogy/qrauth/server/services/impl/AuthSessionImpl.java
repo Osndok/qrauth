@@ -260,7 +260,18 @@ class AuthSessionImpl implements AuthSession
 
 		if (tenantSession!=null)
 		{
+			tenantSession.user=user;
+			tenantSession.username=username;
+			tenantSession.userAuth=userAuth;
 			tenantSession.deadline = sessionDeadline;
+			tenantSession.connected = nowDate;
+
+			if (tenantSession.return_url==null)
+			{
+				log.debug("late notice of tenantSession.return_url");
+				tenantSession.return_url=requestGlobals.getRequest().getHeader("Referer");
+			}
+
 			session.save(tenantSession);
 		}
 
