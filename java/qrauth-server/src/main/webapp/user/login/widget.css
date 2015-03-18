@@ -265,3 +265,191 @@
 	text-decoration: underline;
 	cursor: copy;
 }
+
+#qrauth_sms_stale
+{
+	display:none;
+	border: 2px solid red;
+	font-size: 20px;
+	margin: 50px;
+	padding: 50px;
+}
+
+#qrauth_sms_fresh
+{
+}
+
+#qrauth_sms_fresh h3
+{
+	text-decoration: underline;
+	text-align: center;
+}
+
+#qrauth_sms_fresh left
+{
+	width:336px;
+}
+
+#qrauth_sms_fresh right
+{
+	left: 48%;
+}
+
+/*
+CSS cloud source (mixed):
+---------------------------------
+http://thecodeplayer.com/walkthrough/make-a-simple-cloud-in-css3
+http://stackoverflow.com/questions/16508834/css-apply-border-to-a-cloud-shape
+*/
+
+#qrauth cloud
+{
+    display: block;
+    position: relative;
+    margin: 20px;
+    height: 110px;
+    width: 195px;
+}
+
+#qrauth_sms cloud
+{
+	margin-left: 85px;
+}
+
+#qrauth cloud *
+{
+    border: solid 5px black;
+    display: block;
+}
+
+#qrauth cloud span
+{
+	display:block;
+	position: absolute;
+	bottom:28px;
+	left:6px;
+	right:10px;
+	height: 40px;
+	border: none;
+	text-align: center;
+	z-index: 3;
+}
+
+#qrauth cloud bulk
+{
+    background-color: #fff;
+    border-radius: 100px;
+    height: 80px;
+    position: absolute; 
+    top: 14px;
+    width: 190px;
+    text-align: center;
+    padding: 24px;
+    z-index: 1;
+}
+
+#qrauth cloud hump1
+{
+    background-color: #fff;
+    border-radius: 100%;
+    height: 80px;
+    left: 83px;
+    position: absolute; 
+    top: -13px;
+    width: 80px;
+    z-index: 0;
+}
+
+#qrauth cloud hump2
+{
+    background-color: #fff;
+    border-radius: 100%;
+    height: 65px;
+    left: 26px;
+    position: absolute; 
+    top: -3px;
+    width: 65px;
+    z-index: 0;
+}
+
+#qrauth cloud::before
+{
+    background-color: white;
+    border-radius: 50%;
+    content: '';
+    height: 66px;
+    left: 30px;
+    position: absolute; 
+    top: 1px;
+    width: 57px;
+    z-index: 2;
+    display: block;
+}
+
+#qrauth cloud::after
+{
+    position: absolute;
+    top: -8px;
+    left: 90px;
+    background-color: white;
+    border-radius: 50%;
+    content: '';
+    width: 66px;
+    height: 54px;
+    z-index: 1;
+    display: block;
+}
+
+#qrauth envelope
+{
+	position: relative;
+	display: block;
+	text-align: center;
+	width: 64px;
+	height: 37px;
+	border: 3px solid black;
+}
+
+#qrauth envelope::after
+{
+	display: block;
+	content:' ';
+	position:absolute;
+	left:1px;
+	top:0;
+	width: 0;
+	height: 0;
+	border: 27px solid transparent;
+	border-top-color: white;
+}
+
+#qrauth envelope::before
+{
+	content: ' ';
+	display: block;
+	position:absolute;
+	left:-3px;
+	top:0;
+	width: 0;
+	height: 0;
+	border: 31px solid transparent;
+	border-top-color: black;
+}
+
+#qrauth envelope flap
+{
+	position: absolute;
+	top:3px;
+	left:1px;
+	right:1px;
+	bottom:1px;
+	border:none;
+	text-align: center;
+	z-index:3;
+	font-weight:bold;
+}
+
+#qrauth_sms envelope
+{
+	margin-left: 58px;
+}

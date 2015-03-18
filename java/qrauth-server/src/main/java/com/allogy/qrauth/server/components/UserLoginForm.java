@@ -139,4 +139,22 @@ class UserLoginForm
 		return pageRenderLinkSource.createPageRenderLink(StateNut.class).toRedirectURI();
 	}
 
+	public
+	String getSmsPhoneNumber()
+	{
+		//NB: must be formatted thus, for the "tel://" links??
+		return "1-555-123-4567";
+	}
+
+	public
+	String getSmsSendCode()
+	{
+		return "123";
+	}
+
+	public
+	String getSmsSendLink()
+	{
+		return "sms:"+getSmsPhoneNumber()+"?body="+getSmsSendCode();
+	}
 }

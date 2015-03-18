@@ -45,6 +45,8 @@ function qrauth_nut_state_change(newState)
 
 var qrauth_polling_period=1500;
 
+var qrauth_origination_time=Date.now();
+
 function qrauth_poll_nut()
 {
 	var qrCode=document.getElementById('qrauth_sqrl_qr_nut');
@@ -63,13 +65,15 @@ function qrauth_poll_nut()
 
 	syncQuery.open( 'GET', url );
 
-	var startTime=new Date().getTime();
+	var requestStartTime=new Date().getTime();
 
 	syncQuery.onreadystatechange = function()
 	{
 		if ( syncQuery.readyState == 4 )
 		{
-			var duration=new Date().getTime()-startTime;
+			var now=Date.now();
+			var requestDuration=now-requestStartTime;
+			var timeOnPage=now-qrauth_origination_time;
 
 			if (syncQuery.status==200)
 			{
@@ -88,12 +92,22 @@ function qrauth_poll_nut()
 				}
 			}
 
-			setTimeout(qrauth_poll_nut, qrauth_polling_period+3*duration);
-
-			//TODO: !: at some point, we should probably "give up" and just show the "I have sent the SQRL" button again.
+			//At some point... we should probably "give up" or a speedy response and just show the "I have sent the SQRL" button again.
+			//1-minute  (debugging): if (timeOnPage>60000)
+			//1-day    (production):
+            if (timeOnPage>86400000)
+			{
+				qrauth_page_is_stale();
+			}
+			else
 			if (qrauth_polling_period<7000)
 			{
 				qrauth_polling_period=Math.floor(qrauth_polling_period*1.01);
+				setTimeout(qrauth_poll_nut, qrauth_polling_period+3*requestDuration);
+			}
+			else
+			{
+				setTimeout(qrauth_poll_nut, qrauth_polling_period+3*requestDuration);
 			}
 		}
 	};
@@ -128,6 +142,13 @@ function qrauth_ppp_challenge()
 	}
 	syncQuery.send();
 	return false;
+}
+
+function qrauth_page_is_stale()
+{
+	document.qrauth_form.do_sqrl.removeAttribute("style");
+	document.getElementById('qrauth_sms_stale').setAttribute('style', 'display:block');
+	document.getElementById('qrauth_sms_fresh').setAttribute('style', 'display:none');
 }
 
 function qrauth_ppp_keyup(event)

@@ -50,6 +50,7 @@
 	<a data-tab="#qrauth_ppp"      target="_blank" href="noscript/ppp">PPP</a>
 	<a data-tab="#qrauth_rsa"      target="_blank" href="noscript/rsa">RSA</a>
 	<a data-tab="#qrauth_openid"   target="_blank" href="noscript/openid">OpenID</a>
+	<a data-tab="#qrauth_sms"      target="_blank" href="noscript/sms">SMS</a>
 	<a data-tab="#qrauth_email"    target="_blank" href="noscript/email">Email</a>
 	<a data-tab="#qrauth_overview" target="_blank" href="noscript/overview">Overview</a>
 	<a data-tab="#qrauth_options"  target="_blank" href="noscript/options">Options</a>
@@ -94,13 +95,12 @@
 		(by scanning the qr code) to minimize the risk of an account takeover, or directly
 		from your personal workstation (by clicking on the qr code).
 		<br/><br/>
-	</right>
-	<lower>
 		It is not necessary to create a new identity per-website, as the SQRL protocol
 		automatically isolates your online identities per-domain.
 		See <a href="https://www.grc.com/sqrl/sqrl.htm">the main sqrl page at grc.com</a>
 		for more information.
-		<br/><br/>
+	</right>
+	<lower>
 		If allowed by the server, one can also <b>create</b> or <b>register</b> a new account
 		by logging in using one of these methods: ${registrationMethods}
 	</lower>
@@ -229,6 +229,37 @@
 
 <arena id="qrauth_openid">
 	OpenID goes here...
+</arena>
+
+<arena id="qrauth_sms">
+	<div id="qrauth_sms_stale">
+		Sorry... this login page is too old to reliably login using SMS.
+		If you still would like to use SMS to log in, please refresh the page.
+	</div>
+	<div id="qrauth_sms_fresh">
+		<left>
+			<h3>Send</h3>
+			<a href="${smsSendLink}">
+				<cloud>
+					<bulk></bulk>
+					<hump1></hump1>
+					<hump2></hump2>
+					<span>${smsPhoneNumber}</span>
+				</cloud>
+			</a>
+			<downArrow/>
+			<phone>${smsSendCode}</phone>
+		</left>
+		<right>
+			<h3>Receive</h3>
+			<cloud>
+				<bulk></bulk>
+				<hump1></hump1>
+				<hump2></hump2>
+				<span><envelope><flap>?</flap></envelope></span>
+			</cloud>
+		</right>
+	</div>
 </arena>
 
 <arena id="qrauth_email">
