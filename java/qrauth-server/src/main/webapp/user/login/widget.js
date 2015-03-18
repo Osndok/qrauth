@@ -43,6 +43,8 @@ function qrauth_nut_state_change(newState)
 	}
 }
 
+var qrauth_polling_period=1500;
+
 function qrauth_poll_nut()
 {
 	var qrCode=document.getElementById('qrauth_sqrl_qr_nut');
@@ -86,7 +88,13 @@ function qrauth_poll_nut()
 				}
 			}
 
-			setTimeout(qrauth_poll_nut, 1500+3*duration);
+			setTimeout(qrauth_poll_nut, qrauth_polling_period+3*duration);
+
+			//TODO: !: at some point, we should probably "give up" and just show the "I have sent the SQRL" button again.
+			if (qrauth_polling_period<7000)
+			{
+				qrauth_polling_period=Math.floor(qrauth_polling_period*1.01);
+			}
 		}
 	};
 

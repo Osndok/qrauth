@@ -4,6 +4,7 @@ import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.helpers.BlockHelper;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
+import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Journal;
 import org.apache.tapestry5.Block;
 import org.apache.tapestry5.ComponentResources;

@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by robert on 2/25/15.
@@ -199,7 +198,12 @@ class AuthSessionImpl implements AuthSession
 
 	@Override
 	public
-	void authenticateRemoteBrowser(DBUserAuth userAuth, Username username, TenantSession tenantSession)
+	void authenticateRemoteBrowser(
+									  DBUserAuth userAuth,
+									  Username username,
+									  TenantSession tenantSession,
+									  boolean minimalSessionLength
+	)
 	{
 		log.debug("authenticateRemoteBrowser({}, {}, {})", userAuth, username, tenantSession);
 
@@ -227,6 +231,11 @@ class AuthSessionImpl implements AuthSession
 		final
 		Date sessionDeadline;
 		{
+			if (minimalSessionLength)
+			{
+				sessionDeadline=new Date(now + policy.getShortestUsableSessionLength());
+			}
+			else
 			if (userAuth.millisGranted == null)
 			{
 				log.debug("new session (from unbounded auth method) hits global logout time");
@@ -337,6 +346,24 @@ class AuthSessionImpl implements AuthSession
 		Session session = hibernateSessionManager.getSession();
 
 		return getUsername(session, authSessionMemo);
+	}
+
+	@Override
+	public
+	boolean endsWithTenantRedirection()
+	{
+		final
+		AuthSessionMemo authSessionMemo=environment.peek(AuthSessionMemo.class);
+
+		if (authSessionMemo==null)
+		{
+			log.debug("no AuthSessionMemo, so no tenant redirect");
+			return false;
+		}
+		else
+		{
+			return (authSessionMemo.tenantSessionId!=null);
+		}
 	}
 
 	@Inject

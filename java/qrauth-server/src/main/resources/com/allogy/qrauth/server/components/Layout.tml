@@ -81,6 +81,9 @@
     <hr />
 
     <footer>
+<t:if test="continueVisible">
+		<t:pagelink class="btn btn-primary pull-right" page="user/continue">Continue&nbsp;&rArr;</t:pagelink>
+</t:if>
         <p>&copy; Allogy Interactive 2015</p>
     </footer>
 

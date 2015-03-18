@@ -66,4 +66,11 @@ public class Layout
 	{
 		return componentResources.getPageName().toLowerCase().replaceAll("\\/", "_");
 	}
+
+	public
+	boolean isContinueVisible()
+	{
+		return authSession.endsWithTenantRedirection();
+	}
+
 }

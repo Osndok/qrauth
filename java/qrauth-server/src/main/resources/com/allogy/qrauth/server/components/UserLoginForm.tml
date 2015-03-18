@@ -63,9 +63,9 @@
 	-->
 	Options panel goes here...
 	<ul>
-		<li>login straight to account maintenance</li>
-		<li>set desired session length</li>
-		<li>create an account, if one does not exist</li>
+		<li><input type="checkbox" name="option1" value="maintenance"/>&nbsp;login straight to account maintenance</li>
+		<li><input type="checkbox" name="option2" value="minimal"/>&nbsp;minimal session length</li>
+		<li><input type="checkbox" name="option3" value="nocreate"/>&nbsp;do not automatically create an account</li>
 	</ul>
 </arena>
 

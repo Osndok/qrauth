@@ -51,11 +51,18 @@ interface AuthSession extends Dispatcher
 	 * Asks the remote browser to remember a cookie which will server to authenticate them between page requests.
 	 *
 	 * NB: this will cause a log entry to be written in the user-accessible authentication history.
-	 *
-	 * @param dbUserAuth - the user *and* authentication method that should be activated
+	 *  @param dbUserAuth - the user *and* authentication method that should be activated
 	 * @param username - is the username that the user used to authenticate, or null if not applicable
+	 * @param minimalSessionLength
 	 */
-	void authenticateRemoteBrowser(DBUserAuth dbUserAuth, Username username, TenantSession tenantSession);
+	void authenticateRemoteBrowser(
+									  DBUserAuth dbUserAuth,
+									  Username username,
+									  TenantSession tenantSession,
+									  boolean minimalSessionLength
+	);
 
 	Username getUsername();
+
+	boolean endsWithTenantRedirection();
 }

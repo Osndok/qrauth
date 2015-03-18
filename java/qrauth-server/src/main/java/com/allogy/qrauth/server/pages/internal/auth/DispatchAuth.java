@@ -4,6 +4,7 @@ import com.allogy.qrauth.server.entities.*;
 import com.allogy.qrauth.server.helpers.*;
 import com.allogy.qrauth.server.pages.api.AbstractAPICall;
 import com.allogy.qrauth.server.pages.user.ActivityUser;
+import com.allogy.qrauth.server.pages.user.ContinueUser;
 import com.allogy.qrauth.server.pages.user.names.AddNames;
 import com.allogy.qrauth.server.services.AuthSession;
 import com.allogy.qrauth.server.services.Hashing;
@@ -804,6 +805,12 @@ class DispatchAuth extends AbstractAPICall
 	public
 	void createUserWithNewStipulation(DBUserAuth userAuth)
 	{
+		//TODO: handle this better...
+		if (userOption("nocreate"))
+		{
+			throw new RuntimeException("user has opted not to create a new account");
+		}
+
 		final
 		DBUser user = new DBUser();
 
@@ -920,11 +927,43 @@ class DispatchAuth extends AbstractAPICall
 			//NB: nut consumption commit() will be wrapped up in the authSession transaction.
 		}
 
-		authSession.authenticateRemoteBrowser(userAuth, username, tenantSession);
+		authSession.authenticateRemoteBrowser(userAuth, username, tenantSession, userOption("minimal"));
 
-		//TODO: !!!: where do we send them?!?! (a) if tenantSession == null, (b) if tenant session is not null, (c) user selected 'configure' option, (d) requires username allocate/select...
-		return ActivityUser.class;
+		if (authSession.endsWithTenantRedirection() && !userOption("maintenance"))
+		{
+			return continueUser.toNextTenantSessionStep();
+		}
+		else
+		{
+			return ActivityUser.class;
+		}
 	}
+
+	private
+	boolean userOption(String expectedValue)
+	{
+		for (String key : request.getParameterNames())
+		{
+			if (key.startsWith("option"))
+			{
+				final
+				String thisValue=request.getParameter(key);
+
+				if (thisValue.equals(expectedValue))
+				{
+					log.debug("user *HAS* selected {} option", expectedValue);
+					return true;
+				}
+			}
+		}
+
+		log.debug("user has *NOT* selected {} option", expectedValue);
+		return false;
+	}
+
+	@InjectPage
+	private
+	ContinueUser continueUser;
 
 	@Inject
 	private
