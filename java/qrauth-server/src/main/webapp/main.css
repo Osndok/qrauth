@@ -198,3 +198,11 @@ body.user_credentials_add .main form .btn
 {
 	margin-top: 10px;
 }
+
+/* Overly long usernames and tenant names can make tables... weird... as can wrapped dates. */
+td[data-grid-property="time"],
+td[data-grid-property="site"],
+td[data-grid-property="username"]
+{
+	width:120px;
+}
