@@ -66,7 +66,12 @@ class AddNames extends AbstractUserPage
 	{
 		log.debug("onSuccess()");
 
-		if (policy.wouldAllowAdditionalUsernames(user, false) && policy.wouldAllowUsernameToBeRegistered(displayName))
+		if (!policy.wouldAllowUsernameToBeRegistered(displayName))
+		{
+			return new ErrorResponse(400, "sorry, that user name does not fit the owner's policy on allowed usernames");
+		}
+		else
+		if (policy.wouldAllowAdditionalUsernames(user, false))
 		{
 			final
 			String matchValue = policy.usernameMatchFilter(displayName);

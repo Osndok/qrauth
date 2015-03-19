@@ -29,7 +29,7 @@
 	<t:form>
 		<t:label for="username"/>
 		<t:textfield value="displayName" t:id="username"/>
-		<t:submit/>
+		<t:submit value="Submit Request"/>
 	</t:form>
 
 </html>

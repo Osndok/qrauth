@@ -2,7 +2,7 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
-	<t:grid t:source="dataSource" row="username" add="commands">
+	<t:grid t:source="dataSource" row="username" add="commands" rowClass="deadOrAlive">
    		<p:commandsCell>
    			<t:pagelink page="user/names/edit" context="username">Edit</t:pagelink>,
    			<t:pagelink page="user/names/revoke" context="username">Revoke</t:pagelink>
