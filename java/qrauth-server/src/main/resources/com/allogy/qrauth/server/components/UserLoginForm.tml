@@ -247,7 +247,7 @@
 					<span>${smsPhoneNumber}</span>
 				</cloud>
 			</a>
-			<downArrow/>
+			<arrow><up></up></arrow>
 			<phone>${smsSendCode}</phone>
 		</left>
 		<right>
@@ -258,6 +258,7 @@
 				<hump2></hump2>
 				<span><envelope><flap>?</flap></envelope></span>
 			</cloud>
+			<arrow><down></down></arrow>
 		</right>
 	</div>
 </arena>
