@@ -453,9 +453,9 @@ http://stackoverflow.com/questions/16508834/css-apply-border-to-a-cloud-shape
 {
 	display: block;
 	position: relative;
-	width: 1px;
+	width: 0px;
 	height: 50px;
-	border-left: 2px solid black;
+	border-left: 4px solid black;
 }
 
 #qrauth arrow up
@@ -466,7 +466,7 @@ http://stackoverflow.com/questions/16508834/css-apply-border-to-a-cloud-shape
 	border: 15px solid transparent;
 	border-bottom-color: black;
 	position: absolute;
-	left: -16px;
+	left: -17px;
 	top: -16px;
 }
 
@@ -478,7 +478,7 @@ http://stackoverflow.com/questions/16508834/css-apply-border-to-a-cloud-shape
 	border: 15px solid transparent;
 	border-top-color: black;
 	position: absolute;
-	left: -16px;
+	left: -17px;
 	bottom: -16px;
 }
 

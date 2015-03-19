@@ -11,7 +11,7 @@ public
 enum AuthMethod
 {
 	/*
-	NB: You cannot simply change the name of these enums or delete a row, as theese names are stored in the database.
+	NB: You cannot simply change the name of these enums or delete a row, as these names are stored in the database.
 	To do either safely, one must perform a multi-step database migration (coordinated with the production manager).
 	 */
 	/**20-chars-max | RANK | DEADLINE | STATEFUL | 3rd PARTY | NETWORK | CLOCK | LEAKSAFE | P/W ENTRY | REGISTER | GROUP         */
@@ -23,15 +23,17 @@ enum AuthMethod
 	PAPER_PASSWORDS (   7  , false    , true     , false     , false   , false , false    , true      , false    , PPP_CRAM      ),
 	STATIC_OTP      (   8  , false    , true     , false     , false   , false , false    , true      , false    , USER_AND_PASS ),
 	YUBIKEY_PUBLIC  (   9  , false    , false    , true      , true    , false , true     , true      , true     , PASS_ONLY     ),
-	OPEN_ID         (  10  , false    , false    , true      , true    , false , true     , false     , true     , THIRD_PARTY   ),
-	/* --- line of mandatory deadlines ------------------------------------------------------------------------------ */
-	ROLLING_PASSWORD(  11  , true     , false    , false     , false   , false , false    , true      , false    , USER_AND_PASS ),
-	/* --- line of questionable security ---------------------------------------------------------------------------- */
-	EMAILED_SECRET  (  12  , true     , false    , true      , true    , false , false    , false     , true     , THIRD_PARTY   ),
-	STATIC_PASSWORD (  13  , true     , false    , false     , false   , false , false    , true      , false    , USER_AND_PASS ),
+	SMS_OTP         (  10  , false    , false    , true      , true    , false , true     , true      , true     , USER_AND_PASS ),
+	EMAILED_OTP     (  11  , false    , false    , true      , true    , false , true     , true      , true     , USER_AND_PASS ),
+	OPEN_ID         (  12  , false    , false    , true      , true    , false , true     , false     , true     , THIRD_PARTY   ),
+	/* --- line of mandatory deadlines ----------------------------------------------------------------------------------------- */
+	ROLLING_PASSWORD(  13  , true     , false    , false     , false   , false , false    , true      , false    , USER_AND_PASS ),
+	/* --- line of questionable security --------------------------------------------------------------------------------------- */
+	EMAILED_SECRET  (  14  , true     , false    , true      , true    , false , false    , false     , true     , THIRD_PARTY   ),
+	STATIC_PASSWORD (  15  , true     , false    , false     , false   , false , false    , true      , false    , USER_AND_PASS ),
 	;
 
-	private static final int FIRST_QUESTIONABLE_RANK = 12;
+	private static final int FIRST_QUESTIONABLE_RANK = 14;
 
 	private static final long FIRST_RANK_MILLIS = TimeUnit.DAYS.toMillis(7);
 

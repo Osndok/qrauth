@@ -98,12 +98,17 @@ class PolicyImpl implements Policy, Runnable
 		final
 		String matchable=usernameMatchFilter(username);
 
+		if (matchable.length() < 4)
+		{
+			return false;
+		}
+
 		if (mightIndicateAuthority(matchable))
 		{
 			return false;
 		}
 
-		return matchable.length() > 4;
+		return Character.isAlphabetic(matchable.charAt(0));
 	}
 
 	private
