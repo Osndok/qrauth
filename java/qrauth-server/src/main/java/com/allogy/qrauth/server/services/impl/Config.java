@@ -265,6 +265,11 @@ class Config
 		}
 	}
 
+	/**
+	 * TODO: is there a clean way to have this under the 'policy' service?
+	 * @param tenant
+	 * @return
+	 */
 	public
 	String presentableTenantIdentification(Tenant tenant)
 	{

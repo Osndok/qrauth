@@ -214,7 +214,7 @@ class LoginTenant extends StandardTenantAPICall
 			{
 				log.debug("username required, and not available");
 				//TODO: return a redirection widget instead (remove a few levels of indirection? but assumes login cookie?)
-				return null;
+				return forbiddenCode(409, 4, "user must select a username, but returned to tenant first");
 			}
 
 			retval
@@ -268,7 +268,14 @@ class LoginTenant extends StandardTenantAPICall
 	private
 	boolean selectAlarm(DBUserAuth userAuth, Username username)
 	{
-		return userAuth.silentAlarm || username.silentAlarm;
+		if (username==null)
+		{
+			return userAuth.silentAlarm;
+		}
+		else
+		{
+			return userAuth.silentAlarm || username.silentAlarm;
+		}
 	}
 
 	private

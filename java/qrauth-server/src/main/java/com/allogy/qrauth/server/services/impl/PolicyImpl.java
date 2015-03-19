@@ -124,6 +124,11 @@ class PolicyImpl implements Policy, Runnable
 	public
 	String usernameMatchFilter(String userInput)
 	{
+		if (userInput==null)
+		{
+			return null;
+		}
+
 		final
 		int l=userInput.length();
 

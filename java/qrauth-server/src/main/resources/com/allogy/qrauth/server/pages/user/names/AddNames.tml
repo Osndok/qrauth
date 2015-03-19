@@ -3,7 +3,7 @@
       xmlns:p="tapestry:parameter"
       >
 
-	<t:if test="displayName">
+	<t:block id="tryAgain">
 		<h3>Sorry... "${displayName}" is already taken, or not allowed.</h3>
 		<h4>Please try again, or select from some of these suggestions:</h4>
 		<ul>
@@ -11,11 +11,20 @@
 			<li>${hint}</li>
 </t:loop>
 		</ul>
-	<p:else>
+	</t:block>
+
+	<t:block id="firstTry">
 		<h3>Please provide a username in the format you would like it to be displayed</h3>
     	<h4>(e.g. "John Smith", "Cuddly Kittens", etc.)</h4>
-	</p:else>
-	</t:if>
+	</t:block>
+
+	<t:block id="forTenant">
+		<h3>${tenantName} requires a username, and you don't seem to have any available.</h3>
+		<h3>Please provide a username in the format you would like it to be displayed</h3>
+    	<h4>(e.g. "John Smith", "Cuddly Kittens", etc.)</h4>
+	</t:block>
+
+	<t:delegate to="helpfulBlock"/>
 
 	<t:form>
 		<t:label for="username"/>

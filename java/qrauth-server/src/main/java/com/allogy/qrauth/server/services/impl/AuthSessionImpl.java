@@ -9,6 +9,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.apache.tapestry5.ioc.annotations.Symbol;
 import org.apache.tapestry5.services.*;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -364,6 +365,39 @@ class AuthSessionImpl implements AuthSession
 		{
 			return (authSessionMemo.tenantSessionId!=null);
 		}
+	}
+
+	@Override
+	public
+	TenantSession getTenantSession()
+	{
+		final
+		AuthSessionMemo authSessionMemo=environment.peek(AuthSessionMemo.class);
+
+		if (authSessionMemo==null)
+		{
+			log.debug("no AuthSessionMemo, so no TenantSession");
+			return null;
+		}
+		else
+		if (authSessionMemo.tenantSessionId==null)
+		{
+			log.debug("tenantSessionId is null");
+			return null;
+		}
+		else
+		{
+			return fetchTenantSession(authSessionMemo.tenantSessionId);
+		}
+	}
+
+	private
+	TenantSession fetchTenantSession(Long tenantSessionId)
+	{
+		return (TenantSession)
+			hibernateSessionManager.getSession()
+			.get(TenantSession.class, tenantSessionId)
+			;
 	}
 
 	@Inject

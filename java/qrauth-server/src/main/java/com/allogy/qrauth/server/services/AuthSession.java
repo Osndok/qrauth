@@ -65,4 +65,6 @@ interface AuthSession extends Dispatcher
 	Username getUsername();
 
 	boolean endsWithTenantRedirection();
+
+	TenantSession getTenantSession();
 }

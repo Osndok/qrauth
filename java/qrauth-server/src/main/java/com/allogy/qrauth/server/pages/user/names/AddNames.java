@@ -1,11 +1,15 @@
 package com.allogy.qrauth.server.pages.user.names;
 
+import com.allogy.qrauth.server.entities.TenantSession;
 import com.allogy.qrauth.server.entities.Username;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
+import com.allogy.qrauth.server.pages.user.ContinueUser;
 import com.allogy.qrauth.server.pages.user.NamesUser;
 import com.allogy.qrauth.server.services.Journal;
 import com.allogy.qrauth.server.services.Policy;
+import com.allogy.qrauth.server.services.impl.Config;
+import org.apache.tapestry5.Block;
 import org.apache.tapestry5.annotations.InjectPage;
 import org.apache.tapestry5.annotations.PageActivationContext;
 import org.apache.tapestry5.annotations.Property;
@@ -32,6 +36,16 @@ class AddNames extends AbstractUserPage
 		return this;
 	}
 
+	private static final String FOR_TENANT_HINT="for_tenant";
+
+	public
+	AddNames forTenantRequirement()
+	{
+		//TODO: BUG: overloading this parameter makes "for_tenant" appear in the entry field; convert to query parameter?
+		this.displayName=FOR_TENANT_HINT;
+		return this;
+	}
+
 	@Inject
 	private
 	Logger log;
@@ -44,7 +58,10 @@ class AddNames extends AbstractUserPage
 	private
 	EditNames editNamesPage;
 
-	@CommitAfter
+	@InjectPage
+	private
+	ContinueUser continueUser;
+
 	Object onSuccess()
 	{
 		log.debug("onSuccess()");
@@ -58,16 +75,17 @@ class AddNames extends AbstractUserPage
 
 			if (username == null)
 			{
-				username = new Username();
-				username.user = user;
-				username.displayValue = displayName.trim();
-				username.matchValue = matchValue;
-				session.save(username);
 
-				journal.allocatedUsername(username);
+				username = createNewUsername(matchValue);
 
-				//return editNamesPage.with(username);
-				return NamesUser.class;
+				if (authSession.endsWithTenantRedirection() && thatWasTheFirstAndOnlyActiveUsername())
+				{
+					return continueUser.toNextTenantSessionStep();
+				}
+				else
+				{
+					return NamesUser.class;
+				}
 			}
 
 			return this;
@@ -77,6 +95,37 @@ class AddNames extends AbstractUserPage
 			return new ErrorResponse(400,
 										"please wait a moment, and retry... maybe you have too many active usernames?");
 		}
+	}
+
+	@CommitAfter
+	private
+	Username createNewUsername(String matchValue)
+	{
+		final
+		Username username=new Username();
+
+		username.user = user;
+		username.displayValue = displayName.trim();
+		username.matchValue = matchValue;
+		session.save(username);
+
+		journal.allocatedUsername(username);
+		return username;
+	}
+
+	private
+	boolean thatWasTheFirstAndOnlyActiveUsername()
+	{
+		final
+		int count=session.createCriteria(Username.class)
+			.add(Restrictions.eq("user", user))
+			.add(Restrictions.isNull("deadline"))
+			.list()
+			.size()
+			;
+
+		log.debug("user now has {} usernames (to select towards tenant usage)", count);
+		return (count==1);
 	}
 
 	private
@@ -102,5 +151,52 @@ class AddNames extends AbstractUserPage
 			"TODO: list some actual, untaken, usernames based on dictionary word pairs and bits of supplied name",
 			"TODO: clicking on a suggestion should immediately allocate it, they can revoke it later, if they don't want it."
 		};
+	}
+
+	@Inject
+	private
+	Block tryAgain;
+
+	@Inject
+	private
+	Block firstTry;
+
+	@Inject
+	private
+	Block forTenant;
+
+	public
+	Block getHelpfulBlock()
+	{
+		if (displayName==null)
+		{
+			return firstTry;
+		}
+		else
+		if (displayName.equals(FOR_TENANT_HINT))
+		{
+			return forTenant;
+		}
+		else
+		{
+			return tryAgain;
+		}
+	}
+
+	public
+	String getTenantName()
+	{
+		final
+		TenantSession tenantSession=authSession.getTenantSession();
+
+		if (tenantSession==null)
+		{
+			//???
+			return "the website you were trying to log into visiting";
+		}
+		else
+		{
+			return Config.get().presentableTenantIdentification(tenantSession.tenant);
+		}
 	}
 }

@@ -1,0 +1,27 @@
+<html t:type="layout" title="Select Username"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter"
+      >
+
+	<t:block id="onlyOne">
+		<h3>Would you like to use "${username.displayValue}" for ${tenant}</h3>
+		<!-- TODO: !!!: make this a POST link -->
+		<t:actionlink t:id="doOne" context="username" class="btn btn-primary">Yes</t:actionlink>
+	</t:block>
+
+	<t:block id="fromMany">
+		<h3>Please select the username that you would like to use for ${tenant}</h3>
+		<t:grid t:source="usernames" row="username" add="commands">
+			<p:commandsCell>
+				<!-- TODO: !!!: make this a POST link -->
+   				<t:actionlink t:id="doMany" context="username" class="btn btn-primary">Select</t:actionlink>
+	   		</p:commandsCell>
+	   	</t:grid>
+   	</t:block>
+
+	<t:delegate to="appropriateBlock"/>
+
+   	<t:pagelink page="user/names/add" class="btn btn-primary">Request Another Username</t:pagelink>
+
+
+</html>
