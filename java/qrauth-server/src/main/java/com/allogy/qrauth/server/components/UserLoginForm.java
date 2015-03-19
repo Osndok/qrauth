@@ -149,7 +149,8 @@ class UserLoginForm
 	public
 	String getSmsSendCode()
 	{
-		return "123";
+		//TODO: when ready, the sms code should have a moving epoch, to keep the id numbers *very* small.
+		return Long.toHexString(nut.id).toUpperCase();
 	}
 
 	public

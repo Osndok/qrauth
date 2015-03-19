@@ -5,7 +5,7 @@
  * widget.js
  */
 
-function qrauth_sqrlClick()
+function qrauth_sqrl_click()
 {
 	//This indicates the sqrl code has been clicked, so we might as well obscure the code (to hide the NUT value).
 	//It is unclear if this provides any real security advantage, but might help in the event of a DoS or practical joke?
@@ -15,6 +15,23 @@ function qrauth_sqrlClick()
 	qrCode.setAttribute('src', qrCode.getAttribute('pending'));
 
 	return true;
+}
+
+function qrauth_sms_click()
+{
+	var e=document.getElementById('qrauth_sms_hidden');
+
+	if (e.getAttribute('style'))
+	{
+		e.removeAttribute('style');
+		//TODO: send the phone number via XMLHttpRequest
+		return false;
+	}
+	else
+	{
+		//Second click falls through to submit the form...
+		return true;
+	}
 }
 
 var qrauth_nut_state="INIT";

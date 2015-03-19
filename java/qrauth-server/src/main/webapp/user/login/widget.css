@@ -275,14 +275,11 @@
 	padding: 50px;
 }
 
-#qrauth_sms_fresh
-{
-}
-
 #qrauth_sms_fresh h3
 {
 	text-decoration: underline;
 	text-align: center;
+	margin-top: 4px;
 }
 
 #qrauth_sms_fresh left
@@ -333,6 +330,9 @@ http://stackoverflow.com/questions/16508834/css-apply-border-to-a-cloud-shape
 	border: none;
 	text-align: center;
 	z-index: 3;
+	font-size: 16px;
+	font-family: monospace;
+	color: black;
 }
 
 #qrauth cloud bulk
@@ -449,11 +449,6 @@ http://stackoverflow.com/questions/16508834/css-apply-border-to-a-cloud-shape
 	font-weight:bold;
 }
 
-#qrauth_sms envelope
-{
-	margin-left: 58px;
-}
-
 #qrauth arrow
 {
 	display: block;
@@ -487,10 +482,135 @@ http://stackoverflow.com/questions/16508834/css-apply-border-to-a-cloud-shape
 	bottom: -16px;
 }
 
+#qrauth phone
+{
+	display: block;
+	position: relative;
+	width: 100px;
+	height: 140px;
+	border: 2px solid black;
+	border-radius: 10px;
+	margin-top: 8px;
+	padding: 10px;
+}
 
-#qrauth_sms arrow
+#qrauth phone::before
+{
+	display: block;
+	content: ' ';
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	right: 5px;
+	bottom: 16px;
+	border: 1px solid black;
+}
+
+#qrauth phone::after
+{
+	display: block;
+	content: ' ';
+	position: absolute;
+	left: 44px;
+	bottom: 2px;
+	width : 10px;
+	height: 10px;
+	border: 1px solid black;
+	border-radius: 7px;
+}
+
+#qrauth phone header
+{
+	position: absolute;
+	padding-left: 2px;
+	left: 6px;
+	right: 6px;
+	top: 6px;
+	height: 20px;
+	display: block;
+	color: white;
+	background-color: black;
+	/*border-bottom: 1px solid black;*/
+}
+
+#qrauth phone content
+{
+	position: absolute;
+	top:25px;
+	left:6px;
+	right:6px;
+	bottom: 17px;
+	padding: 4px;
+	/*
+	color: yellow;
+	background-color: lightblue;
+	*/
+}
+
+#qrauth_sms envelope
+{
+	margin-left: 58px;
+}
+
+#qrauth_sms right
+{
+	height: 381px;
+}
+
+#qrauth_sms left arrow
 {
 	margin-left: 172px;
 	margin-top: -22px;
 }
 
+#qrauth_sms right arrow
+{
+	margin-left: 102px;
+	margin-top: -27px;
+}
+
+#qrauth_sms left phone
+{
+	margin-left: 120px;
+}
+
+#qrauth_sms right phone
+{
+	margin-left: 57px;
+}
+
+#qrauth_sms right cloud span
+{
+	height: 47px;
+}
+
+#qrauth_sms fields
+{
+	display: block;
+	position: absolute;
+	right: 19px;
+	width: 202px;
+	bottom: 6px;
+	height: 150px;
+	padding: 2px 8px;
+	border: 1px dashed lightgray;
+	border-radius: 10px;
+}
+
+#qrauth_sms label
+{
+	margin-bottom: 2px;
+	margin-top: 4px;
+}
+
+#qrauth_sms input
+{
+	margin-top: -2px;
+	width: 100%;
+}
+
+#qrauth_sms input[type="submit"]
+{
+	margin-top: 8px;
+	width: 50%;
+}

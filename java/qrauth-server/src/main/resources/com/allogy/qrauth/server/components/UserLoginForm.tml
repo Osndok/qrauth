@@ -72,7 +72,7 @@
 
 <arena id="qrauth_sqrl" class="active">
 	<left>
-		<a href="${doSqrl.url}" onClick="window.setTimeout( qrauth_sqrlClick, 1 );">
+		<a href="${doSqrl.url}" onClick="window.setTimeout( qrauth_sqrl_click, 1 );">
 			<img
 				id="qrauth_sqrl_qr_nut"
 				src="${base}/api/sqrl/qr/${nut.stringValue}/sqrl.png"
@@ -248,7 +248,10 @@
 				</cloud>
 			</a>
 			<arrow><up></up></arrow>
-			<phone>${smsSendCode}</phone>
+			<phone>
+				<header>Send:</header>
+				<content>${smsSendCode}</content>
+			</phone>
 		</left>
 		<right>
 			<h3>Receive</h3>
@@ -259,6 +262,19 @@
 				<span><envelope><flap>?</flap></envelope></span>
 			</cloud>
 			<arrow><down></down></arrow>
+			<phone>
+				<header>Receive:</header>
+				<content>Auth Code!</content>
+			</phone>
+			<fields>
+				<label for="sms_number">My Phone Number:</label><br/>
+				<input name="sms_number" id="sms_number" placeholder="555-123-4567"/><br/>
+				<div id="qrauth_sms_hidden" style="display:none">
+					<label for="sms_code">Code Received:</label><br/>
+    				<input name="sms_code" id="sms_code" placeholder="123456"/><br/>
+				</div>
+				<input type="submit" name="do_sms" value="Submit" onClick="return qrauth_sms_click();"/>
+			</fields>
 		</right>
 	</div>
 </arena>
