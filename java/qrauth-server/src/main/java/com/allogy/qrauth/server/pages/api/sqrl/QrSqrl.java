@@ -3,16 +3,25 @@ package com.allogy.qrauth.server.pages.api.sqrl;
 import com.allogy.qrauth.server.entities.Nut;
 import com.allogy.qrauth.server.entities.OutputStreamResponse;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
+import com.allogy.qrauth.server.services.impl.Config;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import org.apache.tapestry5.Asset;
+import org.apache.tapestry5.StreamResponse;
 import org.apache.tapestry5.annotations.InjectPage;
+import org.apache.tapestry5.annotations.Path;
+import org.apache.tapestry5.ioc.Resource;
+import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.services.Request;
 import org.apache.tapestry5.services.Response;
+import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.util.EnumMap;
@@ -51,24 +60,40 @@ class QrSqrl
 		return this;
 	}
 
+	@Inject
+	@Path("context:images/qr-failure.png")
+	private
+	Asset qrFailure;
+
+	@Inject
+	private
+	Response response;
+
 	@InjectPage
 	private
 	DoSqrl doSqrl;
 
 	Object onActivate(String nutStringValue, String fileName) throws UnknownHostException, WriterException
 	{
-		final
-		String url=doSqrl.with(nutStringValue).getUrl();
+		//TODO: is it likely that someone would want to intentionally offload qr-generation to a different domain?
+		if (requestedDomainDoesNotMatchExpectedDomain())
+		{
+			response.setStatus(500);
+			return assetResponse("image/png", qrFailure);
+		}
 
 		final
-		String finalImageFormat="png";
+		String url = doSqrl.with(nutStringValue).getUrl();
 
 		final
-		QRCodeWriter qrCodeWriter=new QRCodeWriter();
+		String finalImageFormat = "png";
 
-		BarcodeFormat barcodeFormat=BarcodeFormat.QR_CODE;
-		int width =177;
-		int height=177;
+		final
+		QRCodeWriter qrCodeWriter = new QRCodeWriter();
+
+		BarcodeFormat barcodeFormat = BarcodeFormat.QR_CODE;
+		int width = 177;
+		int height = 177;
 
 		Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
 		hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
@@ -78,20 +103,91 @@ class QrSqrl
 
 		return new OutputStreamResponse()
 		{
-			public String getContentType()
+			public
+			String getContentType()
 			{
-				return "image/"+finalImageFormat;
+				return "image/" + finalImageFormat;
 			}
 
-			public void writeToStream(OutputStream outputStream) throws IOException
+			public
+			void writeToStream(OutputStream outputStream) throws IOException
 			{
 				MatrixToImageWriter.writeToStream(bitMatrix, finalImageFormat, outputStream);
 			}
 
-			public void prepareResponse(Response response)
+			public
+			void prepareResponse(Response response)
 			{
 				//no-op...
 			}
 		};
+	}
+
+	private
+	StreamResponse assetResponse(final String mimeType, final Asset asset)
+	{
+		final
+		Resource resource = asset.getResource();
+
+		return new StreamResponse()
+		{
+			@Override
+			public
+			String getContentType()
+			{
+				return mimeType;
+			}
+
+			@Override
+			public
+			InputStream getStream() throws IOException
+			{
+				return resource.openStream();
+			}
+
+			@Override
+			public
+			void prepareResponse(Response response)
+			{
+				//no-op...
+			}
+		};
+	}
+
+	@Inject
+	private
+	Logger log;
+
+	@Inject
+	private
+	Request request;
+
+	private
+	boolean requestedDomainDoesNotMatchExpectedDomain()
+	{
+		final
+		String expectedDomain = Config.get().getSqrlDomain();
+
+		final
+		String requestedDomain = request.getHeader("Host");
+
+		if (expectedDomain != null && requestedDomain != null)
+		{
+			//We use 'startsWith' to avoid the port number...
+			//NB: this is just to detect misconfigurations, not a security barrier.
+			if (requestedDomain.startsWith(expectedDomain))
+			{
+				return false;
+			}
+			else
+			{
+				log.error("expectedDomain: '{}', requestedDomain: '{}'", expectedDomain, requestedDomain);
+				return true;
+			}
+		}
+		else
+		{
+			return false;
+		}
 	}
 }

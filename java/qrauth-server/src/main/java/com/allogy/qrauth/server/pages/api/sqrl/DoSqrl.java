@@ -1003,7 +1003,7 @@ class DoSqrl extends AbstractAPICall
 	PageRenderLinkSource pageRenderLinkSource;
 
 	private static final
-	String SQRL_BASE = System.getenv("SQRL_BASE");
+	String SQRL_BASE = Config.get().getSqrlBase();
 
 	public
 	String getUrl() throws UnknownHostException

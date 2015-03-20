@@ -219,6 +219,36 @@ class Config
 		}
 	}
 
+	/**
+	 * Related to sqrl-base, this does not include a port number.
+	 * @return the *expected* domain name that should be used to generate the sqrl qr codes, or null if it is unknown
+	 */
+	public
+	String getSqrlDomain()
+	{
+		return properties.getProperty("sqrl.domain");
+	}
+
+	/**
+	 * Related to sqrl-domain, but this includes a port number, and possibly a trailing path and piping symbol.
+	 * @return
+	 */
+	public
+	String getSqrlBase()
+	{
+		final
+		String env=System.getenv("SQRL_BASE");
+
+		if (env==null)
+		{
+			return properties.getProperty("sqrl.base");
+		}
+		else
+		{
+			return env;
+		}
+	}
+
 	public
 	String getSqrlServerFriendlyName(Request request, Tenant tenant)
 	{
@@ -368,4 +398,5 @@ class Config
 			return supervisorId.equals(tenant.id);
 		}
 	}
+
 }
