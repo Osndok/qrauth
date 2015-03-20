@@ -2,6 +2,10 @@
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter">
 
+	<t:if test="canEnterSupervisorMode">
+		<t:pagelink page="supervisor" class="btn btn-primary">Supervisor Panel</t:pagelink>
+	</t:if>
+
 	<t:grid t:source="tenantUsers" row="tenantUser" add="name,actions" reorder="created,name">
 		<p:nameCell>
 			${tenantUser.tenant.requestedName}

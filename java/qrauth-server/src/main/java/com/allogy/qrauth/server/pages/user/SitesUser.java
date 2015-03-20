@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.pages.user;
 
 import com.allogy.qrauth.server.entities.TenantUser;
 import com.allogy.qrauth.server.services.Policy;
+import com.allogy.qrauth.server.services.impl.Config;
 import org.apache.tapestry5.annotations.Property;
 import org.apache.tapestry5.ioc.annotations.Inject;
 import org.hibernate.criterion.Restrictions;
@@ -25,6 +26,20 @@ class SitesUser extends AbstractUserPage
 			.add(Restrictions.eq("user", user))
 			.list()
 			;
+
+		final
+		Config config=Config.get();
+
+		if (config.hasSupervisor())
+		{
+			for (TenantUser tenantUser : tenantUsers)
+			{
+				if (tenantUser.authAdmin && config.isSupervisor(tenantUser.tenant))
+				{
+					canEnterSupervisorMode=true;
+				}
+			}
+		}
 	}
 
 	@Property
@@ -50,4 +65,8 @@ class SitesUser extends AbstractUserPage
 
 		return numAdmin < policy.getMaximumTenantsForUser(user);
 	}
+
+	@Property
+	private
+	boolean canEnterSupervisorMode;
 }

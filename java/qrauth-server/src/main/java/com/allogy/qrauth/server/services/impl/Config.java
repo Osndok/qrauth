@@ -43,6 +43,9 @@ class Config
 	private final
 	Properties properties;
 
+	private final
+	Long supervisorId;
+
 	private
 	Config() throws IOException
 	{
@@ -59,6 +62,22 @@ class Config
 			in.close();
 		}
 
+		//Supervisor
+		{
+			final
+			String supervisorIdString=properties.getProperty("supervisor.id");
+
+			if (supervisorIdString==null)
+			{
+				supervisorId=null;
+			}
+			else
+			{
+				supervisorId=Long.parseLong(supervisorIdString);
+			}
+		}
+
+		//YUBI_PUBLIC
 		{
 			final
 			String yubiSecret=_getYubicoApiSecret();
@@ -323,5 +342,30 @@ class Config
 			hmacSha1SigningKey=new SecretKeySpec(getHashingPepper().getBytes(), "HmacSHA1");
 		}
 		return hmacSha1SigningKey;
+	}
+
+	public
+	Long getSupervisorId()
+	{
+		return supervisorId;
+	}
+
+	public
+	boolean hasSupervisor()
+	{
+		return supervisorId!=null;
+	}
+
+	public
+	boolean isSupervisor(Tenant tenant)
+	{
+		if (supervisorId==null)
+		{
+			return false;
+		}
+		else
+		{
+			return supervisorId.equals(tenant.id);
+		}
 	}
 }
