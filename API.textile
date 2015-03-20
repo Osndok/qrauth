@@ -212,13 +212,20 @@ API 5 - Standard Login & account maintenance
 ** USER_IP
 ** CSS_REPLACE (url [can be relative, or even blank] that *REPLACES* default css file)
 ** TODO: ability to add extra panels for backwards compatibility?
-** {uid:12345, unixName:bob, displayName:"Robert", alarm:false, security_rank:4, groups:{...}, permissions:[...]}
+** {uid:12345, deadline:1426828826664, unixName:bob, displayName:"Robert", alarm:false, security_rank:4, groups:{...}, permissions:[...]}
 ** returns either:
 *** (1) the json login info (status 200),
 *** (2) the html that would allow authentication (status 202), or
 *** (3) if the session should be destroyed and retried (status 403)
 ** may be called often (e.g. every 2 minutes), but not at every request, to ensure the user is *still* logged in (for global logout feature)
-
+** JSON blob (on success) includes:
+*** uid      - a numerical user identification that does not change [for a particular tenant] even across usernames
+*** deadline - the time the session should end, expressed as a unix-time of milliseconds accuracy 
+*** seconds  - the relative time (from the API call) to the session end (beware if stored in session)
+*** unixName - the filename-and-url-friendly version of the displayname, does not change if tenant is marked as fixedUsernames
+*** displayName - the human-readable version of the username, which might change in spacing and capitalization from call-to-call (but not significantly)
+*** alarm   - true if (and only if) the user used a username or credential that is marked with the 'alarm' value
+*** security_rank - the relative security rank, or strength of the authentication mechanism used (1 being the highest)
 
 (!!!) NB: there is no logout equivalent: "POST /api/tenant/logout"
 
