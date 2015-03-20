@@ -5,7 +5,10 @@
 
 	<t:grid t:source="dataSource" row="tenant" add="commands" rowClass="rowClass" include="created,updated,requestedName,name">
    		<p:commandsCell>
-   			Details / Approve / Customize / Reject
+   			Details /
+   			<t:eventlink event="approveTenant" context="tenant">Approve</t:eventlink> /
+   			Customize /
+   			<t:eventlink event="rejectTenant" context="tenant">Reject</t:eventlink>
    		</p:commandsCell>
    		<p:empty>
    			No tenants currently require name approval...

@@ -295,7 +295,7 @@ class Config
 		if (tenant.name==null)
 		{
 			//NB: our policy is that we cannot display unapproved user-provided possibly-duplicate tenant names.
-			return tenant.toString()+" [name pending]";
+			return tenant.toString()+(tenant.needsReview?" [name pending]":"");
 		}
 		else
 		{
