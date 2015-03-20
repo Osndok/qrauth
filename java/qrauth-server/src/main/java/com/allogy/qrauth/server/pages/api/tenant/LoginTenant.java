@@ -17,6 +17,7 @@ import org.apache.tapestry5.services.Response;
 import org.apache.tapestry5.util.TextStreamResponse;
 import org.hibernate.criterion.Restrictions;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -111,6 +112,7 @@ class LoginTenant extends StandardTenantAPICall
 		}
 
 		//Render the login form...
+		response.setStatus(202);
 		return BlockHelper.toResponse("text/html", componentResources, loginForm);
 	}
 
@@ -206,6 +208,8 @@ class LoginTenant extends StandardTenantAPICall
 			.put("uid", tenantUser.id)
 			.put("alarm", selectAlarm(userAuth, tenantSession.username))
 			.put("security_rank", userAuth.authMethod.getRank())
+			.put("seconds", secondsUntil(tenantSession.deadline))
+			.put("deadline", tenantSession.deadline.getTime())
 			;
 
 		if (username==null)
@@ -231,8 +235,15 @@ class LoginTenant extends StandardTenantAPICall
 		}
 
 		//TODO: add groups & permissions (if requested?)
-
+		response.setStatus(200);
 		return new TextStreamResponse("application/json", retval.toCompactString());
+	}
+
+	private
+	int secondsUntil(Date date)
+	{
+		long milliseconds=date.getTime()-System.currentTimeMillis();
+		return (int)(milliseconds/1000);
 	}
 
 	private
