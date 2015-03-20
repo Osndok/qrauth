@@ -25,6 +25,11 @@ public class Layout
 	private String title;
 
 	@Property
+	@Parameter
+	private
+	boolean supervisorPage;
+
+	@Property
 	private String pageName;
 
 	@Property

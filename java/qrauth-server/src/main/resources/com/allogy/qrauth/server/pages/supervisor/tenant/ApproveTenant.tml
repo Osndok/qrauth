@@ -1,0 +1,16 @@
+<html t:type="layout" title="Approve Tenant Names"
+	supervisorPage="true"
+      xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
+      xmlns:p="tapestry:parameter">
+
+	<t:grid t:source="dataSource" row="tenant" add="commands" rowClass="rowClass" include="created,updated,requestedName,name">
+   		<p:commandsCell>
+   			Details / Approve / Customize / Reject
+   		</p:commandsCell>
+   		<p:empty>
+   			No tenants currently require name approval...
+   			<br/>
+   		</p:empty>
+   	</t:grid>
+
+</html>

@@ -1,10 +1,11 @@
 <html t:type="layout" title="Supervisor Index"
+	supervisorPage="true"
       xmlns:t="http://tapestry.apache.org/schema/tapestry_5_3.xsd"
       xmlns:p="tapestry:parameter"
       >
 
 	<ul>
-		<li>TODO: pages go here...</li>
+		<li><t:pagelink page="supervisor/tenant/approve">Approve Tenant Names</t:pagelink></li>
 	</ul>
 
 </html>
