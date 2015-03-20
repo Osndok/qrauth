@@ -5,6 +5,7 @@ import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.Username;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.PasswordHelper;
+import com.allogy.qrauth.server.helpers.Redux;
 import com.allogy.qrauth.server.services.Policy;
 import org.apache.tapestry5.SymbolConstants;
 import org.apache.tapestry5.ioc.annotations.Inject;
@@ -123,6 +124,13 @@ class PolicyImpl implements Policy, Runnable
 	@Override
 	public
 	String usernameMatchFilter(String userInput)
+	{
+		return Redux.digest(userInput, null);
+	}
+
+	@Override
+	public
+	String usernameUnixFilter(String userInput)
 	{
 		if (userInput==null)
 		{

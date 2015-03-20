@@ -19,6 +19,7 @@ interface Policy
 	boolean wouldAllowUsernameToBeRegistered(String username);
 
 	String usernameMatchFilter(String userInput);
+	String usernameUnixFilter(String userInput);
 
 	boolean wouldAllowAdditionalUsernames(DBUser user, boolean extraEffort);
 

@@ -23,6 +23,10 @@ class Username extends Attemptable implements Mortal
 	public String displayValue;
 
 	@Column(nullable = false, unique = true)
+	public String unixValue;
+
+	@NonVisual
+	@Column(nullable = false, unique = true)
 	public String matchValue;
 
 	/**

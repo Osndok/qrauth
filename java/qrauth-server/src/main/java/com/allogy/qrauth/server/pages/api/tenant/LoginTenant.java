@@ -229,7 +229,7 @@ class LoginTenant extends StandardTenantAPICall
 		else
 		{
 			retval
-				.put("unixName", username.matchValue)
+				.put("unixName", username.unixValue)
 				.put("displayName", username.displayValue)
 				;
 		}

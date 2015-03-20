@@ -218,6 +218,7 @@
         displayValue varchar(255) not null unique,
         matchValue varchar(255) not null unique,
         silentAlarm BOOLEAN DEFAULT 'f' not null,
+        unixValue varchar(255) not null unique,
         user_id int8,
         primary key (id)
     );
