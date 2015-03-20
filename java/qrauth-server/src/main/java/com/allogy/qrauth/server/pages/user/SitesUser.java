@@ -69,4 +69,6 @@ class SitesUser extends AbstractUserPage
 	@Property
 	private
 	boolean canEnterSupervisorMode;
+
+	//TODO: getRowClass(); highlight the supervisor, discolor those needing review?
 }

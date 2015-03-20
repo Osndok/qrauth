@@ -1,7 +1,6 @@
 package com.allogy.qrauth.server.services.impl;
 
 import com.allogy.qrauth.server.entities.DBUser;
-import com.allogy.qrauth.server.entities.Tenant;
 import com.allogy.qrauth.server.entities.Username;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.PasswordHelper;
@@ -33,6 +32,8 @@ class PolicyImpl implements Policy, Runnable
 	private static final long   DEVEL_LOGOUT_PERIOD     = TimeUnit.HOURS.toMillis(1);
 	private static final long   SHORTEST_USABLE_SESSION = TimeUnit.MINUTES.toMillis(3);
 	private static final long   ADD_CREDENTIAL_TIMEOUT  = TimeUnit.MINUTES.toMillis(30);
+	private static final String UNIX_EMAIL_PREFIX       = "email_";
+	private static final String UNIX_TELEPHONE_PREFIX   = "tele_";
 
 	private
 	JSONObject supremeTenantConfig = new JSONObject();
@@ -104,11 +105,27 @@ class PolicyImpl implements Policy, Runnable
 			return false;
 		}
 
+		//Email addresses (although they use the username mechanism) cannot be registered as usernames.
+		if (matchable.indexOf('@')>=0)
+		{
+			return false;
+		}
+
 		if (mightIndicateAuthority(matchable))
 		{
 			return false;
 		}
 
+		/*
+		Technically no effect, as '_' is stripped out, but this will prevent people from creating usernames
+		testing this vector, and provide a hair of future-proofing in case '_' is allowed in the future.
+		*/
+		if (matchable.startsWith(UNIX_EMAIL_PREFIX) || matchable.startsWith(UNIX_TELEPHONE_PREFIX))
+		{
+			return false;
+		}
+
+		//NB: must begin with a non-number to not trip the phone number detector.
 		return Character.isAlphabetic(matchable.charAt(0));
 	}
 
@@ -125,7 +142,197 @@ class PolicyImpl implements Policy, Runnable
 	public
 	String usernameMatchFilter(String userInput)
 	{
-		return Redux.digest(userInput, null);
+		if (looksLikeEmailAddress(userInput))
+		{
+			return emailAddressMatchFilter(userInput);
+		}
+		else
+		if (looksLikeRegisterablePhoneNumber(userInput))
+		{
+			return phoneNumberMatchFilter(userInput);
+		}
+		else
+		{
+			return Redux.digest(userInput, null);
+		}
+	}
+
+	//TODO: if made 'public' for other uses, this should basically be a repeat of the looksLikeEmailAddress() logic
+	private
+	String emailAddressMatchFilter(String userInput)
+	{
+		return userInput.trim().toLowerCase();
+	}
+
+	/**
+	 * NB: must begin with a number to jive with username matching.
+	 *
+	 * @param userInput
+	 * @return
+	 */
+	private
+	String phoneNumberMatchFilter(String userInput)
+	{
+		final
+		StringBuilder sb=new StringBuilder();
+
+		final
+		int l=userInput.length();
+
+		for (int i=0; i<l; i++)
+		{
+			final
+			char c = userInput.charAt(i);
+
+			if (Character.isDigit(c))
+			{
+				sb.append(c);
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private
+	boolean looksLikeRegisterablePhoneNumber(String userInput)
+	{
+		final
+		int l = userInput.length();
+
+		//Don't match 911, et al.
+		if ( l < 5 || l > 50 )
+		{
+			return false;
+		}
+
+		final
+		StringBuilder digits=new StringBuilder();
+
+		int numDigits = 0;
+
+		for (int i=0; i<l; i++)
+		{
+			final
+			char c = userInput.charAt(i);
+
+			if (Character.isDigit(c))
+			{
+				numDigits++;
+				digits.append(c);
+			}
+		}
+
+		//Don't match special service numbers (311,411,911)
+		if (numDigits < 7 || numDigits > 31 )
+		{
+			return false;
+		}
+
+		final
+		String digitsString=digits.toString();
+
+		/*
+		Special case, "long" emergency phone numbers
+		Simplified by the above <7 check...
+		//@url: http://en.wikipedia.org/wiki/Emergency_telephone_number
+		if (numDigits==5 && ( digitsString.equals("10111") || digitsString.equals("10177") ) )
+		{
+			return false;
+		}
+		if (digitsString.equals("1122") || digitsString.equals("1669"))
+		{
+			return false;
+		}
+		*/
+		if (digitsString.equals("9555555"))
+		{
+			return false;
+		}
+
+		//TODO: detect (or reserve in advance) "our own" phone number (used to send and receive text messages)
+		//TODO: detect reserved fictitious phone number blocks?
+		//@url: http://en.wikipedia.org/wiki/Fictitious_telephone_number
+		return true;
+	}
+
+	/**
+	 * This is not intended to actually test the  validity of an email addresses, but only
+	 * to judge the likelihood of a user-provided string as *trying* to be an email address
+	 * in a linear execution time.
+	 *
+	 * Examples of email addresses that are valid but not matched by this algorithm can be
+	 * seen here:
+	 * http://en.wikipedia.org/wiki/Email_address#Valid_email_addresses
+	 *
+	 * @param userInput
+	 * @return
+	 */
+	public static
+	boolean looksLikeEmailAddress(String userInput)
+	{
+		final
+		int l = userInput.length();
+
+		//"a@b.ly".length()==6
+		if (l<6 || l>254)
+		{
+			return false;
+		}
+
+		boolean foundAtSign=false;
+
+		char lastChar=0;
+
+		for (int i=0; i<l; i++)
+		{
+			final
+			char c = userInput.charAt(i);
+
+			if (c=='@')
+			{
+				if (foundAtSign || i==0)
+				{
+					return false;
+				}
+				else
+				{
+					foundAtSign=true;
+				}
+			}
+			else
+			if (foundAtSign)
+			{
+				if (!commonEmailDomainCharacter(c, lastChar))
+				{
+					log.debug("not a common email-domain character: {}", c);
+					return false;
+				}
+			}
+			else
+			{
+				if (!commonEmailUsernameCharacter(c, lastChar))
+				{
+					log.debug("not a common email-domain character: {}", c);
+					return false;
+				}
+			}
+
+			lastChar=c;
+		}
+
+		return foundAtSign && lastChar!='@';
+	}
+
+	private static
+	boolean commonEmailUsernameCharacter(char c, char lastChar)
+	{
+		return Character.isAlphabetic(c) || Character.isDigit(c) || c=='.' || c=='-' || c=='+';
+	}
+
+	private static
+	boolean commonEmailDomainCharacter(char c, char lastChar)
+	{
+		return Character.isAlphabetic(c) || Character.isDigit(c) || c=='.' || c=='-';
 	}
 
 	@Override
@@ -140,8 +347,23 @@ class PolicyImpl implements Policy, Runnable
 		final
 		int l=userInput.length();
 
+		if (l==0)
+		{
+			return "empty_string";
+		}
+
 		final
 		StringBuilder sb=new StringBuilder();
+
+		if (looksLikeEmailAddress(userInput))
+		{
+			sb.append(UNIX_EMAIL_PREFIX);
+		}
+		else
+		if (looksLikeRegisterablePhoneNumber(userInput))
+		{
+			sb.append(UNIX_TELEPHONE_PREFIX);
+		}
 
 		for (int i=0; i<l; i++)
 		{

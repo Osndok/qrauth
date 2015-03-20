@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.pages.user.names;
 
 import com.allogy.qrauth.server.entities.TenantSession;
 import com.allogy.qrauth.server.entities.Username;
+import com.allogy.qrauth.server.entities.UsernameType;
 import com.allogy.qrauth.server.helpers.ErrorResponse;
 import com.allogy.qrauth.server.pages.user.AbstractUserPage;
 import com.allogy.qrauth.server.pages.user.ContinueUser;
@@ -109,6 +110,7 @@ class AddNames extends AbstractUserPage
 		final
 		Username username=new Username();
 
+		username.type = UsernameType.EXPLICIT;
 		username.user = user;
 		username.displayValue = displayName.trim();
 		username.unixValue = policy.usernameUnixFilter(displayName);

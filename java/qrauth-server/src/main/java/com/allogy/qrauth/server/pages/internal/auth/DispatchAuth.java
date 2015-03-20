@@ -297,6 +297,7 @@ class DispatchAuth extends AbstractAPICall
 					{
 						//TODO: BUG: username is created, even if user account is disabled (low priority b/c atm there are no disabled accounts?).
 						username=new Username();
+						username.type = UsernameType.IMPLICIT;
 						username.user=userAuth.user;
 						username.displayValue=usernameString.trim();
 						username.unixValue=policy.usernameUnixFilter(usernameString);

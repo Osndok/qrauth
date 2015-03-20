@@ -2,9 +2,7 @@ package com.allogy.qrauth.server.entities;
 
 import org.apache.tapestry5.beaneditor.NonVisual;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -18,6 +16,10 @@ class Username extends Attemptable implements Mortal
 {
 	@ManyToOne
 	public DBUser user;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, columnDefinition = "VARCHAR(20)", length = 20)
+	public UsernameType type;
 
 	@Column(nullable = false, unique = true)
 	public String displayValue;
