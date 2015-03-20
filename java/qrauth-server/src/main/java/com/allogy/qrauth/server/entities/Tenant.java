@@ -50,6 +50,20 @@ class Tenant extends Attemptable implements Mortal
 	public String unhashedShellKey;
 
 	/**
+	 * True if (and only if) the tenant has updated (or initially set) the requestedName and the administration
+	 * should take action to approve or deny the same.
+	 */
+	@NonVisual
+	@Column(nullable = false, columnDefinition = Usual.TRUE_BOOLEAN)
+	public boolean needsReview;
+
+	/**
+	 * Updated at least whenever the representative of the tenant updates the tenant's requestedName.
+	 */
+	@Column(nullable = false, columnDefinition = Usual.INSERT_TIME)
+	public Date updated;
+
+	/**
 	 * True if (and only if) the tenant accepts previously-unseen users. False indicates that no TenantUser records
 	 * should be automatically fabricated for this tenant.
 	 */

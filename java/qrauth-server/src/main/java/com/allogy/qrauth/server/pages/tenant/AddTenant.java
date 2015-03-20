@@ -15,6 +15,7 @@ import org.apache.tapestry5.ioc.annotations.Inject;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -96,6 +97,8 @@ class AddTenant extends AbstractUserPage
 		tenant.hashedApiKeyPrimary=hashing.forDatabaseLookupKey(primaryApiKey);
 		tenant.hashedApiKeySecondary=hashing.forDatabaseLookupKey(secondaryApiKey);
 		tenant.config=tenant.fieldDescriptionsJson=tenant.permissionsDescriptionsJson="{}";
+		tenant.needsReview=true;
+		tenant.updated=new Date();
 		session.save(tenant);
 
 		saveAndCommitAdministrator(tenant, user);

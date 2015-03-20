@@ -29,9 +29,9 @@
 		<br/>
 		<t:textfield value="secondaryApiKey" t:id="secondaryApiKey"/>
 		<br/>
-		<t:checkbox value="tenant.newUsers"/>&nbsp;Allow new users to join (open web site)<br/>
-		<t:checkbox value="tenant.requireUsername"/>&nbsp;Require username (e.g. if your site would break without one).<br/>
-		<t:checkbox value="tenant.fixedUsername"/>&nbsp;Fixed (unchanging) usernames (e.g. if your site would break if a user used a different username).<br/>
+		<t:checkbox value="tenant.newUsers"        t:id="newUsers"/><t:label for="newUsers">&nbsp;Allow new users to join (open web site)</t:label><br/>
+		<t:checkbox value="tenant.requireUsername" t:id="requireUsername"/><t:label for="requireUsername">&nbsp;Require username (e.g. if your site would break without one).</t:label><br/>
+		<t:checkbox value="tenant.fixedUsername"   t:id="fixedUsername"  /><t:label for="fixedUsername">&nbsp;Fixed (unchanging) usernames (e.g. if your site would break if a user used a different username).</t:label><br/>
 
 		<t:submit/>
 	</t:form>
