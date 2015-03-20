@@ -4,6 +4,11 @@ hr
 	clear: both;
 }
 
+input:focus
+{
+	box-shadow: -0.40em 0px 0px #7581FD inset;
+}
+
 table.table
 {
 	margin-top: 15px;
