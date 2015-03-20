@@ -114,14 +114,14 @@ class Redux
 	 * For example, it would be nice if: redux("Bobs place") == redux("Place of Bob")
 	 */
 	public static
-	String digest(String name, Set<String> dirty_words)
+	String digest(final String name, Set<String> dirty_words)
 	{
 		//class_exists("PorterStemmer") or GLOBALS["CI"]->load->helper("stemming_helper.php");
-		log.debug("digest: '{}'", name);
+		log.trace("digest: '{}'", name);
 
 		String s = _numeric_split(name);
 
-		log.debug("split: '{}'", s);
+		log.trace("split: '{}'", s);
 
 		//Periods have mixed meanings ("1.3.3", versus "john.doe").
 		//Potentially useful as a word boundary (replace with space), but more likely to be numeric (replace with nothing)
@@ -142,7 +142,7 @@ class Redux
 			//Consider the "Stemmed" version of the word (which *might* reduce it to three characters).
 			if (is_numeric(w))
 			{
-				log.debug("numeric: '{}'", w);
+				log.trace("numeric: '{}'", w);
 
 				//strip: "+-." (period already stripped out)
 				//XXX: w=preg_replace("/[+-\\.]/i", "", w);
@@ -151,16 +151,16 @@ class Redux
 				w = trimLeadingAndTrailingZeros(w);
 				//In general, accept all numerics (no 3-letter-word stuff)
 				words_out.add(w);
-				log.debug("out: '{}'", w);
+				log.trace("out: '{}'", w);
 				continue;
 			}
 
-			log.debug("in: '{}'", w);
+			log.trace("in: '{}'", w);
 
 			//usual: w=preg_replace("/[^a-zA-Z]/i", "", w); //alphanumeric only
 			w = w.replaceAll("[^0-9a-zA-Z]", ""); //no numbers in-words.
 
-			log.debug("1: '{}'", w);
+			log.trace("1: '{}'", w);
 
 			//------PRE-STEMMING-CHECKS-------
 
@@ -179,20 +179,20 @@ class Redux
 			//w=PorterStemmer::Stem(w);
 			w = Stemmer.appliedTo(w);
 
-			log.debug("stemmed: '{}'", w);
+			log.trace("stemmed: '{}'", w);
 
 			if (_word_to_number_mapping.containsKey(w))
 			{
 				//It"s a number... in word form!
 				w = _word_to_number_mapping.get(w);
-				log.debug("to_num: '{}'", w);
+				log.trace("to_num: '{}'", w);
 
 				//Unlike arabic numbers, we will dupe-suppress wordy numbers...
 				if (!repeats.contains(w))
 				{
 					words_out.add(w);
 					repeats.add(w);
-					log.debug("out: '{}'", w);
+					log.trace("out: '{}'", w);
 				}
 				continue;
 			}
@@ -203,13 +203,13 @@ class Redux
 			//Is it a specially-allowed word? (three letters, two... one?!?!)
 			if (_three_character_lowercase_common_names_and_uncommon_words.contains(w))
 			{
-				log.debug("un3: '{}'", w);
+				log.trace("un3: '{}'", w);
 
 				if (!repeats.contains(w))
 				{
 					words_out.add(w);
 					repeats.add(w);
-					log.debug("out: '{}'", w);
+					log.trace("out: '{}'", w);
 				}
 			}
 			else if (l <= 3)
@@ -222,17 +222,17 @@ class Redux
 				{
 					words_out.add(w);
 					repeats.add(w);
-					log.debug("out: '{}'", w);
+					log.trace("out: '{}'", w);
 				}
 			}
 		}
 
 		Collections.sort(words_out);
-		return implode(words_out);
+		return implode(name, words_out);
 	}
 
 	private static
-	String implode(List<String> strings)
+	String implode(String originalInput, List<String> strings)
 	{
 		final
 		StringBuilder sb = new StringBuilder();
@@ -245,7 +245,7 @@ class Redux
 		final
 		String retval=sb.toString();
 
-		log.debug("retval: '{}'", retval);
+		log.debug("final: '{}' -> '{}'", originalInput, retval);
 		return retval;
 	}
 
