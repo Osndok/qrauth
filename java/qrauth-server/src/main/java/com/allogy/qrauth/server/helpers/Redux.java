@@ -242,7 +242,11 @@ class Redux
 			sb.append(string);
 		}
 
-		return sb.toString();
+		final
+		String retval=sb.toString();
+
+		log.debug("retval: '{}'", retval);
+		return retval;
 	}
 
 	//Ha, ha... there's a misnomer for you.
