@@ -4,7 +4,7 @@
 
 	<t:grid t:source="dataSource" row="username" add="commands" rowClass="deadOrAlive">
    		<p:commandsCell>
-   			<t:pagelink page="user/names/edit" context="username">Edit</t:pagelink>,
+   			<t:pagelink page="user/names/edit" context="username">Edit</t:pagelink> |
    			<t:pagelink page="user/names/revoke" context="username">Revoke</t:pagelink>
    		</p:commandsCell>
    		<p:empty>
