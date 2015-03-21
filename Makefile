@@ -1,10 +1,15 @@
 
 #ERSION=$(shell cat .version)
 VERSION=$(shell bin/version_or_snapshot.sh)
+VERSION2=$(shell bin/version_or_snapshot.sh .)
 
 MVN= TZ=UTC mvn -Drelease.version=$(VERSION)
 
-tools: target/qrauth-ssh-keys target/qrauth-pubkey2ssh target/qrauth-ed25519-verify war
+SPEC=target/qrauth-native.spec
+
+all: tools war
+
+tools: target/qrauth-ssh-keys target/qrauth-pubkey2ssh target/qrauth-ed25519-verify
 
 target/qrauth-ssh-keys: src/qrauth-ssh-keys.c
 	rm -fv $@
@@ -47,6 +52,30 @@ run:
 sql:
 	( cd java ; $(MVN) compile )
 	( cd java/qrauth-server ; $(MVN) -f pom.hibernate.xml -X hibernate3:hbm2ddl )
+
+spec: $(SPEC)
+	@echo $^
+
+$(SPEC): .version src/qrauth-native.spec.in bin/spec-vars.sh bin/version_or_snapshot.sh
+	bin/spec-vars.sh
+
+ALWAYS:
+
+tgz: target/qrauth-native-$(VERSION2).tgz
+	@echo $^
+
+target/qrauth-native-$(VERSION2).tgz: ALWAYS
+	mkdir -p target
+	#git archive --format=tar --prefix=qrauth-native-$(VERSION2)/ HEAD | gzip > target/qrauth-native-$(VERSION2).tgz
+	tar --transform "s|^|qrauth-native-$(VERSION2)/|" --exclude .git -czf target/qrauth-native-$(VERSION2).tgz Makefile src ext
+
+srpm: $(SPEC) target/qrauth-native-$(VERSION2).tgz
+	#/usr/bin/mock --buildsrpm --spec "$(SPEC)" --sources "$(shell pwd)/target" --resultdir "$(shell pwd)/target"
+	rpmbuild --nodeps --define '_srcrpmdir '"$(shell pwd)/target" --define '_sourcedir '"$(shell pwd)/target" -bs $(SPEC)
+
+rpms: $(SPEC) target/qrauth-native-$(VERSION2).tgz
+	#/usr/bin/mock $(SRPM) --resultdir "$(shell pwd)/target"
+	rpmbuild -ba --nodeps --define '_rpmdir '"$(shell pwd)/target" --define '_srcrpmdir '"$(shell pwd)/target" --define '_sourcedir '"$(shell pwd)/target" -bs $(SPEC)
 
 clean:
 	rm -rf target java/target java/*/target

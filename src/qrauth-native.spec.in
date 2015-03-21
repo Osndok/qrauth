@@ -1,0 +1,104 @@
+
+Name:           qrauth-native
+Version:        @MAJOR@.@MINOR@.@PATCH@@.SNAPSHOT@
+Release:        @BUILD@%{?dist}
+Summary:        qrauth native crypto accelerator
+
+Group:          Allogy/Infrastructure
+Vendor:         Allogy Interactive
+License:        AGPL
+URL:            http://redmine.allogy.com/projects/qrauth
+
+Source:         qrauth-native-%{version}.tgz
+
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+
+%description
+qrauth native crypto accelerator
+
+%package -n qrauth-login
+
+Version: 0
+Release: 1
+
+Group:     Allogy/Infrastructure
+Summary:   enables qrauth to be used to authenticate shell users
+
+BuildArch: noarch
+
+Requires: git
+Requires: qrauth-native
+
+%description -n qrauth-login
+enables qrauth to be used to authenticate shell users
+
+%prep
+%setup -q
+
+%build
+make tools
+
+%install
+rm   -rf $RPM_BUILD_ROOT
+mkdir    $RPM_BUILD_ROOT
+
+mkdir -p              $RPM_BUILD_ROOT/usr/bin
+cp -v target/qrauth*  $RPM_BUILD_ROOT/usr/bin/
+
+mkdir -p              $RPM_BUILD_ROOT/var/qrauth
+
+mkdir -p              $RPM_BUILD_ROOT/usr/libexec
+
+cat -> $RPM_BUILD_ROOT/usr/libexec/qrauth-git-init <<"EOF"
+#!/bin/bash
+#
+# Temporary stand-in for a guided setup
+#
+
+exit 1
+
+EOF
+
+cat -> $RPM_BUILD_ROOT/usr/libexec/qrauth-sshd-mod <<"EOF"
+#!/bin/bash
+#
+# Adjusts the sshd config to accept keys from qrauth's git repos
+#
+
+FILE=/etc/ssh/sshd_config
+
+if grep qrauth $FILE ; then
+
+	echo 1>&2 "NOTICE: $FILE seems to already be updated to use qrauth"
+
+else
+
+	echo >> $FILE
+	echo "# Allows qrauth users with shell access to login using ssh keys entered through the web interface" >> $FILE
+	echo "AuthorizedKeysCommand /usr/bin/qrauth-ssh-keys" >> $FILE
+	echo >> $FILE
+
+	echo 1>&2 "NOTICE: $FILE has been updated to include qrauth keys"
+
+fi
+
+EOF
+
+
+
+chmod 755 $RPM_BUILD_ROOT/usr/libexec/qrauth-*
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post -n qrauth-login
+exec /usr/libexec/qrauth-sshd-mod
+
+%files -n qrauth-login
+
+%files
+/usr/bin/qrauth*
+/usr/libexec/qrauth*
+%dir /var/qrauth
+
