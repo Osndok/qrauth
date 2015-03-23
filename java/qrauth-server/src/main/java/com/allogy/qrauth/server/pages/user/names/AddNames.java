@@ -113,7 +113,7 @@ class AddNames extends AbstractUserPage
 		username.type = UsernameType.EXPLICIT;
 		username.user = user;
 		username.displayValue = displayName.trim();
-		username.unixValue = policy.usernameUnixFilter(displayName);
+		username.unixValue = policy.usernameUnixFilter(username.type, displayName);
 		username.matchValue = matchValue;
 		session.save(username);
 

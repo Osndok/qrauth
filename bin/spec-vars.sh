@@ -13,6 +13,8 @@ PROJECT=qrauth-native
 SPEC_IN=src/$PROJECT.spec.in
 SPEC_OUT=target/$PROJECT.spec
 
+test -d target || mkdir target
+
 # ----------------------------------------------
 
 VERSION=$(cat .version)

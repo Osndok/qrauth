@@ -300,7 +300,7 @@ class DispatchAuth extends AbstractAPICall
 						username.type = UsernameType.IMPLICIT;
 						username.user=userAuth.user;
 						username.displayValue=usernameString.trim();
-						username.unixValue=policy.usernameUnixFilter(usernameString);
+						username.unixValue=policy.usernameUnixFilter(username.type, usernameString);
 						username.matchValue=policy.usernameMatchFilter(usernameString);
 						session.save(username);
 

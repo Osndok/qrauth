@@ -1,6 +1,7 @@
 package com.allogy.qrauth.server.services;
 
 import com.allogy.qrauth.server.entities.DBUser;
+import com.allogy.qrauth.server.entities.UsernameType;
 
 import java.util.Date;
 
@@ -19,7 +20,8 @@ interface Policy
 	boolean wouldAllowUsernameToBeRegistered(String username);
 
 	String usernameMatchFilter(String userInput);
-	String usernameUnixFilter(String userInput);
+
+	String usernameUnixFilter(UsernameType usernameType, String userInput);
 
 	boolean wouldAllowAdditionalUsernames(DBUser user, boolean extraEffort);
 

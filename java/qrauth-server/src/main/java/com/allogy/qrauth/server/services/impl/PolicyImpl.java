@@ -2,6 +2,7 @@ package com.allogy.qrauth.server.services.impl;
 
 import com.allogy.qrauth.server.entities.DBUser;
 import com.allogy.qrauth.server.entities.Username;
+import com.allogy.qrauth.server.entities.UsernameType;
 import com.allogy.qrauth.server.helpers.Death;
 import com.allogy.qrauth.server.helpers.PasswordHelper;
 import com.allogy.qrauth.server.helpers.Redux;
@@ -19,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import static com.allogy.qrauth.server.entities.UsernameType.EMAIL_ADDRESS;
+import static com.allogy.qrauth.server.entities.UsernameType.IMPLICIT;
+
 /**
  * Created by robert on 2/18/15.
  */
@@ -32,8 +36,6 @@ class PolicyImpl implements Policy, Runnable
 	private static final long   DEVEL_LOGOUT_PERIOD     = TimeUnit.HOURS.toMillis(1);
 	private static final long   SHORTEST_USABLE_SESSION = TimeUnit.MINUTES.toMillis(3);
 	private static final long   ADD_CREDENTIAL_TIMEOUT  = TimeUnit.MINUTES.toMillis(30);
-	private static final String UNIX_EMAIL_PREFIX       = "email_";
-	private static final String UNIX_TELEPHONE_PREFIX   = "tele_";
 
 	private
 	JSONObject supremeTenantConfig = new JSONObject();
@@ -97,6 +99,13 @@ class PolicyImpl implements Policy, Runnable
 		//TODO: prevent usernames that contain dirty words from being registered
 		//TODO: maybe restrict to usernames to unix-style names
 		//TODO: for whole-string username restrictions, use a bloom filter that is created at compile time
+
+		//One cannot register "email:a@b.c", and it would surly not work correctly anyway.
+		if (UsernameType.fromUserInput(username, null)!=null)
+		{
+			return false;
+		}
+
 		final
 		String matchable=usernameMatchFilter(username);
 
@@ -112,15 +121,6 @@ class PolicyImpl implements Policy, Runnable
 		}
 
 		if (mightIndicateAuthority(matchable))
-		{
-			return false;
-		}
-
-		/*
-		Technically no effect, as '_' is stripped out, but this will prevent people from creating usernames
-		testing this vector, and provide a hair of future-proofing in case '_' is allowed in the future.
-		*/
-		if (matchable.startsWith(UNIX_EMAIL_PREFIX) || matchable.startsWith(UNIX_TELEPHONE_PREFIX))
 		{
 			return false;
 		}
@@ -142,18 +142,48 @@ class PolicyImpl implements Policy, Runnable
 	public
 	String usernameMatchFilter(String userInput)
 	{
-		if (looksLikeEmailAddress(userInput))
+		final
+		UsernameType usernameType=UsernameType.fromUserInput(userInput, IMPLICIT);
+
+		if (usernameType==IMPLICIT)
 		{
-			return emailAddressMatchFilter(userInput);
+			if (looksLikeEmailAddress(userInput))
+			{
+				return EMAIL_ADDRESS.withDatabasePrefixFollowedBy(emailAddressMatchFilter(userInput));
+			}
+			else if (looksLikeRegisterablePhoneNumber(userInput))
+			{
+				return phoneNumberMatchFilter(userInput);
+			}
+			else
+			{
+				return Redux.digest(userInput, null);
+			}
 		}
 		else
-		if (looksLikeRegisterablePhoneNumber(userInput))
 		{
-			return phoneNumberMatchFilter(userInput);
-		}
-		else
-		{
-			return Redux.digest(userInput, null);
+			final
+			String withoutPrefix=UsernameType.prefixRemovedFrom(userInput);
+
+			switch (usernameType)
+			{
+				case OPEN_ID:
+				case EMAIL_ADDRESS:
+					return emailAddressMatchFilter(withoutPrefix);
+
+				case PHONE_NUMBER:
+					return phoneNumberMatchFilter(withoutPrefix);
+
+				case EXPLICIT:
+					//Really... ?
+					return Redux.digest(userInput, null);
+
+				case USER_SEQUENCE:
+					//NB: We really can't make a USER_SEQUENCE match work this way anyway...
+				case SKYPE:
+				default:
+					return usernameUnixFilter(usernameType, userInput);
+			}
 		}
 	}
 
@@ -337,9 +367,9 @@ class PolicyImpl implements Policy, Runnable
 
 	@Override
 	public
-	String usernameUnixFilter(String userInput)
+	String usernameUnixFilter(UsernameType usernameType, String userInput)
 	{
-		if (userInput==null)
+		if (usernameType==null || userInput==null)
 		{
 			return null;
 		}
@@ -355,15 +385,7 @@ class PolicyImpl implements Policy, Runnable
 		final
 		StringBuilder sb=new StringBuilder();
 
-		if (looksLikeEmailAddress(userInput))
-		{
-			sb.append(UNIX_EMAIL_PREFIX);
-		}
-		else
-		if (looksLikeRegisterablePhoneNumber(userInput))
-		{
-			sb.append(UNIX_TELEPHONE_PREFIX);
-		}
+		usernameType.appendUnixPrefixAndSeparator(sb);
 
 		for (int i=0; i<l; i++)
 		{
