@@ -241,6 +241,9 @@ of testing facilities designed for use with TestNG (http://testng.org/), so it's
         <slf4j-release-version>1.7.10</slf4j-release-version>
 		<pgsql-version>9.3-1101-jdbc41</pgsql-version>
 		<flyway-version>3.0</flyway-version>
+
+		<!-- don't move: see 'mrb' bug #4743 -->
+		<mrb.web.port>${com.allogy.web.port}</mrb.web.port>
 	</properties>
 
 </project>
