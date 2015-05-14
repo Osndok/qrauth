@@ -97,11 +97,11 @@ class AppModule
 		{
 			if (Version.IS_SNAPSHOT)
 			{
-				configuration.override(SymbolConstants.CONTEXT_PATH, "/qrauth");
+				configuration.add(SymbolConstants.CONTEXT_PATH, "/qrauth");
 			}
 			else
 			{
-				configuration.override(SymbolConstants.CONTEXT_PATH, "/qrauth/v" +Version.MAJOR);
+				configuration.add(SymbolConstants.CONTEXT_PATH, "/qrauth/v" +Version.MAJOR);
 			}
 		}
     }
