@@ -55,7 +55,19 @@ class AppModule
     	// by adding the same key in the contributeApplicationDefaults method.
         configuration.override(SymbolConstants.APPLICATION_VERSION, Version.FULL);
 		configuration.override(SymbolConstants.PRODUCTION_MODE, false);
-    }
+
+		if (System.getenv("HJ_CONFIG_FILE")!=null)
+		{
+			if (Version.IS_SNAPSHOT)
+			{
+				configuration.add(SymbolConstants.CONTEXT_PATH + "2", "/qrauth");
+			}
+			else
+			{
+				configuration.add(SymbolConstants.CONTEXT_PATH + "2", "/qrauth/v" + Version.MAJOR);
+			}
+		}
+	}
 
 	/**
 	 * When in production mode, all pages & actions should be presumed as "secure" (using HTTPS).
@@ -92,18 +104,6 @@ class AppModule
 		configuration.add(HibernateSymbols.DEFAULT_CONFIGURATION, "false");
 
 		configuration.add(SymbolConstants.HMAC_PASSPHRASE, Config.get().getTapestryHMACPassphrase());
-
-		if (System.getenv("HJ_CONFIG_FILE")!=null)
-		{
-			if (Version.IS_SNAPSHOT)
-			{
-				configuration.add(SymbolConstants.CONTEXT_PATH, "/qrauth");
-			}
-			else
-			{
-				configuration.add(SymbolConstants.CONTEXT_PATH, "/qrauth/v" +Version.MAJOR);
-			}
-		}
     }
 
 	public static
