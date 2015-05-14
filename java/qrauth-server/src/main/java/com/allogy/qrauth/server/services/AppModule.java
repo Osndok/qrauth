@@ -55,6 +55,18 @@ class AppModule
     	// by adding the same key in the contributeApplicationDefaults method.
         configuration.override(SymbolConstants.APPLICATION_VERSION, Version.FULL);
 		configuration.override(SymbolConstants.PRODUCTION_MODE, false);
+
+		if (System.getenv("HJ_CONFIG_FILE")!=null)
+		{
+			if (Version.IS_SNAPSHOT)
+			{
+				configuration.override(SymbolConstants.CONTEXT_PATH, "/qrauth");
+			}
+			else
+			{
+				configuration.override(SymbolConstants.CONTEXT_PATH, "/qrauth/v" +Version.MAJOR);
+			}
+		}
     }
 
 	/**
