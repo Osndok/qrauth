@@ -36,7 +36,7 @@ test: target/qrauth-ssh-keys target/qrauth-ed25519-verify
 
 prereqs:
 	sudo yum install libgit2-devel json-c-devel libcrypto-devel
-	git submodule init
+	git submodule update --init
 
 # NB: "java" is a directory, thus a bad make target..
 war:
