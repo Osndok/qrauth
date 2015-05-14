@@ -27,6 +27,7 @@ target/qrauth-ed25519-verify: src/qrauth-ed25519-verify.c target/ed25519.o
 
 target/ed25519.o: ext/ed25519-donna/*.c ext/ed25519-donna/*.h
 	mkdir -p target
+	# On a 32bit system, change 64->32 and delete the SSE2 define
 	cd ext/ed25519-donna ; gcc ed25519.c -m64 -O3 -c -Wall -DED25519_SSE2 -o "../../$@"
 
 test: target/qrauth-ssh-keys target/qrauth-ed25519-verify
