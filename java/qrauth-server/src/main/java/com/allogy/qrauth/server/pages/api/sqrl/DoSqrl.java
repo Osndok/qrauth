@@ -1013,7 +1013,7 @@ class DoSqrl extends AbstractAPICall
 			if (SQRL_BASE == null)
 			{
 				final
-				String url = pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toAbsoluteURI(false);
+				String url = pageRenderLinkSource.createPageRenderLink(DoSqrl.class).toAbsoluteURI(true);
 
 				final
 				int firstColon = url.indexOf(':');
