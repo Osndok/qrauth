@@ -39,6 +39,9 @@ class DBUser extends Attemptable implements Mortal
 	@OneToMany(mappedBy = "user")
 	public List<Username> usernames;
 
+	@OneToMany(mappedBy = "user")
+	public List<DBUserApiKey> apiKeys;
+
 	/**
 	 * One day, we might decide to finish building this out by checking the user-provided
 	 * epoch against the database version, thus truly supporting universal logout (as that

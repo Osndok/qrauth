@@ -38,6 +38,15 @@ class TenantUser extends Attemptable implements Mortal
 	public boolean authAdmin;
 
 	/**
+	 * If true, then this Person has been specially and deliberately blessed by this Tenant to make automatic
+	 * calls to the tenant's systems (as opposed to the qrauth system). The only other way to get api access
+	 * to any tenant is to have that tenant enable "apiAccess4All" (in which case this field does not really
+	 * matter unless that field is later made false).
+	 */
+	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
+	public boolean apiAccess;
+
+	/**
 	 * If true (and *if* the tenant has shell access setup), then this Person has been blessed to directly log into
 	 * this Tenant's infrastructure (SHELL-LEVEL-ACCESS), and possibly to then make very serious changes usually
 	 * left only to software developers, infrastructure engineers, and production managers.

@@ -77,6 +77,13 @@ class Tenant extends Attemptable implements Mortal
 	public boolean requireUsername;
 
 	/**
+	 * True if (and only if) every user of this tenant is allowed to use the tenant's machine-oriented
+	 * API calls.
+	 */
+	@Column(nullable = false, columnDefinition = Usual.FALSE_BOOLEAN)
+	public boolean apiAccess4All;
+
+	/**
 	 * True if (and only if) the tenant is unable to process usernames that change.
 	 */
 	@Column(nullable = false, columnDefinition = Usual.TRUE_BOOLEAN)
