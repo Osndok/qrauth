@@ -323,7 +323,7 @@ class NetworkImpl implements Network, Runnable
 		}
 
 		final
-		String possibleCacheHit=STASHED_BAN_IPS[ipAddress.hashCode() % BAN_STASH_SIZE];
+		String possibleCacheHit=STASHED_BAN_IPS[Math.abs(ipAddress.hashCode() % BAN_STASH_SIZE)];
 
 		return (possibleCacheHit!=null && possibleCacheHit.equals(ipAddress));
 	}
@@ -377,7 +377,7 @@ class NetworkImpl implements Network, Runnable
 		}
 
 		final
-		String possibleBanCacheHit=STASHED_BAN_IPS[ipAddress.hashCode() % BAN_STASH_SIZE];
+		String possibleBanCacheHit=STASHED_BAN_IPS[Math.abs(ipAddress.hashCode() % BAN_STASH_SIZE)];
 		{
 			if (possibleBanCacheHit!=null && possibleBanCacheHit.equals(ipAddress))
 			{
@@ -387,7 +387,7 @@ class NetworkImpl implements Network, Runnable
 		}
 
 		final
-		String possibleWhiteCacheHit=STASHED_WHITE_IPS[ipAddress.hashCode() % WHITE_STASH_SIZE];
+		String possibleWhiteCacheHit=STASHED_WHITE_IPS[Math.abs(ipAddress.hashCode() % WHITE_STASH_SIZE)];
 		{
 			if (possibleWhiteCacheHit!=null && possibleWhiteCacheHit.equals(ipAddress))
 			{
@@ -476,14 +476,17 @@ class NetworkImpl implements Network, Runnable
 	private
 	void stashWhiteList(String ipAddress)
 	{
-		STASHED_WHITE_IPS[ipAddress.hashCode() % WHITE_STASH_SIZE] = ipAddress;
+		STASHED_WHITE_IPS[Math.abs(ipAddress.hashCode() % WHITE_STASH_SIZE)] = ipAddress;
 	}
 
 	private
 	void stashBanMessage(String ipAddress, String s)
 	{
-		STASHED_BAN_MESSAGES[ipAddress.hashCode() % BAN_STASH_SIZE] = s;
-		STASHED_BAN_IPS[ipAddress.hashCode() % BAN_STASH_SIZE] = ipAddress;
+		final
+		int i=Math.abs(ipAddress.hashCode() % BAN_STASH_SIZE);
+
+		STASHED_BAN_MESSAGES[i] = s;
+		STASHED_BAN_IPS[i] = ipAddress;
 	}
 
 	@Override
@@ -494,7 +497,7 @@ class NetworkImpl implements Network, Runnable
 		String ipAddress = getIpAddress();
 
 		final
-		String preferredBanMessage = STASHED_BAN_MESSAGES[ipAddress.hashCode() % BAN_STASH_SIZE];
+		String preferredBanMessage = STASHED_BAN_MESSAGES[Math.abs(ipAddress.hashCode() % BAN_STASH_SIZE)];
 
 		if (preferredBanMessage == null)
 		{
@@ -514,7 +517,7 @@ class NetworkImpl implements Network, Runnable
 		String ipAddress = getIpAddress(httpServletRequest);
 
 		final
-		String preferredBanMessage = STASHED_BAN_MESSAGES[ipAddress.hashCode() % BAN_STASH_SIZE];
+		String preferredBanMessage = STASHED_BAN_MESSAGES[Math.abs(ipAddress.hashCode() % BAN_STASH_SIZE)];
 
 		if (preferredBanMessage == null)
 		{
