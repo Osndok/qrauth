@@ -57,6 +57,7 @@ class UserLoginForm
 	BaseURLSource baseURLSource;
 
 	@Inject
+	@Property
 	private
 	Request request;
 
@@ -67,6 +68,10 @@ class UserLoginForm
 	private
 	Nut nut;
 
+	/**
+	 * NB: UserLoginForm is included in html fragments sent via the tenant api, therefore we cannot use
+	 * relative urls.
+	 */
 	@Property
 	private
 	String base;
@@ -82,12 +87,9 @@ class UserLoginForm
 
 		doSqrl.with(nut);
 
-		final
-		String contextPath = request.getContextPath();
+		base = baseURLSource.getBaseURL(productionMode);
 
-		base = baseURLSource.getBaseURL(productionMode) + contextPath;
-
-		log.debug("setup: {} -> {} -> {} & {} => {}", tenantIP, nut, nut.stringValue, contextPath, base);
+		log.debug("setup: {} -> {} -> {} => {}", tenantIP, nut, nut.stringValue, base);
 	}
 
 	@InjectPage
@@ -100,10 +102,10 @@ class UserLoginForm
 	public
 	String getRegistrationMethods()
 	{
-		if (REGISTRATION_METHODS==null)
+		if (REGISTRATION_METHODS == null)
 		{
 			final
-			StringBuilder sb=new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 
 			for (AuthMethod authMethod : AuthMethod.values())
 			{
@@ -118,7 +120,7 @@ class UserLoginForm
 				}
 			}
 
-			REGISTRATION_METHODS=sb.toString();
+			REGISTRATION_METHODS = sb.toString();
 		}
 
 		return REGISTRATION_METHODS;

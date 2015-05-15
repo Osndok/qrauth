@@ -75,7 +75,7 @@
 		<a href="${doSqrl.url}" onClick="window.setTimeout( qrauth_sqrl_click, 1 );">
 			<img
 				id="qrauth_sqrl_qr_nut"
-				src="${base}/api/sqrl/qr/${nut.stringValue}/sqrl.png"
+				src="${base}${request.contextPath}/api/sqrl/qr/${nut.stringValue}/sqrl.png"
 				poll="${base}${pollStateUrl}"
 				pending="${base}${context:images/qr-pending.png}"
 				failure="${base}${context:images/qr-failure.png}"
