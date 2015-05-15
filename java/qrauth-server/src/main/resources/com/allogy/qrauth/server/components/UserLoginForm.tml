@@ -175,7 +175,7 @@
 		<tr>
 			<td class="num">2</td>
 			<td class="instr">Receive challenge:</td>
-			<td class="field" id="ppp_challenge"><!-- cannot be an empty tag --></td>
+			<td class="field" id="ppp_challenge"><t:remove>cannot be an empty tag</t:remove></td>
 			<td class="action">Locate Password</td>
 		</tr>
 		<tr>
@@ -198,7 +198,7 @@
 <arena id="qrauth_rsa">
 	<label for="username">Username (or RSA public key):</label>
 	<br/>
-	<textarea name="rsa_pubkey"><!-- cannot be an empty tag --></textarea>
+	<textarea name="rsa_pubkey"><t:remove>cannot be an empty tag</t:remove></textarea>
 	<br/>
 	<!--
 	TODO: is the convenience of a copy-to-clipboard widget worth the security risk presented by training users to directly
@@ -222,7 +222,7 @@
 	<pre id="qrauth_rsa_command">echo -n ${nut.stringValue} | openssl rsautl -sign -inkey ~/.ssh/id_rsa | base64</pre>
 	<label for="response">Response:</label>
 	<br/>
-	<textarea name="rsa_response"><!-- cannot be an empty tag --></textarea>
+	<textarea name="rsa_response"><t:remove>cannot be an empty tag</t:remove></textarea>
 	<br/>
 	<input type="submit" name="do_rsa" value="Submit"/>
 </arena>
