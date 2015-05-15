@@ -30,7 +30,7 @@
 	class="outer"
 	method="POST"
 	accept-charset="UTF-8"
-	action="${base}/internal/auth/dispatch"
+	action="${base}${request.contextPath}/internal/auth/dispatch"
 	onSubmit="return qrauth_submit_check();"
 	>
 

@@ -193,6 +193,7 @@ class DoSqrl extends AbstractAPICall
 			with(nuts.allocate(null, tenantIP));
 		}
 		else
+		if (originalNut!=null)
 		{
 			with(originalNut);
 		}
