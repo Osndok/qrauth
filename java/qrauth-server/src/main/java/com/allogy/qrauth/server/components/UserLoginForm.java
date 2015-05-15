@@ -87,7 +87,7 @@ class UserLoginForm
 
 		base = baseURLSource.getBaseURL(productionMode) + contextPath;
 
-		log.debug("setup: {} -> {} -> {} & {} -> {} -> {}", tenantIP, nut, nut.stringValue, contextPath, base);
+		log.debug("setup: {} -> {} -> {} & {} => {}", tenantIP, nut, nut.stringValue, contextPath, base);
 	}
 
 	@InjectPage
