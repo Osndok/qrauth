@@ -54,7 +54,6 @@ class AppModule
     	// number), but may be further overridden by DevelopmentModule or QaModule
     	// by adding the same key in the contributeApplicationDefaults method.
         configuration.override(SymbolConstants.APPLICATION_VERSION, Version.FULL);
-		configuration.override(SymbolConstants.PRODUCTION_MODE, false);
 
 		if (System.getenv("HJ_CONFIG_FILE")!=null)
 		{
